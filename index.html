@@ -239,16 +239,17 @@ body.menu-open{overflow:hidden}
 .pillar.use:hover{box-shadow:0 22px 50px -28px var(--use)}
 .pillar ul{list-style:none;padding:12px 13px 15px;display:flex;flex-direction:column;gap:11px}
 .pillar li{display:flex;align-items:flex-start;gap:9px}
-.pillar li .pd{width:7px;height:7px;border-radius:50%;margin-top:6px;flex-shrink:0}
-.pd.free{background:var(--use);box-shadow:0 0 8px var(--use)}
-.pd.one{background:var(--read);box-shadow:0 0 8px var(--read)}
-.pd.full{background:var(--practise);box-shadow:0 0 8px var(--practise)}
+.pd{display:block;flex:none;width:8px;height:8px;aspect-ratio:1;border-radius:50%;padding:0;box-sizing:border-box}
+.pillar li .pd{margin-top:7px}
+.pd.pdfree{background:var(--use)}
+.pd.pdone{background:var(--read)}
+.pd.pdfull{background:var(--practise)}
 .pillar li .pl{display:flex;flex-direction:column;line-height:1.2}
 .pillar li .pl span{font-size:.86rem;color:var(--ink);font-weight:500}
 .pillar li .pl small{color:var(--muted-2);font-size:.72rem;margin-top:1px}
 .legend{display:flex;justify-content:center;align-items:center;gap:22px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin:0 auto 50px}
 .legend .lg{display:inline-flex;align-items:center;gap:8px}
-.legend .lg .pd{width:9px;height:9px;border-radius:50%}
+.legend .lg .pd{width:9px;height:9px}
 .legend .trial-note{color:var(--use);font-weight:600}
 @media(max-width:860px){.pillars{grid-template-columns:1fr 1fr}}
 @media(max-width:520px){.pillars{grid-template-columns:1fr}.legend{gap:12px}}
@@ -493,46 +494,46 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
         <div class="pillar read">
           <div class="ph">Read it</div>
           <ul>
-            <li><span class="pd free"></span><span class="pl"><span>Free Sample</span><small>Free</small></span></li>
-            <li><span class="pd one"></span><span class="pl"><span>Episode Transcript</span><small>$1</small></span></li>
-            <li><span class="pd one"></span><span class="pl"><span>Interactive Transcript</span><small>$1</small></span></li>
-            <li><span class="pd one"></span><span class="pl"><span>Word Tour</span><small>$1</small></span></li>
-            <li><span class="pd free"></span><span class="pl"><span>Cheat Sheet</span><small>Free</small></span></li>
+            <li><span class="pd pdfree"></span><span class="pl"><span>Free Sample</span><small>Free</small></span></li>
+            <li><span class="pd pdone"></span><span class="pl"><span>Episode Transcript</span><small>$1</small></span></li>
+            <li><span class="pd pdone"></span><span class="pl"><span>Interactive Transcript</span><small>$1</small></span></li>
+            <li><span class="pd pdone"></span><span class="pl"><span>Word Tour</span><small>$1</small></span></li>
+            <li><span class="pd pdfree"></span><span class="pl"><span>Cheat Sheet</span><small>Free</small></span></li>
           </ul>
         </div>
         <div class="pillar hear">
           <div class="ph">Hear it</div>
           <ul>
-            <li><span class="pd full"></span><span class="pl"><span>Audio Keys</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>Shadowing Audio</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Audio Keys</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Shadowing Audio</span><small>$2.99</small></span></li>
           </ul>
         </div>
         <div class="pillar practise">
           <div class="ph">Practise it</div>
           <ul>
-            <li><span class="pd full"></span><span class="pl"><span>Pronunciation Games</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>Quiz Workbook</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>Listening Quiz</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>Practice Week</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>Shadowing Practice</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>Flashcards</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Pronunciation Games</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Quiz Workbook</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Listening Quiz</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Practice Week</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Shadowing Practice</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Flashcards</span><small>$2.99</small></span></li>
           </ul>
         </div>
         <div class="pillar use">
           <div class="ph">Use it</div>
           <ul>
-            <li><span class="pd full"></span><span class="pl"><span>Real-Life Scenarios</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>Phrase Bank</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>Speak Like Anna &amp; Jake</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>One-Minute Script</span><small>$2.99</small></span></li>
-            <li><span class="pd full"></span><span class="pl"><span>Mini-Story</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Real-Life Scenarios</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Phrase Bank</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Speak Like Anna &amp; Jake</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>One-Minute Script</span><small>$2.99</small></span></li>
+            <li><span class="pd pdfull"></span><span class="pl"><span>Mini-Story</span><small>$2.99</small></span></li>
           </ul>
         </div>
       </div>
       <div class="legend reveal">
-        <span class="lg"><span class="pd free"></span>Free</span>
-        <span class="lg"><span class="pd one"></span>$1 — Transcript Library</span>
-        <span class="lg"><span class="pd full"></span>$2.99 — Fluency Club</span>
+        <span class="lg"><span class="pd pdfree"></span>Free</span>
+        <span class="lg"><span class="pd pdone"></span>$1 — Transcript Library</span>
+        <span class="lg"><span class="pd pdfull"></span>$2.99 — Fluency Club</span>
         <span class="trial-note">✦ 1-week free trial on both paid tiers</span>
       </div>
 
