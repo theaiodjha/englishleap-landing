@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English Leap Club &middot; Member Archive</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
+<style>
+  :root{--space:#0a0a14;--ink:#eef0fb;--soft:#a6a6c4;--pink:#f6479a;--coral:#ff8a63;--purple:#8b6cff;--teal:#1fc4b6;
+    --glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12)}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;font-family:'General Sans',system-ui,sans-serif;color:var(--ink);background:var(--space);overflow-x:hidden}
+  .aurora{position:fixed;inset:-30%;z-index:0;filter:blur(80px);opacity:.5;pointer-events:none}
+  .aurora b{position:absolute;border-radius:50%;mix-blend-mode:screen;animation:drift 22s ease-in-out infinite}
+  .a1{width:46vw;height:46vw;background:var(--purple);top:-6%;left:-4%}
+  .a2{width:40vw;height:40vw;background:var(--teal);bottom:-10%;right:-6%;animation-delay:-7s}
+  .a3{width:34vw;height:34vw;background:var(--pink);top:30%;right:25%;animation-delay:-14s}
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(4%,6%) scale(1.12)}}
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:48px 22px 100px}
+  header{text-align:center;margin-bottom:18px}
+  .brand{font-weight:600;letter-spacing:.22em;font-size:13px;color:var(--teal)}
+  h1{font-family:'Clash Display';font-weight:700;font-size:clamp(34px,6vw,58px);margin:8px 0 4px;
+    background:linear-gradient(100deg,var(--pink),var(--coral) 55%,var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--soft);font-size:16px}
+
+  /* gate */
+  .gate{max-width:460px;margin:42px auto 0;background:var(--glass);border:1px solid var(--line);border-radius:22px;
+    padding:34px 30px;backdrop-filter:blur(14px);box-shadow:0 30px 80px rgba(0,0,0,.5);text-align:center}
+  .gate h2{font-family:'Clash Display';font-weight:600;font-size:24px;margin:0 0 8px}
+  .gate p{color:var(--soft);font-size:14px;margin:0 0 22px;line-height:1.5}
+  .patreon{display:inline-flex;align-items:center;gap:10px;width:100%;justify-content:center;font-weight:600;font-size:16px;
+    border:none;border-radius:13px;padding:15px 20px;cursor:pointer;color:#0a0a14;text-decoration:none;
+    background:linear-gradient(100deg,var(--teal),var(--coral));transition:transform .12s,filter .12s}
+  .patreon:hover{transform:translateY(-1px);filter:brightness(1.06)}
+  .alt{margin-top:18px;font-size:13px;color:var(--soft);cursor:pointer;text-decoration:underline}
+  .codebox{display:none;margin-top:18px}
+  .field{display:flex;gap:10px}
+  input{flex:1;font-family:inherit;font-size:15px;letter-spacing:.14em;text-transform:uppercase;background:rgba(0,0,0,.35);
+    border:1px solid var(--line);color:var(--ink);border-radius:11px;padding:13px 14px;outline:none}
+  input:focus{border-color:var(--teal)}
+  .codebox button{font-family:inherit;font-weight:600;border:none;border-radius:11px;padding:13px 18px;cursor:pointer;color:#0a0a14;background:var(--purple)}
+  .msg{margin-top:14px;font-size:14px;min-height:18px}.msg.err{color:var(--coral)}.msg.ok{color:var(--teal)}
+
+  /* archive */
+  #archive{display:none;margin-top:24px}
+  .hello{text-align:center;color:var(--soft);font-size:14px;margin-bottom:18px}
+  .banner{max-width:760px;margin:0 auto 26px;background:rgba(255,138,99,.12);border:1px solid rgba(255,138,99,.4);
+    border-radius:14px;padding:16px 18px;font-size:14px;line-height:1.5;text-align:center}
+  .banner a{color:var(--coral);font-weight:600}
+  .deck{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:22px}
+  .card{background:var(--glass);border:1px solid var(--line);border-radius:20px;overflow:hidden;backdrop-filter:blur(12px);
+    box-shadow:0 20px 60px rgba(0,0,0,.4);transition:transform .15s,border-color .15s}
+  .card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.22)}
+  .cover{position:relative;aspect-ratio:16/9;background:linear-gradient(120deg,#1a1430,#241a3e);overflow:hidden}
+  .cover img{width:100%;height:100%;object-fit:cover;display:block}
+  .cover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;text-align:center;
+    font-family:'Clash Display';font-weight:700;font-size:24px;color:#fff;background:linear-gradient(120deg,var(--purple),var(--teal))}
+  .now{position:absolute;top:12px;left:12px;font-size:11px;font-weight:700;color:#0a0a14;background:var(--teal);border-radius:30px;padding:4px 11px;letter-spacing:.04em}
+  .head{display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;user-select:none}
+  .head .meta{flex:1}
+  .head .ep{font-family:'Clash Display';font-weight:700;font-size:15px;color:var(--teal);letter-spacing:.04em}
+  .head .ttl{font-family:'Clash Display';font-weight:600;font-size:19px;line-height:1.15;margin-top:2px}
+  .head .chev{flex:0 0 auto;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;
+    color:var(--soft);transition:transform .25s,background .15s}
+  .card.open .head .chev{transform:rotate(180deg);background:rgba(255,255,255,.08)}
+  .panel{max-height:0;overflow:hidden;transition:max-height .35s ease}
+  .panel-inner{padding:2px 18px 20px}
+  .pgroup{margin-top:14px}
+  .plabel{font-size:11px;font-weight:700;letter-spacing:.12em;margin-bottom:8px}
+  .plabel.read{color:var(--pink)}.plabel.hear{color:var(--coral)}.plabel.practise{color:var(--purple)}.plabel.use{color:var(--teal)}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:420px){.tiles{grid-template-columns:1fr}}
+  .file{display:flex;align-items:center;gap:11px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;
+    padding:11px 13px;text-decoration:none;color:var(--ink);transition:border-color .12s,transform .1s}
+  .file:hover{border-color:var(--teal);transform:translateY(-2px)}
+  .file .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:14px;font-weight:700;color:#0a0a14}
+  .file .nm{font-size:13.5px;font-weight:500;line-height:1.2}.file .tag{font-size:10.5px;color:var(--soft)}
+  .pill-read{background:var(--pink)}.pill-hear{background:var(--coral)}.pill-practise{background:var(--purple)}.pill-use{background:var(--teal)}
+  .signout{display:none;text-align:center;margin-top:30px}.signout span{color:var(--soft);font-size:13px;cursor:pointer;text-decoration:underline}
+  footer{text-align:center;color:var(--soft);font-size:12px;margin-top:50px}
+</style>
+</head>
+<body>
+<div class="aurora"><b class="a1"></b><b class="a2"></b><b class="a3"></b></div>
+<div class="wrap">
+  <header>
+    <div class="brand">ENGLISH LEAP CLUB</div>
+    <h1>Member Archive</h1>
+    <div class="sub">Every episode pack, in one place.</div>
+  </header>
+
+  <section class="gate" id="gate">
+    <h2>Welcome back</h2>
+    <p>Connect your Patreon once to unlock your packs. After that, this page just remembers you.</p>
+    <a class="patreon" href="/api/auth/login">&#9654;&nbsp; Continue with Patreon</a>
+    <div class="alt" id="altToggle">Have a member code instead?</div>
+    <div class="codebox" id="codebox">
+      <div class="field">
+        <input id="code" placeholder="ELC-XXXX-XXXX" autocomplete="off" spellcheck="false">
+        <button id="go">Unlock</button>
+      </div>
+    </div>
+    <div class="msg" id="msg"></div>
+  </section>
+
+  <section id="archive"></section>
+  <div class="signout" id="signout"><span id="signoutBtn">Sign out of this device</span></div>
+  <footer>&copy; 2024 Leap Labs &middot; A practice community - not a replacement for formal English education.</footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const PILLARS=[['read','READ IT'],['hear','HEAR IT'],['practise','PRACTISE IT'],['use','USE IT']];
+const PILL={read:'pill-read',hear:'pill-hear',practise:'pill-practise',use:'pill-use'};
+const LETTER={read:'R',hear:'H',practise:'P',use:'U'};
+const ERR={auth:'Sign-in did not complete. Please try again.',notmember:'We could not find an active membership for that Patreon account.'};
+function showMsg(t,kind){const m=$('#msg');m.className='msg '+(kind||'');m.textContent=t||'';}
+const eParam=new URLSearchParams(location.search).get('e'); if(eParam&&ERR[eParam]) showMsg(ERR[eParam],'err');
+
+async function tryLoad(){
+  const r=await fetch('/api/list'); if(!r.ok) return false;
+  const data=await r.json(); if(!data.ok) return false; render(data); return true;
+}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function card(ep,openFirst){
+  const c=document.createElement('div'); c.className='card'+(openFirst?' open':'');
+  const cover = ep.cover
+    ? `<img src="${esc(ep.cover)}" alt="${esc(ep.title)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'${esc(ep.title)}'}))">`
+    : `<div class="ph">${esc(ep.title)}</div>`;
+  // group files by pillar
+  let groups='';
+  PILLARS.forEach(([key,label])=>{
+    const fs=ep.files.filter(f=>f.pillar===key); if(!fs.length) return;
+    groups+=`<div class="pgroup"><div class="plabel ${key}">${label}</div><div class="tiles">`+
+      fs.map(f=>`<a class="file" href="${f.url}"><span class="ic ${PILL[f.pillar]||'pill-use'}">${LETTER[f.pillar]||'•'}</span>
+        <span><span class="nm">${esc(f.name)}</span><br><span class="tag">${esc(f.kind||'PDF')}</span></span></a>`).join('')+
+      `</div></div>`;
+  });
+  c.innerHTML=`<div class="cover">${ep.current?'<span class="now">THIS WEEK</span>':''}${cover}</div>
+    <div class="head"><div class="meta"><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
+      <div class="chev">&#9662;</div></div>
+    <div class="panel"><div class="panel-inner">${groups}</div></div>`;
+  const head=c.querySelector('.head'), panel=c.querySelector('.panel');
+  const sync=()=>{ panel.style.maxHeight = c.classList.contains('open') ? panel.scrollHeight+'px' : '0px'; };
+  head.addEventListener('click',()=>{ c.classList.toggle('open'); sync(); });
+  requestAnimationFrame(sync);
+  return c;
+}
+function render(data){
+  $('#gate').style.display='none';
+  $('#signout').style.display='block';
+  const root=$('#archive'); root.style.display='block'; root.innerHTML='';
+  if(data.name) root.insertAdjacentHTML('beforeend',`<div class="hello">Signed in as ${esc(data.name)}</div>`);
+  if(data.access==='trial') root.insertAdjacentHTML('beforeend',
+    `<div class="banner">You're on a <b>free trial</b> - this week's episode is unlocked below. Your full archive opens automatically once your first payment goes through. &#128153;</div>`);
+  const deck=document.createElement('div'); deck.className='deck';
+  data.items.forEach((ep,i)=>deck.appendChild(card(ep, i===0))); // newest expanded by default
+  root.appendChild(deck);
+}
+$('#altToggle').addEventListener('click',()=>{const b=$('#codebox');b.style.display=b.style.display==='block'?'none':'block';});
+async function unlock(){
+  const code=$('#code').value.trim(); if(!code){showMsg('Please enter your code.','err');return;}
+  $('#go').disabled=true;
+  try{
+    const r=await fetch('/api/unlock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+    const d=await r.json();
+    if(!r.ok||!d.ok){showMsg(d.error||'That code did not work.','err');$('#go').disabled=false;return;}
+    showMsg('Unlocked. Loading...','ok'); await tryLoad();
+  }catch{showMsg('Something went wrong. Try again.','err');$('#go').disabled=false;}
+}
+$('#go').addEventListener('click',unlock);
+$('#code').addEventListener('keydown',ev=>{if(ev.key==='Enter')unlock();});
+$('#signoutBtn').addEventListener('click',async()=>{await fetch('/api/auth/signout',{method:'POST'});location.href='/archive.html';});
+window.addEventListener('resize',()=>document.querySelectorAll('.card.open .panel').forEach(p=>p.style.maxHeight=p.scrollHeight+'px'));
+tryLoad();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "elc-members-oauth",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" }
+}
