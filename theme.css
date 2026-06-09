@@ -107,3 +107,6 @@ html[data-theme="light"] .club-glow{opacity:.4}
 html[data-theme="light"] .tabs a.active,
 html[data-theme="light"] .acct .out:hover{color:#06121f}
 html[data-theme="light"] .upsell{background:linear-gradient(120deg,rgba(139,108,255,.14),rgba(31,196,182,.12)) !important}
+
+/* clue-room: calm the background glow on light so relics read crisply */
+html[data-theme="light"] #stagebg{opacity:.4}
