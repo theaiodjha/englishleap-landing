@@ -30,9 +30,12 @@
   .frac{font-family:var(--display);font-weight:700;font-size:14px;color:var(--amber);min-width:30px;text-align:right}
   .back{font-size:13px;color:var(--soft);text-decoration:none;padding:8px 12px;border-radius:999px}
 
-  .hint{position:fixed;left:0;right:0;bottom:14px;z-index:8;text-align:center;pointer-events:none;
-    font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);opacity:0;transition:.4s}
+  .hint{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:8;text-align:center;pointer-events:none;
+    display:flex;align-items:center;gap:9px;padding:9px 17px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--ink);
+    background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(0,0,0,.4);opacity:0;transition:.4s}
   .hint.show{opacity:1}
+  .hint .gleam{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:pulseg 1.8s ease-in-out infinite}
+  @keyframes pulseg{0%,100%{opacity:.5;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
 
   .modal{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;padding:16px;
     background:rgba(6,4,18,.35);opacity:0;pointer-events:none;transition:.25s}
@@ -82,6 +85,45 @@
   .gateview .panel{max-width:420px}
   .muted{color:var(--soft);font-size:14px;line-height:1.55;margin:8px 0 20px}
   .hide{display:none!important}
+  /* in-game menu */
+  .top button{pointer-events:auto}
+  .menu-wrap{position:relative;width:64px;display:flex;justify-content:flex-end}
+  .menubtn{width:40px;height:40px;border-radius:50%;color:var(--ink);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}
+  .menu{position:absolute;top:48px;right:0;min-width:190px;border-radius:16px;padding:7px;display:none;flex-direction:column;gap:2px;z-index:20}
+  .menu.show{display:flex}
+  .menu a,.menu button{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:none;border:none;color:var(--ink);
+    font-family:var(--body);font-size:14.5px;font-weight:500;padding:11px 12px;border-radius:10px;cursor:pointer;text-decoration:none}
+  .menu a:hover,.menu button:hover{background:rgba(255,255,255,.10)}
+  .menu .sep{height:1px;background:var(--line);margin:4px 6px}
+  .menu .out{color:var(--coral)}
+
+  /* intro / instructions — lives outside the reveal card */
+  .intro{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:radial-gradient(120% 90% at 50% 0%,rgba(139,108,255,.22),rgba(6,4,18,.62));opacity:0;pointer-events:none;transition:.4s}
+  .intro.show{opacity:1;pointer-events:auto}
+  .intro .panel{max-width:432px;text-align:center;border-radius:28px;padding:30px 26px}
+  .intro .eyebrow{font-size:12px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;
+    background:linear-gradient(100deg,var(--pink),var(--coral),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .intro h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,7vw,40px);margin:8px 0 8px;line-height:1.02}
+  .intro .lede{color:var(--soft);font-size:15.5px;line-height:1.55;margin-bottom:22px}
+  .steps{display:flex;flex-direction:column;gap:13px;text-align:left;margin-bottom:24px}
+  .step{display:flex;gap:13px;align-items:flex-start}
+  .step .n{flex:0 0 auto;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:14px;color:#10101c}
+  .step .st b{font-family:var(--display);font-weight:600;font-size:15px;display:block;margin-bottom:1px}
+  .step .st span{color:var(--soft);font-size:13.5px;line-height:1.45}
+  .startbtn{display:block;width:100%;border:none;border-radius:16px;padding:15px;cursor:pointer;
+    font-family:var(--display);font-weight:700;font-size:16px;color:#10101c;background:linear-gradient(110deg,var(--teal),var(--coral))}
+
+  /* fireworks + night banner */
+  #fx{position:fixed;inset:0;z-index:44;pointer-events:none;opacity:0;transition:.3s}
+  #fx.show{opacity:1}
+  .nightbanner{position:fixed;left:50%;top:17%;transform:translate(-50%,-12px);z-index:46;text-align:center;
+    padding:6px 22px;opacity:0;pointer-events:none;transition:.5s;max-width:92vw}
+  .nightbanner.show{opacity:1;transform:translate(-50%,0)}
+  .nightbanner .big{font-family:var(--display);font-weight:700;font-size:clamp(26px,6.4vw,38px);line-height:1.04;
+    background:linear-gradient(100deg,#ffffff,var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 26px rgba(255,205,70,.55))}
+  .nightbanner .small{color:#fff;font-size:15px;margin-top:7px;opacity:.94;text-shadow:0 2px 18px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -91,9 +133,17 @@
 <div class="top hide" id="hud">
   <a class="back" href="/practice-arcade.html">&#8592; Arcade</a>
   <div class="pill card-glass"><span class="ep" id="epLabel">EP</span><span class="dots" id="dots"></span><span class="frac" id="frac">0/6</span></div>
-  <span style="width:64px"></span>
+  <div class="menu-wrap">
+    <button class="menubtn card-glass" id="menuBtn" aria-label="Menu">&#8942;</button>
+    <div class="menu card-glass" id="menu">
+      <a href="/practice-arcade.html">&#127918; Practice Arcade</a>
+      <a href="/archive.html">&#128218; Member Archive</a>
+      <div class="sep"></div>
+      <button class="out" id="signoutMenu">&#9211; Sign out</button>
+    </div>
+  </div>
 </div>
-<div class="hint" id="hint">Tap a glowing object</div>
+<div class="hint" id="hint"><span class="gleam"></span><span id="hintTxt">Tap a glowing clue to begin</span></div>
 
 <!-- reveal card -->
 <div class="modal" id="reveal"><div class="sheet card-glass" id="sheet"></div></div>
@@ -130,6 +180,20 @@
   <a class="btn" id="gateBtn" href="/practice-arcade.html" style="background:linear-gradient(110deg,var(--teal),var(--coral));color:#10101c">Go to the Arcade</a>
 </div></div>
 
+<canvas id="fx"></canvas>
+<div class="nightbanner" id="nightbanner"></div>
+<div class="intro" id="intro"><div class="panel card-glass">
+  <div class="eyebrow" id="introEyebrow">Practice Arcade</div>
+  <h1>The Clue Room</h1>
+  <p class="lede">Six phrases from this episode are hidden in the light. Step in, uncover each one, then put them together &mdash; this is where the words become <i>yours</i>.</p>
+  <div class="steps">
+    <div class="step"><div class="n" style="background:var(--pink)">1</div><div class="st"><b>Tap the glowing objects</b><span>Each one holds a phrase from the episode.</span></div></div>
+    <div class="step"><div class="n" style="background:var(--purple)">2</div><div class="st"><b>Read it &amp; hear it</b><span>See what it means, tap the speakers to listen.</span></div></div>
+    <div class="step"><div class="n" style="background:var(--teal)">3</div><div class="st"><b>Solve the sentence</b><span>Drop the phrases into place to keep them for good.</span></div></div>
+  </div>
+  <button class="startbtn" id="startBtn">Start exploring &#8594;</button>
+</div></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
@@ -153,7 +217,8 @@ const TYPE='clue-room';
   if(!data.ok) return gate('Unavailable','We couldn\u2019t load this game right now.');
   $('#loading').classList.add('hide');
   $('#epLabel').textContent=data.ep||EP.toUpperCase();
-  boot(data.content);
+  $('#introEyebrow').textContent=(data.ep||EP.toUpperCase())+' \u00b7 '+(data.title||'Clue Room');
+  boot(data);
 })();
 
 function gate(title,msg,cta){
@@ -164,7 +229,8 @@ function gate(title,msg,cta){
 }
 
 // ---------- game ----------
-function boot(content){
+function boot(data){
+  const content=data.content;
   const clues=content.clues, puzzle=content.puzzle;
   $('#hud').classList.remove('hide');
   $('#ctaBtn').href=CTA;
@@ -174,7 +240,7 @@ function boot(content){
   const dotsEl=$('#dots'); clues.forEach(()=>dotsEl.appendChild(document.createElement('i')));
   const colorOf={}; clues.forEach(c=>colorOf[c.word]=c.color);
   function progress(){ const arr=[...dotsEl.children]; clues.forEach((c,i)=>{ if(solved.has(c.id)){arr[i].style.background=c.color;arr[i].style.boxShadow='0 0 10px '+c.color;} });
-    $('#frac').textContent=solved.size+'/'+clues.length; }
+    $('#frac').textContent=solved.size+'/'+clues.length; updateHint(); }
 
   // ---- three scene ----
   const scene=new THREE.Scene();
@@ -246,7 +312,25 @@ function boot(content){
     renderer.render(scene,camera);
   })();
   addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
-  setTimeout(()=>$('#hint').classList.add('show'),600);
+  // ---- intro / instructions (outside the card) ----
+  $('#intro').classList.add('show');
+  $('#startBtn').onclick=()=>{ $('#intro').classList.remove('show'); updateHint(); $('#hint').classList.add('show'); };
+
+  // ---- in-game menu: arcade / archive / sign out ----
+  const menu=$('#menu');
+  $('#menuBtn').onclick=e=>{ e.stopPropagation(); menu.classList.toggle('show'); };
+  document.addEventListener('click',e=>{ if(!e.target.closest('.menu-wrap')) menu.classList.remove('show'); });
+  $('#signoutMenu').onclick=async()=>{ try{await fetch('/api/auth/signout',{method:'POST'});}catch{} location.href='/practice-arcade.html'; };
+
+  // ---- friendly progress hint ----
+  const cheer=['Nice find!','Love that.','You\u2019ve got this.','Keep going!','Beautiful.'];
+  function updateHint(){
+    const n=solved.size, total=clues.length, left=total-n, tx=$('#hintTxt');
+    if(n===0) tx.textContent='Tap a glowing clue to begin';
+    else if(left>1) tx.textContent=cheer[Math.min(n-1,cheer.length-1)]+' '+left+' more glowing in the room.';
+    else if(left===1) tx.textContent='One more to find \u2014 you\u2019re so close!';
+    else tx.textContent='All '+total+' found! Tap \u201CSolve the sentence\u201D \u25B8';
+  }
 
   // ---- pronunciation (placeholder via speech synthesis) ----
   function speak(text){ if(!('speechSynthesis' in window))return; const u=new SpeechSynthesisUtterance(text); u.lang='en-GB'; u.rate=.95; speechSynthesis.cancel(); setTimeout(()=>speechSynthesis.speak(u),80); }
@@ -269,7 +353,7 @@ function boot(content){
     $('#sheet').querySelector('.ax').onclick=function(){speak(c.example);};
     if(first && solved.size===clues.length) setTimeout(()=>{ $('#solveWrap').classList.add('show'); },300);
   }
-  function closeReveal(){ $('#reveal').classList.remove('show'); }
+  function closeReveal(){ $('#reveal').classList.remove('show'); updateHint(); $('#hint').classList.add('show'); }
   $('#reveal').addEventListener('click',e=>{ if(e.target.id==='reveal') closeReveal(); });
 
   // ---- puzzle ----
@@ -294,11 +378,13 @@ function boot(content){
     $('#sentence').querySelectorAll('.slot').forEach(el=>el.onclick=()=>{ const i=+el.dataset.i; if(filled[i]){filled[i]=null; renderPuzzle('Fill every blank, then check.');} });
     $('#bank').querySelectorAll('.chip').forEach(el=>el.onclick=()=>{ if(el.disabled)return; const i=filled.indexOf(null); if(i<0)return; filled[i]=el.dataset.w; renderPuzzle('Fill every blank, then check.'); });
   }
+  const nudges=['So close \u2014 give it another look. You\u2019ve got this. \uD83D\uDCAA','Almost! Swap a word \u2014 every try makes it stick.',
+    'Not yet, but you\u2019re learning. Tap a word to rethink it. \u2728','Keep going \u2014 fluency is built one try at a time.'];
   $('#checkBtn').onclick=()=>{
     if(filled.some(x=>!x))return;
     if(filled.every((w,i)=>w===answers[i])){ $('#pstatus').textContent='Perfect! \uD83C\uDF89'; $('#pstatus').style.color='var(--teal)';
-      setTimeout(showResult,900); }
-    else { $('#pstatus').textContent='Not quite — tap a wrong word to swap it.'; $('#pstatus').style.color='var(--coral)'; }
+      $('#checkBtn').disabled=true; celebrate(); setTimeout(showResult,2500); }
+    else { $('#pstatus').textContent=nudges[Math.floor(Math.random()*nudges.length)]; $('#pstatus').style.color='var(--amber)'; }
   };
 
   function showResult(){
@@ -306,6 +392,36 @@ function boot(content){
     $('#keeper').textContent='\u201C'+puzzle.keeper+'\u201D';
     $('#recap').innerHTML=clues.map(c=>'<span class="tag" style="background:'+c.color+'22;color:'+c.color+';box-shadow:inset 0 0 0 1.5px '+c.color+'88">'+esc(c.word)+'</span>').join('');
     $('#result').classList.add('show');
+  }
+
+  // ---- celebration: a banner that lights up the night ----
+  function celebrate(){
+    const name=(data.user||'').trim().split(/\s+/)[0];
+    const head=name?('Brilliant, '+name+'!'):'Brilliant!';
+    const lines=['Six phrases \u2014 all yours now. \u2728','You turned watching into doing. \uD83C\uDF1F','That\u2019s real progress. Keep shining. \uD83C\uDF19'];
+    const nb=$('#nightbanner');
+    nb.innerHTML='<div class="big">'+esc(head)+'</div><div class="small">'+esc(lines[Math.floor(Math.random()*lines.length)])+'</div>';
+    nb.classList.add('show'); setTimeout(()=>nb.classList.remove('show'),2600);
+    if(!reduced) launchFireworks(2400);
+  }
+  function launchFireworks(ms){
+    const cv=$('#fx'), ctx=cv.getContext('2d');
+    function size(){cv.width=innerWidth;cv.height=innerHeight;} size();
+    const onR=()=>size(); addEventListener('resize',onR); cv.classList.add('show');
+    const cols=['#f6479a','#ff8a63','#8b6cff','#1fc4b6','#ffcd46','#57e6c4'];
+    let parts=[], end=performance.now()+ms, last=0;
+    function burst(x,y){ const c=cols[(Math.random()*cols.length)|0], n=36;
+      for(let i=0;i<n;i++){ const a=(Math.PI*2*i)/n+Math.random()*0.2, sp=2+Math.random()*3.6;
+        parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.2,life:1,col:c}); } }
+    function frame(now){ ctx.clearRect(0,0,cv.width,cv.height);
+      if(now<end && now-last>340){ last=now; burst(cv.width*(0.2+Math.random()*0.6), cv.height*(0.16+Math.random()*0.3)); }
+      for(const p of parts){ p.vy+=0.05; p.x+=p.vx; p.y+=p.vy; p.vx*=0.99; p.life-=0.012;
+        ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.col; ctx.beginPath(); ctx.arc(p.x,p.y,2.6,0,7); ctx.fill(); }
+      ctx.globalAlpha=1; parts=parts.filter(p=>p.life>0);
+      if(now<end||parts.length) requestAnimationFrame(frame);
+      else{ cv.classList.remove('show'); ctx.clearRect(0,0,cv.width,cv.height); removeEventListener('resize',onR); }
+    }
+    requestAnimationFrame(frame);
   }
   function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 }

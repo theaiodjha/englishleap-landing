@@ -80,5 +80,5 @@ export default async function handler(req, res) {
     if (level !== "fluency") return res.status(403).json({ ok: false, upgrade: true, error: "This game is part of Fluency Club ($2.99)." });
     return res.status(403).json({ ok: false, error: "This episode is part of the full Fluency Club." });
   }
-  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, content: e.content });
+  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, user: s ? s.name : null, content: e.content });
 }
