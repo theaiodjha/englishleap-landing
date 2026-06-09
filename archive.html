@@ -81,16 +81,33 @@
   .pill-read{background:var(--pink)}.pill-hear{background:var(--coral)}.pill-practise{background:var(--purple)}.pill-use{background:var(--teal)}
   .signout{display:none;text-align:center;margin-top:30px}.signout span{color:var(--soft);font-size:13px;cursor:pointer;text-decoration:underline}
   footer{text-align:center;color:var(--soft);font-size:12px;margin-top:50px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:30px}
+  .brandmini{display:flex;align-items:center;gap:10px;font-family:'Clash Display';font-weight:600;font-size:15px;color:var(--ink);text-decoration:none}
+  .brandmini .dotm{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--pink),var(--purple));box-shadow:0 6px 16px -5px var(--purple)}
+  .acct{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--soft);min-height:38px}
+  .acct .out{font-family:inherit;font-weight:600;font-size:13px;color:var(--ink);background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:9px 17px;cursor:pointer;transition:.15s;backdrop-filter:blur(10px)}
+  .acct .out:hover{border-color:var(--teal);transform:translateY(-1px)}
+  .tabs{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px);margin:20px auto 0;box-shadow:0 10px 30px -16px rgba(0,0,0,.6)}
+  .tabs a{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-family:'Clash Display';font-weight:600;font-size:14px;color:var(--soft);text-decoration:none;transition:.2s}
+  .tabs a:hover{color:var(--ink)}
+  .tabs a.active{background:linear-gradient(100deg,var(--teal),var(--coral));color:#06121f;box-shadow:0 8px 20px -8px rgba(31,196,182,.6)}
 </style>
 </head>
 <body>
 <div class="aurora"><b class="a1"></b><b class="a2"></b><b class="a3"></b></div>
 <div class="wrap">
+  <div class="topbar">
+    <a class="brandmini" href="/"><span class="dotm"></span> English Leap Club</a>
+    <div class="acct" id="acct"></div>
+  </div>
   <header>
-    <div class="brand">ENGLISH LEAP CLUB</div>
+    <div class="brand">MEMBER ARCHIVE</div>
     <h1>Member Archive</h1>
     <div class="sub">Every episode pack, in one place.</div>
-    <div style="margin-top:10px;font-size:13px;color:var(--soft)"><a href="/" style="color:var(--teal);text-decoration:none;font-weight:600">Home</a> &middot; <a href="/practice-arcade.html" style="color:var(--teal);text-decoration:none;font-weight:600">Practice Arcade</a></div>
+    <div class="tabs">
+      <a href="/practice-arcade.html">&#127918; Practice Arcade</a>
+      <a href="/archive.html" class="active">&#128218; Member Archive</a>
+    </div>
   </header>
 
   <section class="gate" id="gate">
@@ -153,9 +170,10 @@ function card(ep,openFirst){
 }
 function render(data){
   $('#gate').style.display='none';
-  $('#signout').style.display='block';
+  const acct=$('#acct');
+  acct.innerHTML=(data.name?`Signed in as <b style="color:var(--ink);font-weight:600">${esc(data.name)}</b> `:'')+'<button class="out" id="acctOut">Sign out</button>';
+  $('#acctOut').onclick=async()=>{await fetch('/api/auth/signout',{method:'POST'});location.href='/archive.html';};
   const root=$('#archive'); root.style.display='block'; root.innerHTML='';
-  if(data.name) root.insertAdjacentHTML('beforeend',`<div class="hello">Signed in as ${esc(data.name)}</div>`);
   if(data.access==='trial') root.insertAdjacentHTML('beforeend',
     `<div class="banner">You're on a <b>free trial</b> - this week's episode is unlocked below. Your full archive opens automatically once your first payment goes through. &#128153;</div>`);
   const deck=document.createElement('div'); deck.className='deck';

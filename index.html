@@ -103,9 +103,13 @@ header.nav.scrolled{background:rgba(8,8,18,.7);backdrop-filter:blur(16px) satura
 .logo .mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;
   background:linear-gradient(140deg,var(--read),var(--practise));box-shadow:0 6px 20px -5px rgba(123,92,255,.65),0 0 22px -7px var(--read)}
 .logo .mark svg{width:20px;height:20px}
-.nav-links{display:flex;align-items:center;gap:20px}
-.nav-links a{font-size:.88rem;color:var(--muted);font-weight:500;transition:color .25s}
+.nav-links{display:flex;align-items:center;gap:22px}
+.nav-links a{position:relative;font-size:.88rem;color:var(--muted);font-weight:500;transition:color .25s}
+.nav-links a::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,var(--read),var(--practise));transform:scaleX(0);transform-origin:left;
+  transition:transform .3s cubic-bezier(.2,.7,.2,1)}
 .nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{transform:scaleX(1)}
 .nav-cta{display:flex;align-items:center;gap:12px}
 .nav-cta .btn{padding:9px 17px;font-size:.86rem}
 .menu-btn{display:none;width:42px;height:42px;border-radius:11px;background:var(--panel);border:1px solid var(--line);
