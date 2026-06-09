@@ -1,0 +1,55 @@
+/* theme.css — light-theme token overrides + the Auto/Light/Dark toggle.
+   The pages keep their existing dark :root tokens; this file only redefines
+   them when <html data-theme="light"> is set (by theme.js). */
+
+[data-theme="light"]{
+  /* index.html token names */
+  --bg:#f6f1ff; --bg-2:#efe6ff;
+  --panel:rgba(255,255,255,.70); --panel-2:rgba(255,255,255,.85);
+  --line:rgba(40,40,80,.12);
+  --ink:#272538; --muted:#5e5a82; --muted-2:#8c88ad;
+  /* archive.html / arcade token names */
+  --space:#f6f1ff; --glass:rgba(255,255,255,.66); --soft:#5e5a82;
+}
+
+/* vibrant cream → lilac shell */
+[data-theme="light"] body{
+  background:linear-gradient(160deg,#fff6ef 0%,#f6efff 46%,#ece1ff 100%) !important;
+  background-attachment:fixed;
+}
+
+/* soften the aurora glow on light so type stays readable */
+[data-theme="light"] .aurora{opacity:.42}
+[data-theme="light"] .vignette{
+  background:radial-gradient(120% 80% at 50% -10%,transparent 46%,rgba(150,130,205,.16) 100%) !important;
+}
+
+/* dark surfaces that were hardcoded → light equivalents */
+[data-theme="light"] header.nav.scrolled{background:rgba(255,255,255,.72) !important}
+[data-theme="light"] .mobile-menu{background:rgba(255,255,255,.94) !important}
+[data-theme="light"] .stat{background:rgba(255,255,255,.66) !important}
+[data-theme="light"] .pillar{background:rgba(255,255,255,.6) !important}
+[data-theme="light"] .file{background:rgba(255,255,255,.6) !important}
+[data-theme="light"] input{background:rgba(255,255,255,.72) !important; color:var(--ink)}
+[data-theme="light"] .cover{background:linear-gradient(120deg,#ece6ff,#dff6f1) !important}
+
+/* ---- Auto / Light / Dark toggle ---- */
+#elc-theme-toggle{
+  position:fixed; z-index:9999; right:14px; bottom:14px;
+  display:flex; gap:2px; padding:4px; border-radius:999px;
+  background:var(--panel-2,rgba(255,255,255,.1)); border:1px solid var(--line,rgba(255,255,255,.14));
+  backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%);
+  box-shadow:0 10px 28px rgba(0,0,0,.28);
+  font-family:var(--body,system-ui,sans-serif);
+}
+#elc-theme-toggle button{
+  all:unset; cursor:pointer; width:36px; height:32px; display:grid; place-items:center;
+  border-radius:999px; font-size:13px; font-weight:700; color:var(--muted,#9a96c4); transition:.2s;
+}
+#elc-theme-toggle button:hover{color:var(--ink,#fff)}
+#elc-theme-toggle button.active{
+  background:linear-gradient(110deg,var(--practise,#8b6cff),var(--use,#1fc4b6)); color:#fff;
+  box-shadow:0 4px 14px rgba(139,108,255,.4);
+}
+#elc-theme-toggle .lbl{font-size:10.5px; letter-spacing:.06em; padding:0 8px; width:auto}
+@media (prefers-reduced-motion:reduce){#elc-theme-toggle button{transition:none}}

@@ -122,3 +122,41 @@ Work through these in order after deploying. Each has a clear pass signal.
   client setup.
 - **Code-only version** (the other starter): no Patreon API, but you issue/revoke codes yourself.
 Run OAuth as the main door and keep codes for gifts/comps — exactly how this project is wired.
+
+---
+
+## Practice Arcade (added)
+
+A gated member games hub at **`/practice-arcade.html`**, reusing the same Patreon
+session as the archive. Games are organised by *type*, each holding one game per
+episode (trial → current episode only; paid → all).
+
+```
+practice-arcade.html      the gated arcade page (Continue with Patreon + code)
+api/games.js              catalogue + per-game GATED content (same 24h re-check as /api/list)
+lib/arcade-data.js        the catalogue: game types → episodes → content (edit this to add games)
+games/clue-room/          the playable Clue Room (buildless Three.js via CDN)
+theme.js / theme.css      Auto/Light/Dark theme, shared across all pages
+```
+
+**No new environment variables.** Game *content* (words, clues, answers) lives in
+`lib/arcade-data.js` and is served only to entitled members through `/api/games`,
+so it never ships to non-members. (Unlike the archive, games don't need `BLOB_MAP`
+— there are no private files to sign.)
+
+### Add a game to an episode
+Edit `lib/arcade-data.js`: add an episode block under a game type (or add a whole
+new type + a `/games/<type>/` folder). Set `current: true` on the live episode so
+trial members can play it. The Clue Room engine reads `content` generically, so a
+new episode is pure data.
+
+### Theme
+Every page loads `theme.js` (in `<head>`, before paint) and `theme.css`. A floating
+**Auto / ☀ / 🌙** control sits bottom-right. **Auto** follows the visitor's local
+sunrise/sunset, computed from a no-prompt IP location lookup (falls back to a
+6am–6pm clock rule if the lookup is blocked). The manual choice overrides Auto and
+is saved in `localStorage`. Light theme is a vibrant cream→lilac palette.
+
+### Deploy
+Same as before — push to Git / Vercel. The games are static files; `/api/*` stay
+serverless. Nothing new to build.
