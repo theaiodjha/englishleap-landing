@@ -68,11 +68,26 @@
   .bank{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
   .chip{border:none;border-radius:14px;padding:10px 16px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:14.5px;transition:.15s}
   .chip:disabled{opacity:.32;cursor:default}
-  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px}
+  .row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:18px}
   .status{font-size:13.5px;color:var(--soft)}
   .check{border:none;border-radius:14px;padding:11px 22px;cursor:pointer;font-family:var(--display);font-weight:700;color:#10101c;
     background:linear-gradient(110deg,var(--amber),#f5a623)}
   .check:disabled{opacity:.4;cursor:default}
+  .reset{border:none;border-radius:14px;padding:11px 20px;cursor:pointer;font-family:var(--display);font-weight:700;font-size:14.5px;
+    color:var(--ink);background:var(--glass);box-shadow:inset 0 0 0 1.5px var(--line)}
+  .reset:hover{box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.34)}
+
+  /* solve heading + feedback live OUTSIDE the card, big and vibrant */
+  .puzzle-stack{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:16px}
+  .solvebanner{text-align:center}
+  .sb-title{font-family:var(--display);font-weight:700;font-size:clamp(27px,6.6vw,42px);line-height:1.02;
+    background:linear-gradient(100deg,var(--pink),var(--coral) 55%,var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 6px 24px rgba(139,108,255,.35))}
+  .sb-msg{font-family:var(--display);font-weight:600;font-size:clamp(16px,4.2vw,21px);margin-top:9px;color:var(--soft);transition:color .25s}
+  .sb-msg.ok{color:var(--teal)}
+  .sb-msg.nudge{color:var(--amber)}
+  .sb-msg.pop{animation:pop .42s ease}
+  @keyframes pop{0%{transform:scale(.92)}55%{transform:scale(1.07)}100%{transform:scale(1)}}
 
   .keeper{font-family:var(--display);font-weight:600;font-size:clamp(18px,4.6vw,24px);color:var(--amber);text-align:center;margin:10px 0 18px;line-height:1.35}
   .recap{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:18px}
@@ -152,12 +167,19 @@
 <div class="center" id="solveWrap"><div style="position:fixed;bottom:26px"><button class="btn" id="solveBtn" style="background:linear-gradient(110deg,var(--amber),#f5a623);padding:14px 28px;width:auto">Solve the sentence &#9656;</button></div></div>
 
 <!-- puzzle -->
-<div class="center" id="puzzle"><div class="panel card-glass">
-  <div class="kick">Solve the sentence</div>
-  <div class="sentence" id="sentence"></div>
-  <div class="bank" id="bank"></div>
-  <div class="row"><span class="status" id="pstatus">Fill every blank, then check.</span>
-    <button class="check" id="checkBtn" disabled>Check</button></div>
+<div class="center" id="puzzle"><div class="puzzle-stack">
+  <div class="solvebanner">
+    <div class="sb-title">Solve the sentence</div>
+    <div class="sb-msg" id="pstatus">Fill every blank, then check.</div>
+  </div>
+  <div class="panel card-glass">
+    <div class="sentence" id="sentence"></div>
+    <div class="bank" id="bank"></div>
+    <div class="row">
+      <button class="reset" id="resetBtn">&#8634; Reset</button>
+      <button class="check" id="checkBtn" disabled>Check &#10003;</button>
+    </div>
+  </div>
 </div></div>
 
 <!-- result -->
@@ -326,10 +348,10 @@ function boot(data){
   const cheer=['Nice find!','Love that.','You\u2019ve got this.','Keep going!','Beautiful.'];
   function updateHint(){
     const n=solved.size, total=clues.length, left=total-n, tx=$('#hintTxt');
+    if(n>=total){ $('#hint').classList.remove('show'); return; }
     if(n===0) tx.textContent='Tap a glowing clue to begin';
     else if(left>1) tx.textContent=cheer[Math.min(n-1,cheer.length-1)]+' '+left+' more glowing in the room.';
-    else if(left===1) tx.textContent='One more to find \u2014 you\u2019re so close!';
-    else tx.textContent='All '+total+' found! Tap \u201CSolve the sentence\u201D \u25B8';
+    else tx.textContent='One more to find \u2014 you\u2019re so close!';
   }
 
   // ---- pronunciation (placeholder via speech synthesis) ----
@@ -351,13 +373,16 @@ function boot(data){
     $('#xBtn').onclick=$('#gotBtn').onclick=closeReveal;
     $('#sheet').querySelector('.aw').onclick=function(){speak(c.word);};
     $('#sheet').querySelector('.ax').onclick=function(){speak(c.example);};
-    if(first && solved.size===clues.length) setTimeout(()=>{ $('#solveWrap').classList.add('show'); },300);
+    if(first && solved.size===clues.length) $('#hint').classList.remove('show');
   }
-  function closeReveal(){ $('#reveal').classList.remove('show'); updateHint(); $('#hint').classList.add('show'); }
+  function closeReveal(){ $('#reveal').classList.remove('show');
+    if(solved.size>=clues.length){ $('#hint').classList.remove('show'); $('#solveWrap').classList.add('show'); }
+    else { updateHint(); $('#hint').classList.add('show'); } }
   $('#reveal').addEventListener('click',e=>{ if(e.target.id==='reveal') closeReveal(); });
 
   // ---- puzzle ----
-  $('#solveBtn').onclick=()=>{ $('#solveWrap').classList.remove('show'); buildPuzzle(); $('#puzzle').classList.add('show'); };
+  $('#solveBtn').onclick=()=>{ $('#solveWrap').classList.remove('show'); $('#hint').classList.remove('show'); buildPuzzle(); $('#puzzle').classList.add('show'); };
+  $('#resetBtn').onclick=()=>{ if(!answers)return; filled=answers.map(()=>null); renderPuzzle('Cleared \u2014 give it a fresh go. \u2728'); };
   function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
   let filled, answers, bank;
   function buildPuzzle(){
@@ -373,7 +398,7 @@ function boot(data){
     $('#sentence').innerHTML=html;
     $('#bank').innerHTML=bank.map(w=>{ const used=filled.indexOf(w)>=0;
       return '<button class="chip" '+(used?'disabled':'')+' data-w="'+esc(w)+'" style="background:'+colorOf[w]+'22;color:'+colorOf[w]+';box-shadow:inset 0 0 0 1.5px '+colorOf[w]+'88">'+esc(w)+'</button>'; }).join('');
-    $('#pstatus').textContent=statusText; $('#pstatus').style.color='var(--soft)';
+    $('#pstatus').textContent=statusText; $('#pstatus').className='sb-msg';
     $('#checkBtn').disabled=filled.some(x=>!x);
     $('#sentence').querySelectorAll('.slot').forEach(el=>el.onclick=()=>{ const i=+el.dataset.i; if(filled[i]){filled[i]=null; renderPuzzle('Fill every blank, then check.');} });
     $('#bank').querySelectorAll('.chip').forEach(el=>el.onclick=()=>{ if(el.disabled)return; const i=filled.indexOf(null); if(i<0)return; filled[i]=el.dataset.w; renderPuzzle('Fill every blank, then check.'); });
@@ -382,9 +407,10 @@ function boot(data){
     'Not yet, but you\u2019re learning. Tap a word to rethink it. \u2728','Keep going \u2014 fluency is built one try at a time.'];
   $('#checkBtn').onclick=()=>{
     if(filled.some(x=>!x))return;
-    if(filled.every((w,i)=>w===answers[i])){ $('#pstatus').textContent='Perfect! \uD83C\uDF89'; $('#pstatus').style.color='var(--teal)';
+    const ps=$('#pstatus');
+    if(filled.every((w,i)=>w===answers[i])){ ps.textContent='Perfect! \uD83C\uDF89'; ps.className='sb-msg ok pop';
       $('#checkBtn').disabled=true; celebrate(); setTimeout(showResult,2500); }
-    else { $('#pstatus').textContent=nudges[Math.floor(Math.random()*nudges.length)]; $('#pstatus').style.color='var(--amber)'; }
+    else { ps.textContent=nudges[Math.floor(Math.random()*nudges.length)]; ps.className='sb-msg nudge pop'; }
   };
 
   function showResult(){

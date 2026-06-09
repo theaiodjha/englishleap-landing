@@ -136,3 +136,7 @@ html[data-theme="light"] .nightbanner .small{color:#2a2150; text-shadow:none}
     transition: background-color .4s ease, border-color .4s ease, box-shadow .4s ease, color .35s ease;
   }
 }
+
+/* solve-the-sentence feedback (outside the card) on light */
+html[data-theme="light"] .sb-msg.ok{color:#0f9b90}
+html[data-theme="light"] .sb-msg.nudge{color:#c98a12}
