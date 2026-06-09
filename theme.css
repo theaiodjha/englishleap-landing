@@ -110,3 +110,29 @@ html[data-theme="light"] .upsell{background:linear-gradient(120deg,rgba(139,108,
 
 /* clue-room: calm the background glow on light so relics read crisply */
 html[data-theme="light"] #stagebg{opacity:.4}
+
+/* ---- Clue Room game: full light-theme parity (premium, contrasting) ---- */
+/* soft violet depth instead of heavy black shadow on glass surfaces */
+html[data-theme="light"] .card-glass{box-shadow:0 18px 46px -24px rgba(80,60,150,.5) !important}
+/* progress + accents that washed out on light */
+html[data-theme="light"] .dots i{background:rgba(60,50,110,.18); box-shadow:inset 0 0 0 1px rgba(60,50,110,.25)}
+html[data-theme="light"] .pill .ep{color:#0f9b90}
+html[data-theme="light"] .frac,
+html[data-theme="light"] .kick{color:#c98a12}
+html[data-theme="light"] .keeper{color:#b9791b}
+/* scrims become bright frosted glass, not dark veils */
+html[data-theme="light"] .modal{background:rgba(245,239,255,.55) !important}
+html[data-theme="light"] .intro{background:radial-gradient(120% 90% at 50% 0%,rgba(139,108,255,.18),rgba(245,239,255,.82)) !important}
+/* warm info card + secondary action button on light */
+html[data-theme="light"] .oriva{background:rgba(255,255,255,.62) !important; border:1px solid rgba(60,50,110,.14) !important}
+html[data-theme="light"] .actions a.btn[href="/practice-arcade.html"]{background:rgba(60,50,110,.08) !important; box-shadow:inset 0 0 0 1px rgba(60,50,110,.16)}
+/* night banner reads on a bright sky */
+html[data-theme="light"] .nightbanner .big{background:linear-gradient(100deg,#2a2150,#d98a14) !important; filter:drop-shadow(0 0 18px rgba(240,160,30,.4))}
+html[data-theme="light"] .nightbanner .small{color:#2a2150; text-shadow:none}
+
+/* ---- smooth, premium theme transition (surfaces without transform hovers) ---- */
+@media (prefers-reduced-motion:no-preference){
+  body, header.nav, .gate, .hint, .menu, .tabs, .upsell, .pill, .dots i{
+    transition: background-color .4s ease, border-color .4s ease, box-shadow .4s ease, color .35s ease;
+  }
+}
