@@ -125,7 +125,7 @@
 <div class="gateview hide" id="gateview"><div class="panel card-glass"><div class="kick">Members only</div>
   <div class="ptitle" id="gateTitle">Open the Practice Arcade</div>
   <p class="muted" id="gateMsg">Sign in with Patreon to play this game.</p>
-  <a class="btn" href="/practice-arcade.html" style="background:linear-gradient(110deg,var(--teal),var(--coral));color:#10101c">Go to the Arcade</a>
+  <a class="btn" id="gateBtn" href="/practice-arcade.html" style="background:linear-gradient(110deg,var(--teal),var(--coral));color:#10101c">Go to the Arcade</a>
 </div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -143,7 +143,9 @@ const TYPE='clue-room';
   try{ res=await fetch('/api/games?type='+encodeURIComponent(TYPE)+'&ep='+encodeURIComponent(EP)); }
   catch{ return gate('Something went wrong','Please try again from the Arcade.'); }
   if(res.status===401) return gate('Members only','Sign in with Patreon from the Practice Arcade to play.');
-  if(res.status===403){ const d=await res.json().catch(()=>({})); return gate('Locked',(d&&d.error)||'This episode is part of the full Fluency Club.'); }
+  if(res.status===403){ const d=await res.json().catch(()=>({})); 
+    if(d&&d.upgrade) return gate('A Fluency Club game',(d.error||'The Practice Arcade is part of Fluency Club ($2.99).'),{href:CTA,label:'Upgrade to Fluency Club'});
+    return gate('Locked',(d&&d.error)||'This episode is part of the full Fluency Club.'); }
   if(!res.ok) return gate('Unavailable','We couldn\u2019t load this game right now.');
   const data=await res.json();
   if(!data.ok) return gate('Unavailable','We couldn\u2019t load this game right now.');
@@ -152,9 +154,10 @@ const TYPE='clue-room';
   boot(data.content);
 })();
 
-function gate(title,msg){
+function gate(title,msg,cta){
   $('#loading').classList.add('hide');
   $('#gateTitle').textContent=title; $('#gateMsg').textContent=msg;
+  if(cta){ const b=$('#gateBtn'); b.href=cta.href; b.textContent=cta.label; b.target='_blank'; b.rel='noopener'; }
   $('#gateview').classList.remove('hide');
 }
 

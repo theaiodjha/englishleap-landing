@@ -103,10 +103,11 @@ header.nav.scrolled{background:rgba(8,8,18,.7);backdrop-filter:blur(16px) satura
 .logo .mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;
   background:linear-gradient(140deg,var(--read),var(--practise));box-shadow:0 6px 20px -5px rgba(123,92,255,.65),0 0 22px -7px var(--read)}
 .logo .mark svg{width:20px;height:20px}
-.nav-links{display:flex;align-items:center;gap:30px}
-.nav-links a{font-size:.93rem;color:var(--muted);font-weight:500;transition:color .25s}
+.nav-links{display:flex;align-items:center;gap:20px}
+.nav-links a{font-size:.88rem;color:var(--muted);font-weight:500;transition:color .25s}
 .nav-links a:hover{color:var(--ink)}
-.nav-cta{display:flex;align-items:center;gap:14px}
+.nav-cta{display:flex;align-items:center;gap:12px}
+.nav-cta .btn{padding:9px 17px;font-size:.86rem}
 .menu-btn{display:none;width:42px;height:42px;border-radius:11px;background:var(--panel);border:1px solid var(--line);
   color:var(--ink);cursor:pointer;place-items:center;backdrop-filter:blur(8px)}
 .menu-btn span{display:block;width:18px;height:2px;background:var(--ink);border-radius:2px;position:relative;transition:transform .3s,opacity .2s}
@@ -125,12 +126,12 @@ header.nav.scrolled{background:rgba(8,8,18,.7);backdrop-filter:blur(16px) satura
 .mobile-menu .m-cta{display:flex;flex-direction:column;gap:12px;margin-top:24px}
 .mobile-menu .m-cta .btn{width:100%;justify-content:center}
 body.menu-open{overflow:hidden}
-@media(max-width:860px){
+@media(max-width:1080px){
   .nav-links{display:none}
   .nav-cta .btn-ghost{display:none}
   .menu-btn{display:grid}
 }
-@media(min-width:861px){.mobile-menu{display:none}}
+@media(min-width:1081px){.mobile-menu{display:none}}
 
 /* ---------- Hero ---------- */
 .hero{padding:170px 0 90px;text-align:center}

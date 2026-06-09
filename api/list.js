@@ -46,7 +46,7 @@ export default async function handler(req, res) {
         res.setHeader('Set-Cookie', clearCookie);
         return res.status(403).json({ ok: false, error: 'Your membership looks inactive now.' });
       }
-      s = { ...s, at, rt, atexp, access: mem.status, tier: mem.status === 'paid' ? 'fluency' : 'trial', recheck: Date.now() + RECHECK_HOURS * 3600e3 };
+      s = { ...s, at, rt, atexp, access: mem.status, cents: mem.cents, tier: mem.status === 'paid' ? 'fluency' : 'trial', recheck: Date.now() + RECHECK_HOURS * 3600e3 };
       res.setHeader('Set-Cookie', sessionCookie(s)); // refresh cached status + tokens
     } catch {
       // Patreon API unreachable → keep serving the cached status (outage-safe). Try again next visit.

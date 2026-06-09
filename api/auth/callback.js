@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
   try {
     const tokens = await exchangeCode(code);
-    const { status, name } = await checkMembership(tokens.access_token);
+    const { status, name, cents } = await checkMembership(tokens.access_token);
 
     if (status === 'none') return res.redirect(302, '/archive.html?e=notmember');
 
@@ -21,6 +21,7 @@ export default async function handler(req, res) {
     const session = {
       name, tier: status === 'paid' ? 'fluency' : 'trial',
       access: status,                       // 'paid' | 'trial'
+      cents,                                // current tier price in cents (gates Fluency-only features)
       at: tokens.access_token,
       rt: tokens.refresh_token,
       atexp: Date.now() + (tokens.expires_in ? tokens.expires_in * 1000 : 30 * 864e5),

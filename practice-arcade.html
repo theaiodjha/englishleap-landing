@@ -107,6 +107,7 @@
 
 <script>
 const $=s=>document.querySelector(s);
+const CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
 const ERR={auth:'Sign-in did not complete. Please try again.',notmember:'We could not find an active membership for that Patreon account.'};
 function showMsg(t,kind){const m=$('#msg');m.className='msg '+(kind||'');m.textContent=t||'';}
 const eParam=new URLSearchParams(location.search).get('e'); if(eParam&&ERR[eParam]) showMsg(ERR[eParam],'err');
@@ -126,23 +127,44 @@ function tile(type,ep){
       <div class="play">&#9654;</div></div></a>`;
 }
 function render(data){
-  $('#gate').style.display='none';
-  $('#signout').style.display='block';
+  const signedIn=!!data.name;
   const root=$('#arcade'); root.style.display='block'; root.innerHTML='';
-  if(data.name) root.insertAdjacentHTML('beforeend',`<div class="hello">Signed in as ${esc(data.name)}</div>`);
-  if(data.access==='trial') root.insertAdjacentHTML('beforeend',
-    `<div class="banner">You're on a <b>free trial</b> - this week's games are unlocked. Your full arcade opens once your first payment goes through. &#128153;</div>`);
-  if(!data.arcade.length || data.arcade.every(g=>!g.episodes.length)){
-    root.insertAdjacentHTML('beforeend',`<div class="banner">New games are on the way. Check back soon!</div>`); return;
+  $('#signout').style.display=signedIn?'block':'none';
+
+  if(signedIn){ $('#gate').style.display='none'; }
+  else {
+    $('#gate').style.display='block';
+    const h=$('#gate h2'), p=$('#gate p');
+    if(h) h.textContent='Unlock every game';
+    if(p) p.innerHTML="Connect Patreon to play a game for every episode \u2014 or try this week's, free below.";
   }
-  data.arcade.forEach(gt=>{
-    if(!gt.episodes.length) return;
-    const sec=document.createElement('div'); sec.className='gtype';
-    sec.innerHTML=`<div class="gtype-head"><div class="gicon">${gt.icon||'\uD83C\uDFAE'}</div>
-      <div><div class="gt-name">${esc(gt.name)}</div><div class="gt-tag">${esc(gt.tagline||'')}</div></div></div>
-      <div class="deck">${gt.episodes.map(ep=>tile(gt.type,ep)).join('')}</div>`;
-    root.appendChild(sec);
-  });
+
+  if(signedIn) root.insertAdjacentHTML('beforeend',`<div class="hello">Signed in as ${esc(data.name)}</div>`);
+
+  if(data.level==='fluency' && data.access==='trial')
+    root.insertAdjacentHTML('beforeend',`<div class="banner">You're on a <b>free trial</b> - this week's games are unlocked. Your full arcade opens once your first payment goes through. &#128153;</div>`);
+  if(data.level==='none')
+    root.insertAdjacentHTML('beforeend',`<div class="banner"><b>Free taster</b> - no account needed. Join Fluency Club to unlock a game for every episode. &#128153;</div>`);
+
+  const hasGames = data.arcade.length && data.arcade.some(g=>g.episodes.length);
+  if(hasGames){
+    data.arcade.forEach(gt=>{
+      if(!gt.episodes.length) return;
+      const sec=document.createElement('div'); sec.className='gtype';
+      sec.innerHTML=`<div class="gtype-head"><div class="gicon">${gt.icon||'\uD83C\uDFAE'}</div>
+        <div><div class="gt-name">${esc(gt.name)}</div><div class="gt-tag">${esc(gt.tagline||'')}</div></div></div>
+        <div class="deck">${gt.episodes.map(ep=>tile(gt.type,ep)).join('')}</div>`;
+      root.appendChild(sec);
+    });
+  } else {
+    root.insertAdjacentHTML('beforeend',`<div class="banner">New games are on the way. Check back soon!</div>`);
+  }
+
+  if(data.level==='transcript')
+    root.insertAdjacentHTML('beforeend',`<div class="gate" style="margin:28px auto 0">
+      <h2>Want the whole arcade?</h2>
+      <p>You're on the <b>Transcript</b> tier — here's the latest game from each type. <b>Fluency Club</b> ($2.99) unlocks every episode's games.</p>
+      <a class="patreon" href="${CTA}" target="_blank" rel="noopener">Upgrade to Fluency Club &middot; $2.99</a></div>`);
 }
 $('#altToggle').addEventListener('click',()=>{const b=$('#codebox');b.style.display=b.style.display==='block'?'none':'block';});
 async function unlock(){
