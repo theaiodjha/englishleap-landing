@@ -7,7 +7,7 @@ import {
   readSession, sessionCookie, clearCookie,
   checkMembership, refreshToken, RECHECK_HOURS,
 } from "../lib/session.js";
-import { ARCADE } from "../lib/arcade-data.js";
+import { getArcade } from "../lib/arcade-store.js";
 
 // Same 24h live re-check used by /api/list. Returns the (possibly updated)
 // session, or null if membership is now inactive (cookie cleared).
@@ -37,6 +37,8 @@ export default async function handler(req, res) {
   // Logged-in members get a live re-check; anonymous visitors are still allowed a taster.
   let s = readSession(req);
   if (s) s = await revalidate(req, res, s); // becomes null if membership went inactive
+
+  const ARCADE = await getArcade(); // server-side store (KV) with static fallback
 
   const paid = !!(s && s.access === "paid");
   const FLUENCY_MIN_CENTS = 200; // Transcript = 100¢, Fluency Club = 299¢; unknown fails open

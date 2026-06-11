@@ -142,6 +142,14 @@
     filter:drop-shadow(0 0 26px rgba(255,205,70,.55))}
   .nightbanner .small{color:#fff;font-size:15px;margin-top:7px;opacity:.94;text-shadow:0 2px 18px rgba(0,0,0,.5)}
 </style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0a0a14">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="English Leap">
+<script src="/pwa.js" defer></script>
 </head>
 <body>
 <div id="stagebg"></div>
@@ -333,10 +341,19 @@ function boot(data){
     room.rotation.y=reduced?0:Math.sin(t*0.12)*0.16;
     room.rotation.x=reduced?0:Math.sin(t*0.1)*0.025;
     dust.rotation.y+=0.0006;
-    if(!reduced){ camera.position.x=Math.sin(t*0.18)*0.45; camera.position.y=1.6+Math.sin(t*0.22)*0.12; camera.lookAt(0,1.0,0); }
+    if(!reduced){ camera.position.x=Math.sin(t*0.18)*0.45*roomScale; camera.position.y=1.6+Math.sin(t*0.22)*0.12; camera.lookAt(0,1.0,0); }
     renderer.render(scene,camera);
   })();
-  addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+  let roomScale=1;
+  function fit(){
+    const A=innerWidth/innerHeight;
+    camera.aspect=A; camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+    // narrow/portrait screens can't fit the wide clue spread → scale the room down to fit
+    roomScale=Math.min(1, Math.max(0.44, 0.8*A));
+    room.scale.setScalar(roomScale);
+  }
+  fit(); addEventListener('resize',fit);
   // ---- intro / instructions (outside the card) ----
   $('#intro').classList.add('show');
   $('#startBtn').onclick=()=>{ $('#intro').classList.remove('show'); updateHint(); $('#hint').classList.add('show'); };
