@@ -324,7 +324,7 @@ function boot(data){
   renderer.domElement.addEventListener('pointermove',e=>{ const h=pick(e); hovered=h?h.object.parent:null; document.body.style.cursor=h?'pointer':'default'; });
   renderer.domElement.addEventListener('pointerdown',e=>{ const h=pick(e); if(h) openReveal(h.object.parent.userData.clue); });
 
-  let t=0;
+  let t=0, roomScale=1;
   (function loop(){ requestAnimationFrame(loop); t+=reduced?0:0.016;
     const light=document.documentElement.dataset.theme==='light'; const gf=light?0.5:1;
     amb.intensity=light?0.42:0.7; key.intensity=light?0.5:1.1; p1.intensity=light?7:18; p2.intensity=light?5:14; warm.intensity=light?3:9;
@@ -344,7 +344,6 @@ function boot(data){
     if(!reduced){ camera.position.x=Math.sin(t*0.18)*0.45*roomScale; camera.position.y=1.6+Math.sin(t*0.22)*0.12; camera.lookAt(0,1.0,0); }
     renderer.render(scene,camera);
   })();
-  let roomScale=1;
   function fit(){
     const A=innerWidth/innerHeight;
     camera.aspect=A; camera.updateProjectionMatrix();
