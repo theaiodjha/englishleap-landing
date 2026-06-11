@@ -298,11 +298,60 @@ function boot(data){
     default:return new THREE.IcosahedronGeometry(.6,0);
   }}
 
+  // ---- branded clue icons (extruded shapes + glassy brand material) ----
+  // Procedural environment map for real reflections on the bevels (guarded: if
+  // anything is unsupported, ENV stays null and materials still render fine).
+  let ENV=null;
+  try{
+    const pmrem=new THREE.PMREMGenerator(renderer);
+    const cv=document.createElement('canvas'); cv.width=64; cv.height=32; const cc=cv.getContext('2d');
+    const grd=cc.createLinearGradient(0,0,0,32);
+    grd.addColorStop(0,'#46367f'); grd.addColorStop(.5,'#10101c'); grd.addColorStop(1,'#0e2f2c');
+    cc.fillStyle=grd; cc.fillRect(0,0,64,32);
+    cc.fillStyle='rgba(255,255,255,.55)'; cc.fillRect(0,2,64,3); // bright band → an edge highlight
+    const tex=new THREE.CanvasTexture(cv); tex.mapping=THREE.EquirectangularReflectionMapping;
+    ENV=pmrem.fromEquirectangular(tex).texture; pmrem.dispose();
+  }catch(e){ ENV=null; }
+
+  // lighter geometry on low-end devices / reduced motion
+  const lite=(navigator.hardwareConcurrency||4)<=4 || Math.min(innerWidth,innerHeight)<480 || reduced;
+
+  function poly(pts){ const s=new THREE.Shape(); s.moveTo(pts[0][0],pts[0][1]); for(let i=1;i<pts.length;i++) s.lineTo(pts[i][0],pts[i][1]); s.closePath(); return s; }
+  function extrude(shape){ const g=new THREE.ExtrudeGeometry(shape,{depth:0.34,bevelEnabled:true,bevelThickness:0.07,bevelSize:0.06,bevelSegments:lite?1:3,steps:1,curveSegments:lite?10:18}); g.center(); return g; }
+  function circleShape(r){ const s=new THREE.Shape(); s.absarc(0,0,r,0,Math.PI*2,false); return s; }
+  function starPts(R,r,n){ const p=[]; for(let i=0;i<n*2;i++){ const a=-Math.PI/2+i*Math.PI/n, rad=i%2?r:R; p.push([rad*Math.cos(a),rad*Math.sin(a)]); } return p; }
+  function iconMat(col){ return new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.5,metalness:0.5,roughness:0.2,envMap:ENV,envMapIntensity:lite?0.5:1.0}); }
+  function accentMat(col){ return new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:0.65,metalness:0.3,roughness:0.3,envMap:ENV,envMapIntensity:lite?0.4:0.8}); }
+
+  const ICON={
+    'carve out time': () => extrude(poly([[-0.72,0.8],[0.72,0.8],[0.13,0],[0.72,-0.8],[-0.72,-0.8],[-0.13,0]])),                 // hourglass
+    'make the most of': () => extrude(poly(starPts(0.85,0.4,5))),                                                                // star
+    'put off': () => extrude(poly([[-0.72,0.24],[0.12,0.24],[0.12,0.52],[0.82,0],[0.12,-0.52],[0.12,-0.24],[-0.72,-0.24]])),     // forward arrow (postpone)
+    'get carried away': () => extrude(poly([[-0.82,0.5],[0.82,0],[-0.82,-0.5],[-0.42,0]])),                                       // paper plane
+  };
+  function buildIcon(c){
+    const w=(c.word||'').toLowerCase(); let geo=null, accents=[];
+    if(w==='slip away'){                       // clock: disc + two hands
+      geo=extrude(circleShape(0.8));
+      const hand=(len,rot)=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(len,0.1,0.12), accentMat(0xffffff)); m.geometry.translate(len/2,0,0); m.rotation.z=rot; m.position.z=0.2; return m; };
+      accents.push(hand(0.5,Math.PI/2), hand(0.34,0));
+    } else if(w==='stay on track'){            // target / bullseye
+      geo=extrude(circleShape(0.82));
+      const ring=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.07,12,lite?16:28), accentMat(0xffffff)); ring.position.z=0.16;
+      const dot=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.1,16), accentMat(0xffffff)); dot.rotation.x=Math.PI/2; dot.position.z=0.18;
+      accents.push(ring,dot);
+    } else if(ICON[w]){ geo=ICON[w](); }
+    else { geo=extrude(poly([[0,0.85],[0.62,0],[0,-0.85],[-0.62,0]])); } // default gem
+    const mesh=new THREE.Mesh(geo, iconMat(c.color));
+    accents.forEach(a=>mesh.add(a));
+    return mesh;
+  }
+
   const room=new THREE.Group(); scene.add(room);
   const relics=[];
   clues.forEach((c,i)=>{
     const g=new THREE.Group(); g.position.set(c.position[0],c.position[1],c.position[2]);
-    const mesh=new THREE.Mesh(geom(c.geo), new THREE.MeshStandardMaterial({color:c.color,emissive:c.color,emissiveIntensity:.55,metalness:.32,roughness:.3}));
+    const mesh=buildIcon(c);
     g.add(mesh);
     const halo=new THREE.Mesh(new THREE.SphereGeometry(.85,16,16), new THREE.MeshBasicMaterial({color:c.color,transparent:true,opacity:.18,blending:THREE.AdditiveBlending,depthWrite:false}));
     const halo2=new THREE.Mesh(new THREE.SphereGeometry(1.1,16,16), new THREE.MeshBasicMaterial({color:c.color,transparent:true,opacity:.07,blending:THREE.AdditiveBlending,depthWrite:false}));
@@ -321,8 +370,9 @@ function boot(data){
   function pick(e){ const r=renderer.domElement.getBoundingClientRect();
     pointer.x=((e.clientX-r.left)/r.width)*2-1; pointer.y=-((e.clientY-r.top)/r.height)*2+1;
     ray.setFromCamera(pointer,camera); return ray.intersectObjects(relics,true)[0]; }
-  renderer.domElement.addEventListener('pointermove',e=>{ const h=pick(e); hovered=h?h.object.parent:null; document.body.style.cursor=h?'pointer':'default'; });
-  renderer.domElement.addEventListener('pointerdown',e=>{ const h=pick(e); if(h) openReveal(h.object.parent.userData.clue); });
+  function relicOf(o){ while(o && !(o.userData && o.userData.clue)) o=o.parent; return o; }
+  renderer.domElement.addEventListener('pointermove',e=>{ const h=pick(e); hovered=h?relicOf(h.object):null; document.body.style.cursor=hovered?'pointer':'default'; });
+  renderer.domElement.addEventListener('pointerdown',e=>{ const h=pick(e); const g0=h?relicOf(h.object):null; if(g0) openReveal(g0.userData.clue); });
 
   let t=0, roomScale=1;
   (function loop(){ requestAnimationFrame(loop); t+=reduced?0:0.016;
@@ -330,7 +380,7 @@ function boot(data){
     amb.intensity=light?0.42:0.7; key.intensity=light?0.5:1.1; p1.intensity=light?7:18; p2.intensity=light?5:14; warm.intensity=light?3:9;
     relics.forEach(g=>{ const d=g.userData; const done=solved.has(d.clue.id);
       g.position.y=d.base+Math.sin(t*1.4+d.phase)*(done?0.04:0.12);
-      d.mesh.rotation.y+=done?0.002:0.006; d.mesh.rotation.x+=done?0:0.0015;
+      d.mesh.rotation.y=Math.sin(t*0.6+d.phase)*(done?0.22:0.5); d.mesh.rotation.x=Math.sin(t*0.5+d.phase)*0.12;
       const targ=(hovered===g)?1.2:1; d.mesh.scale.x+=(targ-d.mesh.scale.x)*0.15; d.mesh.scale.y=d.mesh.scale.z=d.mesh.scale.x;
       const pulse=Math.sin(t*2+d.phase);
       d.mesh.material.emissiveIntensity=done?(light?0.34:0.18):((light?0.5:0.55)+pulse*0.14);
