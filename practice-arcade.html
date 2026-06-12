@@ -108,6 +108,42 @@
   .upsell .ut p{color:var(--soft);font-size:14px;margin:0;line-height:1.5}
   .upsell .patreon{width:auto;flex:0 0 auto;white-space:nowrap;padding:14px 24px}
 
+  /* compact sign-in strip */
+  .signin{background:var(--glass);border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-bottom:34px;backdrop-filter:blur(12px)}
+  .signin .si-main{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:space-between}
+  .signin .si-text{flex:1 1 280px;color:var(--soft);font-size:14.5px;line-height:1.5}
+  .signin .si-text b{color:var(--ink)}
+  .signin .si-btn{flex:0 0 auto;text-decoration:none;color:#06121f;font-weight:700;font-size:15px;white-space:nowrap;
+    background:linear-gradient(135deg,var(--teal),var(--coral));padding:12px 20px;border-radius:999px}
+  .signin .si-foot{margin-top:10px}
+  .signin .alt{color:var(--soft);font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .signin .codebox{display:none;margin-top:12px}
+  .signin .field{display:flex;gap:8px;max-width:360px}
+  .signin .field input{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--ink);font:inherit}
+  .signin .field button{border:0;border-radius:12px;padding:11px 18px;font-weight:700;cursor:pointer;background:var(--teal);color:#062018}
+  .signin .msg{margin-top:10px;font-size:13px}
+  .signin .msg.err{color:#ff9a9a}.signin .msg.ok{color:var(--teal)}
+
+  /* game-type tiles (poster style) */
+  .types{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:22px}
+  .gtile{position:relative;display:block;border-radius:22px;overflow:hidden;aspect-ratio:16/10;text-decoration:none;color:#fff;
+    border:1px solid var(--line);box-shadow:0 26px 60px -24px rgba(0,0,0,.65);transition:transform .16s,border-color .16s}
+  .gtile:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.3)}
+  .gcover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .gtile::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(6,8,16,.94) 4%,rgba(6,8,16,.45) 40%,transparent 68%)}
+  .gtile.locked .gcover{filter:saturate(.6) brightness(.66)}
+  .gribbon{position:absolute;top:13px;left:13px;z-index:2;font-size:11px;font-weight:800;letter-spacing:.04em;padding:4px 11px;border-radius:999px}
+  .gribbon.free{background:rgba(31,196,182,.92);color:#062018}
+  .gribbon.transcript{background:rgba(139,108,255,.94);color:#0d0a26}
+  .gribbon.fluency{background:rgba(255,205,70,.94);color:#231a02}
+  .glock{position:absolute;top:12px;right:13px;z-index:2;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;
+    background:rgba(8,6,20,.6);color:#fff;font-size:15px;backdrop-filter:blur(4px)}
+  .gov{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 20px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+  .gname{font-family:var(--display);font-weight:700;font-size:23px;line-height:1.05}
+  .gcount{margin-top:5px;color:rgba(255,255,255,.84);font-weight:600;font-size:14px}
+  .gplay{flex:0 0 auto;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:16px;color:#06121f;
+    background:linear-gradient(135deg,var(--teal),var(--coral))}
+
   footer{text-align:center;color:var(--soft);font-size:12px;margin-top:54px}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
@@ -128,20 +164,16 @@
   </div>
 
   <header>
-    <div class="brand">PRACTICE ARCADE</div>
     <h1>Practice Arcade</h1>
-    <div class="sub">Play the phrases. One mini-game per episode.</div>
-    <div class="tabs">
-      <a href="/practice-arcade.html" class="active">&#127918; Practice Arcade</a>
-      <a href="/archive.html">&#128218; Member Archive</a>
-    </div>
+    <div class="sub">Play the phrases &mdash; one game per episode.</div>
   </header>
 
-  <section class="gate" id="gate">
-    <h2>Members only</h2>
-    <p>Connect your Patreon once to play. After that, this page just remembers you.</p>
-    <a class="patreon" href="/api/auth/login">&#9654;&nbsp; Continue with Patreon</a>
-    <div class="alt" id="altToggle">Have a member code instead?</div>
+  <section class="signin" id="gate">
+    <div class="si-main">
+      <div class="si-text"><b>The Clue Room is free</b> &mdash; no account needed. Sign in with Patreon to unlock more games.</div>
+      <a class="si-btn" href="/api/auth/login">&#9654;&nbsp; Continue with Patreon</a>
+    </div>
+    <div class="si-foot"><span class="alt" id="altToggle">Have a member code?</span></div>
     <div class="codebox" id="codebox">
       <div class="field"><input id="code" placeholder="ELC-XXXX-XXXX" autocomplete="off" spellcheck="false"><button id="go">Unlock</button></div>
     </div>
@@ -164,69 +196,46 @@ async function tryLoad(){
   const r=await fetch('/api/games'); if(!r.ok) return false;
   const data=await r.json(); if(!data.ok) return false; render(data); return true;
 }
-function tile(type,ep,locked,access){
-  const cover = ep.cover
-    ? `<img src="${esc(ep.cover)}" alt="${esc(ep.title)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'${esc(ep.title)}'}))">`
-    : `<div class="ph">${esc(ep.title)}</div>`;
-  if(locked){
-    const label = access==='transcript' ? 'Unlock &middot; $1' : 'Unlock &middot; $2.99';
-    return `<a class="tile locked" href="${CTA}" target="_blank" rel="noopener" aria-label="Unlock ${esc(ep.title)}">
-      <div class="cover">${cover}<span class="lockbadge">&#128274;</span></div>
-      <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
-        <div class="unlock">${label}</div></div></a>`;
-  }
-  return `<a class="tile" href="/games/${esc(type)}/?ep=${esc(ep.id)}">
-    <div class="cover">${ep.current?'<span class="now">THIS WEEK</span>':''}${cover}</div>
-    <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
-      <div class="play">&#9654;</div></div></a>`;
+const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
+function typeTile(gt){
+  const n=(gt.episodes||[]).length;
+  const cnt=n+' '+(n===1?'episode':'episodes');
+  const cover=`/covers/${esc(gt.type)}.png`;
+  return `<a class="gtile ${gt.locked?'locked':''}" href="/arcade-type.html?type=${esc(gt.type)}">
+    <img class="gcover" src="${cover}" alt="${esc(gt.name)}" onerror="this.style.display='none'">
+    <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>
+    ${gt.locked?'<span class="glock">&#128274;</span>':''}
+    <div class="gov">
+      <div><div class="gname">${esc(gt.name)}</div><div class="gcount">${cnt}</div></div>
+      ${gt.locked?'':'<span class="gplay">&#9654;</span>'}
+    </div></a>`;
 }
 function render(data){
   const signedIn=!!data.name;
-  const root=$('#arcade'); root.style.display='block'; root.innerHTML='';
+  const root=$('#arcade'); root.style.display='block';
   const acct=$('#acct');
   if(signedIn){
     $('#gate').style.display='none';
     acct.innerHTML=`Signed in as <b style="color:var(--ink);font-weight:600">${esc(data.name)}</b> <button class="out" id="signoutBtn">Sign out</button>`;
     $('#signoutBtn').onclick=async()=>{await fetch('/api/auth/signout',{method:'POST'});location.href='/practice-arcade.html';};
   } else {
-    acct.innerHTML='';
-    $('#gate').style.display='block';
-    const h=$('#gate h2'), p=$('#gate p');
-    if(h) h.textContent='Unlock more games';
-    if(p) p.innerHTML="The Clue Room is free for everyone below. Connect Patreon to unlock Phrase Pairs and the rest.";
+    acct.innerHTML=''; $('#gate').style.display='block';
   }
 
-  const tierName = data.level==='fluency'?'Fluency Club':data.level==='transcript'?'Transcript':'Guest';
-  if(!signedIn)
-    root.insertAdjacentHTML('beforeend',`<div class="banner"><b>The Clue Room is free for everyone</b> \u2014 no account needed. Sign in with Patreon to unlock more games. &#128153;</div>`);
-  else if(data.level==='fluency')
-    root.insertAdjacentHTML('beforeend',`<div class="banner">You're on <b>Fluency Club</b> \u2014 every game is unlocked. \u2728</div>`);
-  else
-    root.insertAdjacentHTML('beforeend',`<div class="banner">You're on <b>${esc(tierName)}</b>. Your unlocked games are below \u2014 upgrade any time for the rest. &#128153;</div>`);
+  const types=(data.arcade||[]);
+  let html=`<div class="types">${types.map(typeTile).join('')}</div>`;
 
-  const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
-  (data.arcade||[]).forEach(gt=>{
-    const sec=document.createElement('div'); sec.className='gtype';
-    const eps=(gt.episodes||[]).slice(0,3);
-    const more=(gt.episodes||[]).length>3;
-    const viewall=more?`<a class="viewall" href="/arcade-type.html?type=${esc(gt.type)}">View all ${gt.episodes.length} &rsaquo;</a>`:'';
-    sec.innerHTML=`<div class="gtype-head"><div class="gicon">${gt.icon||'\uD83C\uDFAE'}</div>
-      <div><div class="gt-name">${esc(gt.name)}<span class="ribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span></div>
-      <div class="gt-tag">${esc(gt.tagline||'')}</div></div>${viewall}</div>
-      <div class="deck">${eps.map(ep=>tile(gt.type,ep,gt.locked,gt.access)).join('')}</div>`;
-    root.appendChild(sec);
-  });
-
-  const lockedTiers=[...new Set((data.arcade||[]).filter(g=>g.locked).map(g=>g.access))];
+  const lockedTiers=[...new Set(types.filter(g=>g.locked).map(g=>g.access))];
   if(lockedTiers.length){
     const wantFluency=lockedTiers.includes('fluency');
     const copy = data.level==='transcript'
       ? 'You have the <b>Transcript</b> tier. <b>Fluency Club ($2.99)</b> opens every game.'
       : '<b>Transcript ($1)</b> adds Phrase Pairs; <b>Fluency Club ($2.99)</b> opens everything.';
-    root.insertAdjacentHTML('beforeend',`<div class="upsell">
+    html+=`<div class="upsell">
       <div class="ut"><h3>Unlock more games</h3><p>${copy}</p></div>
-      <a class="patreon" href="${CTA}" target="_blank" rel="noopener">${wantFluency?'Join Fluency Club &middot; $2.99':'Join &middot; $1'}</a></div>`);
+      <a class="patreon" href="${CTA}" target="_blank" rel="noopener">${wantFluency?'Join Fluency Club &middot; $2.99':'Join &middot; $1'}</a></div>`;
   }
+  root.innerHTML=html;
 }
 $('#altToggle').addEventListener('click',()=>{const b=$('#codebox');b.style.display=b.style.display==='block'?'none':'block';});
 async function unlock(){
