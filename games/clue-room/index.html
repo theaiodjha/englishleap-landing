@@ -346,7 +346,7 @@ function boot(data){
     ray.setFromCamera(pointer,camera); return ray.intersectObjects(relics,true)[0]; }
   function relicOf(o){ while(o && !(o.userData && o.userData.clue)) o=o.parent; return o; }
   renderer.domElement.addEventListener('pointermove',e=>{ const h=pick(e); hovered=h?relicOf(h.object):null; document.body.style.cursor=hovered?'pointer':'default'; });
-  renderer.domElement.addEventListener('pointerdown',e=>{ const h=pick(e); const g0=h?relicOf(h.object):null; if(g0) openReveal(g0.userData.clue); });
+  renderer.domElement.addEventListener('click',e=>{ const h=pick(e); const g0=h?relicOf(h.object):null; if(g0) openReveal(g0.userData.clue); });
 
   let t=0, roomScale=1;
   (function loop(){ requestAnimationFrame(loop); t+=reduced?0:0.016;
@@ -401,6 +401,7 @@ function boot(data){
     synth.speak(u); }
 
   // ---- reveal card ----
+  let revealOpenedAt=0;
   function openReveal(c){
     const first=!solved.has(c.id); solved.add(c.id); progress();
     $('#hint').classList.remove('show');
@@ -412,7 +413,7 @@ function boot(data){
       '<div class="clue">'+c.clue+'</div>'+
       '<div class="ex"><span>\u201C'+c.example+'\u201D</span><button class="audio ax" title="Hear the sentence">\uD83D\uDD0A</button></div>'+
       '<button class="btn" id="gotBtn" style="background:'+c.color+';color:#10101c">Got it</button>';
-    $('#reveal').classList.add('show');
+    $('#reveal').classList.add('show'); revealOpenedAt=Date.now();
     $('#xBtn').onclick=$('#gotBtn').onclick=closeReveal;
     $('#sheet').querySelector('.aw').onclick=function(){speak(c.word);};
     $('#sheet').querySelector('.ax').onclick=function(){speak(c.example);};
@@ -421,7 +422,7 @@ function boot(data){
   function closeReveal(){ $('#reveal').classList.remove('show');
     if(solved.size>=clues.length){ $('#hint').classList.remove('show'); $('#solveWrap').classList.add('show'); }
     else { updateHint(); $('#hint').classList.add('show'); } }
-  $('#reveal').addEventListener('click',e=>{ if(e.target.id==='reveal') closeReveal(); });
+  $('#reveal').addEventListener('click',e=>{ if(e.target.id==='reveal' && Date.now()-revealOpenedAt>250) closeReveal(); });
 
   // ---- puzzle ----
   $('#solveBtn').onclick=()=>{ $('#solveWrap').classList.remove('show'); $('#hint').classList.remove('show'); buildPuzzle(); $('#puzzle').classList.add('show'); };
