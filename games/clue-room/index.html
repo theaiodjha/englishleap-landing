@@ -429,6 +429,7 @@ function boot(data){
   function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
   let filled, answers, bank;
   function buildPuzzle(){
+    const sb=document.querySelector('.solvebanner'); if(sb) sb.style.visibility='visible';
     answers=puzzle.answers; bank=shuffle(answers); filled=answers.map(()=>null);
     renderPuzzle('Fill every blank, then check.');
   }
@@ -465,6 +466,7 @@ function boot(data){
 
   // ---- celebration: a banner that lights up the night ----
   function celebrate(){
+    const sb=document.querySelector('.solvebanner'); if(sb) sb.style.visibility='hidden';
     const name=(data.user||'').trim().split(/\s+/)[0];
     const head=name?('Brilliant, '+name+'!'):'Brilliant!';
     const lines=['Six phrases \u2014 all yours now. \u2728','You turned watching into doing. \uD83C\uDF1F','That\u2019s real progress. Keep shining. \uD83C\uDF19'];
