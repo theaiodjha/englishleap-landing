@@ -86,6 +86,14 @@
   .tile .ep{font-family:var(--display);font-weight:700;font-size:13px;color:var(--teal);letter-spacing:.04em}
   .tile .ttl{font-family:var(--display);font-weight:600;font-size:17px;line-height:1.15;margin-top:2px}
   .tile .play{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--coral),var(--pink))}
+  .tile.locked .cover{filter:saturate(.55) brightness(.62)}
+  .tile.locked:hover{transform:translateY(-3px)}
+  .lockbadge{position:absolute;top:10px;right:11px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(8,6,20,.6);color:#fff;font-size:14px;backdrop-filter:blur(4px)}
+  .tile .unlock{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--ink);background:var(--glass);border:1px solid var(--line);padding:8px 13px;border-radius:999px;white-space:nowrap}
+  .gt-name .ribbon{font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+  .ribbon.free{background:rgba(31,196,182,.16);color:#13978d}
+  .ribbon.transcript{background:rgba(139,108,255,.18);color:#6f54e6}
+  .ribbon.fluency{background:rgba(255,205,70,.20);color:#b07d05}
 
   /* upgrade banner — full width, aligned with the games */
   .upsell{display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-top:34px;
@@ -152,10 +160,17 @@ async function tryLoad(){
   const r=await fetch('/api/games'); if(!r.ok) return false;
   const data=await r.json(); if(!data.ok) return false; render(data); return true;
 }
-function tile(type,ep){
+function tile(type,ep,locked,access){
   const cover = ep.cover
     ? `<img src="${esc(ep.cover)}" alt="${esc(ep.title)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'${esc(ep.title)}'}))">`
     : `<div class="ph">${esc(ep.title)}</div>`;
+  if(locked){
+    const label = access==='transcript' ? 'Unlock &middot; $1' : 'Unlock &middot; $2.99';
+    return `<a class="tile locked" href="${CTA}" target="_blank" rel="noopener" aria-label="Unlock ${esc(ep.title)}">
+      <div class="cover">${cover}<span class="lockbadge">&#128274;</span></div>
+      <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
+        <div class="unlock">${label}</div></div></a>`;
+  }
   return `<a class="tile" href="/games/${esc(type)}/?ep=${esc(ep.id)}">
     <div class="cover">${ep.current?'<span class="now">THIS WEEK</span>':''}${cover}</div>
     <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
@@ -173,34 +188,38 @@ function render(data){
     acct.innerHTML='';
     $('#gate').style.display='block';
     const h=$('#gate h2'), p=$('#gate p');
-    if(h) h.textContent='Unlock every game';
-    if(p) p.innerHTML="Connect Patreon to play a game for every episode \u2014 or try this week's, free below.";
+    if(h) h.textContent='Unlock more games';
+    if(p) p.innerHTML="The Clue Room is free for everyone below. Connect Patreon to unlock Phrase Pairs and the rest.";
   }
 
-  if(data.level==='fluency' && data.access==='trial')
-    root.insertAdjacentHTML('beforeend',`<div class="banner">You're on a <b>free trial</b> - this week's games are unlocked. Your full arcade opens once your first payment goes through. &#128153;</div>`);
-  if(data.level==='none')
-    root.insertAdjacentHTML('beforeend',`<div class="banner"><b>Free taster</b> - no account needed. Join Fluency Club to unlock a game for every episode. &#128153;</div>`);
+  const tierName = data.level==='fluency'?'Fluency Club':data.level==='transcript'?'Transcript':'Guest';
+  if(!signedIn)
+    root.insertAdjacentHTML('beforeend',`<div class="banner"><b>The Clue Room is free for everyone</b> \u2014 no account needed. Sign in with Patreon to unlock more games. &#128153;</div>`);
+  else if(data.level==='fluency')
+    root.insertAdjacentHTML('beforeend',`<div class="banner">You're on <b>Fluency Club</b> \u2014 every game is unlocked. \u2728</div>`);
+  else
+    root.insertAdjacentHTML('beforeend',`<div class="banner">You're on <b>${esc(tierName)}</b>. Your unlocked games are below \u2014 upgrade any time for the rest. &#128153;</div>`);
 
-  const hasGames = data.arcade.length && data.arcade.some(g=>g.episodes.length);
-  if(hasGames){
-    data.arcade.forEach(gt=>{
-      if(!gt.episodes.length) return;
-      const sec=document.createElement('div'); sec.className='gtype';
-      sec.innerHTML=`<div class="gtype-head"><div class="gicon">${gt.icon||'\uD83C\uDFAE'}</div>
-        <div><div class="gt-name">${esc(gt.name)}</div><div class="gt-tag">${esc(gt.tagline||'')}</div></div></div>
-        <div class="deck">${gt.episodes.map(ep=>tile(gt.type,ep)).join('')}</div>`;
-      root.appendChild(sec);
-    });
-  } else {
-    root.insertAdjacentHTML('beforeend',`<div class="banner">New games are on the way. Check back soon!</div>`);
-  }
+  const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
+  (data.arcade||[]).forEach(gt=>{
+    const sec=document.createElement('div'); sec.className='gtype';
+    sec.innerHTML=`<div class="gtype-head"><div class="gicon">${gt.icon||'\uD83C\uDFAE'}</div>
+      <div><div class="gt-name">${esc(gt.name)}<span class="ribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span></div>
+      <div class="gt-tag">${esc(gt.tagline||'')}</div></div></div>
+      <div class="deck">${gt.episodes.map(ep=>tile(gt.type,ep,gt.locked,gt.access)).join('')}</div>`;
+    root.appendChild(sec);
+  });
 
-  if(data.level==='transcript')
+  const lockedTiers=[...new Set((data.arcade||[]).filter(g=>g.locked).map(g=>g.access))];
+  if(lockedTiers.length){
+    const wantFluency=lockedTiers.includes('fluency');
+    const copy = data.level==='transcript'
+      ? 'You have the <b>Transcript</b> tier. <b>Fluency Club ($2.99)</b> opens every game.'
+      : '<b>Transcript ($1)</b> adds Phrase Pairs; <b>Fluency Club ($2.99)</b> opens everything.';
     root.insertAdjacentHTML('beforeend',`<div class="upsell">
-      <div class="ut"><h3>Want the whole arcade?</h3>
-        <p>You're on the <b>Transcript</b> tier — here's the latest game from each type. <b>Fluency Club</b> ($2.99) unlocks every episode's games.</p></div>
-      <a class="patreon" href="${CTA}" target="_blank" rel="noopener">Upgrade to Fluency Club &middot; $2.99</a></div>`);
+      <div class="ut"><h3>Unlock more games</h3><p>${copy}</p></div>
+      <a class="patreon" href="${CTA}" target="_blank" rel="noopener">${wantFluency?'Join Fluency Club &middot; $2.99':'Join &middot; $1'}</a></div>`);
+  }
 }
 $('#altToggle').addEventListener('click',()=>{const b=$('#codebox');b.style.display=b.style.display==='block'?'none':'block';});
 async function unlock(){

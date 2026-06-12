@@ -40,34 +40,27 @@ export default async function handler(req, res) {
 
   const ARCADE = await getArcade(); // server-side store (KV) with static fallback
 
-  const paid = !!(s && s.access === "paid");
-  const FLUENCY_MIN_CENTS = 200; // Transcript = 100¢, Fluency Club = 299¢; unknown fails open
-  const level = !s
-    ? "none"
-    : (((s.cents === undefined) ? true : (Number(s.cents) || 0) >= FLUENCY_MIN_CENTS) ? "fluency" : "transcript");
-
-  // Which episodes of a game type this level may play:
-  //   none       → the first game of the FIRST type only (public taster)
-  //   transcript → the first game of EVERY type ($1 subscribers)
-  //   fluency    → all episodes (paid) or the current one (trial)
-  // "first" = first listed in lib/arcade-data.js, so reorder there to pick the taster.
-  const epsFor = (gt, gi) => {
-    if (level === "fluency") return paid ? gt.episodes : gt.episodes.filter((e) => e.current);
-    if (level === "transcript") return gt.episodes.slice(0, 1);
-    return gi === 0 ? gt.episodes.slice(0, 1) : [];
-  };
+  // Access ladder: each game declares a tier; your Patreon level unlocks every
+  // game at or below it. free → everyone (no login needed); transcript → $1+;
+  // fluency → $2.99 only. All episodes of an unlocked game are playable.
+  const FLUENCY_MIN_CENTS = 200; // Transcript = 100¢, Fluency Club = 299¢
+  const RANK = { free: 0, transcript: 1, fluency: 2 };
+  const userRank = !s ? 0 : (s.cents === undefined ? 2 : ((Number(s.cents) || 0) >= FLUENCY_MIN_CENTS ? 2 : 1));
+  const tierLabel = ["none", "transcript", "fluency"][userRank];
+  const gameRank = (gt) => (RANK[gt.access] ?? 2);
+  const unlocked = (gt) => userRank >= gameRank(gt);
 
   const { type, ep } = req.query;
 
-  // --- catalogue ---
+  // --- catalogue --- every game is shown; locked ones carry a flag + tier so
+  // the hub can render them as upsell tiles. Episode meta is always listed.
   if (!type || !ep) {
-    const arcade = ARCADE
-      .map((gt, gi) => ({
-        type: gt.type, name: gt.name, icon: gt.icon, accent: gt.accent, tagline: gt.tagline,
-        episodes: epsFor(gt, gi).map((e) => ({ id: e.id, ep: e.ep, title: e.title, current: !!e.current, cover: e.cover || null })),
-      }))
-      .filter((gt) => gt.episodes.length);
-    return res.json({ ok: true, name: s ? s.name : null, access: s ? s.access : "none", level, arcade });
+    const arcade = ARCADE.map((gt) => ({
+      type: gt.type, name: gt.name, icon: gt.icon, accent: gt.accent, tagline: gt.tagline,
+      access: gt.access || "fluency", locked: !unlocked(gt),
+      episodes: gt.episodes.map((e) => ({ id: e.id, ep: e.ep, title: e.title, current: !!e.current, cover: e.cover || null })),
+    }));
+    return res.json({ ok: true, name: s ? s.name : null, level: tierLabel, userRank, arcade });
   }
 
   // --- one game's content ---
@@ -76,11 +69,10 @@ export default async function handler(req, res) {
   const e = gt ? gt.episodes.find((x) => x.id === ep) : null;
   if (!gt || !e) return res.status(404).json({ ok: false, error: "Game not found." });
 
-  const allowed = epsFor(gt, gi).some((x) => x.id === e.id);
-  if (!allowed) {
-    if (!s) return res.status(401).json({ ok: false, login: true, error: "Sign in to play this game." });
-    if (level !== "fluency") return res.status(403).json({ ok: false, upgrade: true, error: "This game is part of Fluency Club ($2.99)." });
-    return res.status(403).json({ ok: false, error: "This episode is part of the full Fluency Club." });
+  if (!unlocked(gt)) {
+    const tierName = (gt.access === "transcript") ? "the Transcript tier ($1)" : "Fluency Club ($2.99)";
+    if (!s) return res.status(401).json({ ok: false, login: true, access: gt.access, error: "Sign in with Patreon to play this game." });
+    return res.status(403).json({ ok: false, upgrade: true, access: gt.access, error: "This game is part of " + tierName + "." });
   }
   return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, user: s ? s.name : null, content: e.content });
 }
