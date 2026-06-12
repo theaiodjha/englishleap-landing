@@ -67,8 +67,12 @@
   .banner{max-width:780px;margin:0 auto 24px;background:rgba(255,138,99,.12);border:1px solid rgba(255,138,99,.4);
     border-radius:14px;padding:14px 18px;font-size:14px;line-height:1.5;text-align:center}
   .banner b{color:var(--coral)}
-  .gtype{margin-top:8px}
+  .gtype{margin-top:0;margin-bottom:52px}
+  .gtype:last-child{margin-bottom:24px}
   .gtype-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .viewall{margin-left:auto;flex:0 0 auto;text-decoration:none;color:var(--teal);font-weight:700;font-size:13.5px;
+    background:var(--glass);border:1px solid var(--line);padding:8px 14px;border-radius:999px;white-space:nowrap}
+  .viewall:hover{border-color:rgba(255,255,255,.3)}
   .gicon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;flex:0 0 auto;
     background:linear-gradient(135deg,var(--purple),var(--teal));box-shadow:0 10px 26px -8px rgba(139,108,255,.6)}
   .gtype-head .gt-name{font-family:var(--display);font-weight:700;font-size:22px;line-height:1.05}
@@ -203,10 +207,13 @@ function render(data){
   const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
   (data.arcade||[]).forEach(gt=>{
     const sec=document.createElement('div'); sec.className='gtype';
+    const eps=(gt.episodes||[]).slice(0,3);
+    const more=(gt.episodes||[]).length>3;
+    const viewall=more?`<a class="viewall" href="/arcade-type.html?type=${esc(gt.type)}">View all ${gt.episodes.length} &rsaquo;</a>`:'';
     sec.innerHTML=`<div class="gtype-head"><div class="gicon">${gt.icon||'\uD83C\uDFAE'}</div>
       <div><div class="gt-name">${esc(gt.name)}<span class="ribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span></div>
-      <div class="gt-tag">${esc(gt.tagline||'')}</div></div></div>
-      <div class="deck">${gt.episodes.map(ep=>tile(gt.type,ep,gt.locked,gt.access)).join('')}</div>`;
+      <div class="gt-tag">${esc(gt.tagline||'')}</div></div>${viewall}</div>
+      <div class="deck">${eps.map(ep=>tile(gt.type,ep,gt.locked,gt.access)).join('')}</div>`;
     root.appendChild(sec);
   });
 

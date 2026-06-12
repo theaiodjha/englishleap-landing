@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Practice Arcade</title>
+<meta name="theme-color" content="#0b1020">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#eef3fb; --soft:#9fb1c7; --teal:#1fc4b6; --coral:#ff8a63; --pink:#f6479a; --purple:#8b6cff;
+    --glass:rgba(255,255,255,.07); --line:rgba(255,255,255,.13);
+    --display:'Clash Display',system-ui,sans-serif; --body:'General Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--body);color:var(--ink);background:
+    radial-gradient(100% 60% at 20% 0%, rgba(139,108,255,.16), transparent 55%),
+    radial-gradient(90% 60% at 90% 4%, rgba(31,196,182,.16), transparent 58%),
+    linear-gradient(180deg,#0b1020,#0e1626) fixed;min-height:100vh;-webkit-tap-highlight-color:transparent}
+  .wrap{max-width:1040px;margin:0 auto;padding:16px 20px 70px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 0 18px}
+  .back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--soft);font-weight:600;font-size:14px;
+    background:var(--glass);border:1px solid var(--line);padding:9px 15px;border-radius:999px}
+  .back:hover{color:var(--ink)}
+  .acct{color:var(--soft);font-size:13px}
+  .head{display:flex;align-items:center;gap:16px;margin:6px 0 30px}
+  .gicon{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:26px;flex:0 0 auto;
+    background:var(--glass);border:1px solid var(--line)}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,5.4vw,38px);margin:0;line-height:1.04}
+  .ribbon{font-size:12px;font-weight:800;letter-spacing:.04em;padding:3px 10px;border-radius:999px;margin-left:10px;vertical-align:middle}
+  .ribbon.free{background:rgba(31,196,182,.18);color:#7fe6da}
+  .ribbon.transcript{background:rgba(139,108,255,.22);color:#c3b4ff}
+  .ribbon.fluency{background:rgba(255,205,70,.22);color:#ffdd80}
+  .tag{color:var(--soft);font-size:14.5px;margin-top:4px}
+  .deck{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+  .tile{display:block;text-decoration:none;color:var(--ink);background:var(--glass);border:1px solid var(--line);
+    border-radius:20px;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,.4);transition:transform .15s,border-color .15s}
+  .tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.24)}
+  .cover{position:relative;aspect-ratio:16/9;background:linear-gradient(120deg,#1a1430,#241a3e);overflow:hidden}
+  .cover img{width:100%;height:100%;object-fit:cover;display:block}
+  .cover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;text-align:center;
+    font-family:var(--display);font-weight:700;font-size:20px;color:#fff;background:linear-gradient(120deg,var(--purple),var(--teal))}
+  .now{position:absolute;top:11px;left:11px;font-size:11px;font-weight:700;color:#06121f;background:var(--teal);border-radius:30px;padding:4px 11px;letter-spacing:.04em}
+  .lockbadge{position:absolute;top:10px;right:11px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(8,6,20,.6);color:#fff;font-size:14px;backdrop-filter:blur(4px)}
+  .tile.locked .cover{filter:saturate(.55) brightness(.62)}
+  .body{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .ep{font-family:var(--display);font-weight:700;font-size:13px;color:var(--teal);letter-spacing:.04em}
+  .ttl{font-family:var(--display);font-weight:600;font-size:17px;line-height:1.15;margin-top:2px}
+  .play{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--coral),var(--pink))}
+  .unlock{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--ink);background:var(--glass);border:1px solid var(--line);padding:8px 13px;border-radius:999px;white-space:nowrap}
+  .note{color:var(--soft);font-size:14px;background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="back" href="/practice-arcade.html">&#8249;&nbsp;Practice Arcade</a>
+    <div class="acct" id="acct"></div>
+  </div>
+  <div class="head" id="head"></div>
+  <div class="deck" id="deck"></div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
+const TYPE=new URLSearchParams(location.search).get('type')||'';
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
+function tile(type,ep,locked,access){
+  const cover = ep.cover
+    ? `<img src="${esc(ep.cover)}" alt="${esc(ep.title)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'${esc(ep.title)}'}))">`
+    : `<div class="ph">${esc(ep.title)}</div>`;
+  if(locked){
+    const label = access==='transcript' ? 'Unlock &middot; $1' : 'Unlock &middot; $2.99';
+    return `<a class="tile locked" href="${CTA}" target="_blank" rel="noopener">
+      <div class="cover">${cover}<span class="lockbadge">&#128274;</span></div>
+      <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
+        <div class="unlock">${label}</div></div></a>`;
+  }
+  return `<a class="tile" href="/games/${esc(type)}/?ep=${esc(ep.id)}">
+    <div class="cover">${ep.current?'<span class="now">THIS WEEK</span>':''}${cover}</div>
+    <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
+      <div class="play">&#9654;</div></div></a>`;
+}
+async function load(){
+  let data;
+  try{ const r=await fetch('/api/games'); data=await r.json(); }catch(e){ $('#deck').innerHTML='<div class="note">Couldn\u2019t load the arcade. Please try again.</div>'; return; }
+  if(data&&data.name) $('#acct').innerHTML='Signed in as <b style="color:var(--ink)">'+esc(data.name)+'</b>';
+  const gt=(data.arcade||[]).find(g=>g.type===TYPE);
+  if(!gt){ $('#head').innerHTML='<h1>Game not found</h1>'; return; }
+  $('#head').innerHTML=`<div class="gicon">${gt.icon||'\uD83C\uDFAE'}</div>
+    <div><h1>${esc(gt.name)}<span class="ribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span></h1>
+    <div class="tag">${esc(gt.tagline||'')}</div></div>`;
+  document.title=gt.name+' — Practice Arcade';
+  $('#deck').innerHTML=(gt.episodes||[]).map(ep=>tile(gt.type,ep,gt.locked,gt.access)).join('')
+    || '<div class="note">No episodes here yet.</div>';
+}
+load();
+</script>
+</body>
+</html>
