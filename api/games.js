@@ -58,7 +58,14 @@ export default async function handler(req, res) {
     const arcade = ARCADE.map((gt) => ({
       type: gt.type, name: gt.name, icon: gt.icon, accent: gt.accent, tagline: gt.tagline,
       access: gt.access || "fluency", locked: !unlocked(gt),
-      episodes: gt.episodes.map((e) => ({ id: e.id, ep: e.ep, title: e.title, current: !!e.current, cover: e.cover || null })),
+      episodes: gt.episodes.map((e) => ({
+        id: e.id, ep: e.ep, title: e.title, current: !!e.current, cover: e.cover || null,
+        words: ((e.content && (
+          (e.content.clues && e.content.clues.map((c) => c.word)) ||
+          (e.content.pairs && e.content.pairs.map((p) => p.word)) ||
+          (e.content.rounds && e.content.rounds.map((r) => r.phrase))
+        )) || []),
+      })),
     }));
     return res.json({ ok: true, name: s ? s.name : null, level: tierLabel, userRank, arcade });
   }

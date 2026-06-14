@@ -3,185 +3,211 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>English Leap Club &middot; Practice Arcade</title>
-<script src="/theme.js"></script>
-<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<title>Practice Arcade — English Leap Club</title>
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="Every English Leap episode becomes a mini practice game. Solve clues, match phrases, build sentences and practise the English from the podcast.">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" href="/icons/icon-192.png">
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/theme.css">
 <style>
-  :root{--space:#0a0a14;--ink:#eef0fb;--soft:#a6a6c4;--pink:#f6479a;--coral:#ff8a63;--purple:#8b6cff;--teal:#1fc4b6;
-    --practise:#8b6cff;--use:#1fc4b6;--glass:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);
-    --display:'Clash Display',system-ui,sans-serif;--body:'General Sans',system-ui,sans-serif}
+  :root{
+    --space:#0b1020; --ink:#eef3fb; --soft:#9fb1c7;
+    --pink:#f6479a; --coral:#ff8a63; --purple:#8b6cff; --teal:#1fc4b6; --mint:#57e6c4; --amber:#ffcd46;
+    --glass:rgba(255,255,255,.06); --line:rgba(255,255,255,.12);
+    --display:'Clash Display',system-ui,sans-serif; --body:'General Sans',system-ui,sans-serif;
+  }
   *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;font-family:var(--body);color:var(--ink);background:var(--space);overflow-x:hidden}
-  .aurora{position:fixed;inset:-30%;z-index:0;filter:blur(80px);opacity:.5;pointer-events:none}
-  .aurora b{position:absolute;border-radius:50%;mix-blend-mode:screen;animation:drift 22s ease-in-out infinite}
-  .a1{width:46vw;height:46vw;background:var(--purple);top:-6%;left:-4%}
-  .a2{width:40vw;height:40vw;background:var(--teal);bottom:-10%;right:-6%;animation-delay:-7s}
-  .a3{width:34vw;height:34vw;background:var(--coral);top:30%;right:25%;animation-delay:-14s}
-  @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(4%,6%) scale(1.12)}}
-  .wrap{position:relative;z-index:1;max-width:1040px;margin:0 auto;padding:22px 22px 110px}
+  body{margin:0;font-family:var(--body);color:var(--ink);min-height:100vh;-webkit-tap-highlight-color:transparent;
+    background:
+      radial-gradient(90% 55% at 18% 0%, rgba(139,108,255,.20), transparent 55%),
+      radial-gradient(80% 55% at 92% 3%, rgba(31,196,182,.18), transparent 58%),
+      radial-gradient(70% 50% at 60% 100%, rgba(255,138,99,.12), transparent 70%),
+      linear-gradient(180deg,#0b1020,#0d1422) fixed;}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:16px 20px 70px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 0 8px}
+  .brandmark{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:17px}
+  .brandmark .b{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:15px}
+  .acct{font-size:13px;color:var(--soft)}
+  .out{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--soft);font:inherit;font-size:13px;font-weight:600;padding:8px 13px;border-radius:999px;cursor:pointer;margin-left:6px}
+  .out:hover{color:var(--ink)}
+  .signlink{color:var(--teal);font-weight:600;text-decoration:none;font-size:14px}
 
-  /* top bar */
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:34px}
-  .brandmini{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:15px;color:var(--ink);text-decoration:none;letter-spacing:.01em}
-  .brandmini .dotm{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,var(--pink),var(--purple));box-shadow:0 6px 16px -5px var(--purple)}
-  .acct{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--soft);min-height:38px}
-  .acct .out{font-family:inherit;font-weight:600;font-size:13px;color:var(--ink);background:var(--glass);border:1px solid var(--line);
-    border-radius:999px;padding:9px 17px;cursor:pointer;transition:.15s;backdrop-filter:blur(10px)}
-  .acct .out:hover{border-color:var(--teal);transform:translateY(-1px)}
+  /* hero */
+  .hero{text-align:center;padding:40px 8px 26px}
+  .eyebrow{font-family:var(--display);font-weight:700;letter-spacing:.16em;font-size:13px;color:var(--teal)}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,7.2vw,62px);line-height:1.02;margin:14px 0 0;
+    background:linear-gradient(100deg,#fff,#cdbcff 60%,#9be7dd);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero .lede{color:var(--ink);font-size:clamp(16px,2.4vw,19px);font-weight:600;margin:16px auto 0;max-width:30em;font-family:var(--display)}
+  .hero .sub{color:var(--soft);font-size:clamp(14px,2vw,16px);margin:12px auto 0;max-width:40em;line-height:1.55}
+  .cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+  .btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-family:var(--display);font-weight:700;font-size:16px;padding:15px 26px;border-radius:999px;cursor:pointer;border:0}
+  .btn.primary{color:#07131f;background:linear-gradient(135deg,var(--teal),var(--mint));box-shadow:0 18px 38px -16px rgba(31,196,182,.7)}
+  .btn.ghost{color:var(--ink);background:var(--glass);border:1px solid var(--line)}
+  .btn:hover{transform:translateY(-2px)}
+  .tri{width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid currentColor}
 
-  header{text-align:center;margin-bottom:8px}
-  .brand{font-weight:600;letter-spacing:.22em;font-size:13px;color:var(--teal)}
-  h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,6vw,56px);margin:6px 0 4px;
-    background:linear-gradient(100deg,var(--pink),var(--coral) 55%,var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{color:var(--soft);font-size:16px}
+  /* stats */
+  .stats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:8px 0 10px}
+  .stat{background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:14px 22px;text-align:center;min-width:150px}
+  .stat .n{font-family:var(--display);font-weight:700;font-size:24px;background:linear-gradient(100deg,var(--teal),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat .l{color:var(--soft);font-size:12.5px;margin-top:2px}
 
-  /* modern segmented switcher */
-  .tabs{display:inline-flex;gap:4px;padding:5px;border-radius:999px;background:var(--glass);border:1px solid var(--line);
-    backdrop-filter:blur(12px);margin:20px auto 0;box-shadow:0 10px 30px -16px rgba(0,0,0,.6)}
-  .tabs a{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;font-family:var(--display);
-    font-weight:600;font-size:14px;color:var(--soft);text-decoration:none;transition:.2s}
-  .tabs a:hover{color:var(--ink)}
-  .tabs a.active{background:linear-gradient(100deg,var(--teal),var(--coral));color:#06121f;box-shadow:0 8px 20px -8px rgba(31,196,182,.6)}
+  /* sections */
+  section{margin-top:54px}
+  .sec-head{text-align:center;margin-bottom:24px}
+  .sec-head h2{font-family:var(--display);font-weight:700;font-size:clamp(24px,4vw,32px);margin:0}
+  .sec-head p{color:var(--soft);margin:8px auto 0;max-width:38em;font-size:15px;line-height:1.5}
 
-  /* gate (anonymous) */
-  .gate{max-width:460px;margin:34px auto 0;background:var(--glass);border:1px solid var(--line);border-radius:22px;
-    padding:32px 30px;backdrop-filter:blur(14px);box-shadow:0 30px 80px rgba(0,0,0,.5);text-align:center}
-  .gate h2{font-family:var(--display);font-weight:600;font-size:23px;margin:0 0 8px}
-  .gate p{color:var(--soft);font-size:14px;margin:0 0 22px;line-height:1.5}
-  .patreon{display:inline-flex;align-items:center;gap:10px;width:100%;justify-content:center;font-weight:600;font-size:15px;
-    border:none;border-radius:13px;padding:15px 20px;cursor:pointer;color:#06121f;text-decoration:none;
-    background:linear-gradient(100deg,var(--teal),var(--coral));transition:transform .12s,filter .12s}
-  .patreon:hover{transform:translateY(-1px);filter:brightness(1.06)}
-  .alt{margin-top:16px;font-size:13px;color:var(--soft);cursor:pointer;text-decoration:underline}
-  .codebox{display:none;margin-top:16px}
-  .field{display:flex;gap:10px}
-  input{flex:1;font-family:inherit;font-size:15px;letter-spacing:.14em;text-transform:uppercase;background:rgba(0,0,0,.35);
-    border:1px solid var(--line);color:var(--ink);border-radius:11px;padding:13px 14px;outline:none}
-  input:focus{border-color:var(--teal)}
-  .codebox button{font-family:inherit;font-weight:600;border:none;border-radius:11px;padding:13px 18px;cursor:pointer;color:#06121f;background:var(--purple)}
-  .msg{margin-top:14px;font-size:14px;min-height:18px}.msg.err{color:var(--coral)}.msg.ok{color:var(--teal)}
-
-  #arcade{display:none;margin-top:30px}
-  .banner{max-width:780px;margin:0 auto 24px;background:rgba(255,138,99,.12);border:1px solid rgba(255,138,99,.4);
-    border-radius:14px;padding:14px 18px;font-size:14px;line-height:1.5;text-align:center}
-  .banner b{color:var(--coral)}
-  .gtype{margin-top:0;margin-bottom:52px}
-  .gtype:last-child{margin-bottom:24px}
-  .gtype-head{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-  .viewall{margin-left:auto;flex:0 0 auto;text-decoration:none;color:var(--teal);font-weight:700;font-size:13.5px;
-    background:var(--glass);border:1px solid var(--line);padding:8px 14px;border-radius:999px;white-space:nowrap}
-  .viewall:hover{border-color:rgba(255,255,255,.3)}
-  .gicon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:22px;flex:0 0 auto;
-    background:linear-gradient(135deg,var(--purple),var(--teal));box-shadow:0 10px 26px -8px rgba(139,108,255,.6)}
-  .gtype-head .gt-name{font-family:var(--display);font-weight:700;font-size:22px;line-height:1.05}
-  .gtype-head .gt-tag{color:var(--soft);font-size:13.5px;margin-top:2px}
-  .deck{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
-  .tile{display:block;text-decoration:none;color:var(--ink);background:var(--glass);border:1px solid var(--line);
-    border-radius:20px;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,.4);transition:transform .15s,border-color .15s}
-  .tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.24)}
-  .cover{position:relative;aspect-ratio:16/9;background:linear-gradient(120deg,#1a1430,#241a3e);overflow:hidden}
-  .cover img{width:100%;height:100%;object-fit:cover;display:block}
-  .cover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;text-align:center;
-    font-family:var(--display);font-weight:700;font-size:20px;color:#fff;background:linear-gradient(120deg,var(--purple),var(--teal))}
-  .now{position:absolute;top:11px;left:11px;font-size:11px;font-weight:700;color:#06121f;background:var(--teal);border-radius:30px;padding:4px 11px;letter-spacing:.04em}
-  .tile .body{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .tile .ep{font-family:var(--display);font-weight:700;font-size:13px;color:var(--teal);letter-spacing:.04em}
-  .tile .ttl{font-family:var(--display);font-weight:600;font-size:17px;line-height:1.15;margin-top:2px}
-  .tile .play{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--coral),var(--pink))}
-  .tile.locked .cover{filter:saturate(.55) brightness(.62)}
-  .tile.locked:hover{transform:translateY(-3px)}
-  .lockbadge{position:absolute;top:10px;right:11px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(8,6,20,.6);color:#fff;font-size:14px;backdrop-filter:blur(4px)}
-  .tile .unlock{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--ink);background:var(--glass);border:1px solid var(--line);padding:8px 13px;border-radius:999px;white-space:nowrap}
-  .gt-name .ribbon{font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
-  .ribbon.free{background:rgba(31,196,182,.16);color:#13978d}
-  .ribbon.transcript{background:rgba(139,108,255,.18);color:#6f54e6}
-  .ribbon.fluency{background:rgba(255,205,70,.20);color:#b07d05}
-
-  /* upgrade banner — full width, aligned with the games */
-  .upsell{display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-top:34px;
-    background:linear-gradient(120deg,rgba(139,108,255,.18),rgba(31,196,182,.13));border:1px solid var(--line);
-    border-radius:22px;padding:24px 28px;backdrop-filter:blur(12px);box-shadow:0 24px 60px -34px rgba(0,0,0,.6)}
-  .upsell .ut{flex:1 1 320px;min-width:260px}
-  .upsell .ut h3{font-family:var(--display);font-weight:700;font-size:21px;margin:0 0 6px}
-  .upsell .ut p{color:var(--soft);font-size:14px;margin:0;line-height:1.5}
-  .upsell .patreon{width:auto;flex:0 0 auto;white-space:nowrap;padding:14px 24px}
-
-  /* compact sign-in strip */
-  .signin{background:var(--glass);border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin-bottom:34px;backdrop-filter:blur(12px)}
-  .signin .si-main{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:space-between}
-  .signin .si-text{flex:1 1 280px;color:var(--soft);font-size:14.5px;line-height:1.5}
-  .signin .si-text b{color:var(--ink)}
-  .signin .si-btn{flex:0 0 auto;text-decoration:none;color:#06121f;font-weight:700;font-size:15px;white-space:nowrap;
-    background:linear-gradient(135deg,var(--teal),var(--coral));padding:12px 20px;border-radius:999px}
-  .signin .si-foot{margin-top:10px}
-  .signin .alt{color:var(--soft);font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-  .signin .codebox{display:none;margin-top:12px}
-  .signin .field{display:flex;gap:8px;max-width:360px}
-  .signin .field input{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;padding:11px 13px;color:var(--ink);font:inherit}
-  .signin .field button{border:0;border-radius:12px;padding:11px 18px;font-weight:700;cursor:pointer;background:var(--teal);color:#062018}
-  .signin .msg{margin-top:10px;font-size:13px}
-  .signin .msg.err{color:#ff9a9a}.signin .msg.ok{color:var(--teal)}
-
-  /* game-type tiles (poster style) */
-  .types{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:22px}
-  .gtile{position:relative;display:block;border-radius:22px;overflow:hidden;aspect-ratio:16/10;text-decoration:none;color:#fff;
-    border:1px solid var(--line);box-shadow:0 26px 60px -24px rgba(0,0,0,.65);transition:transform .16s,border-color .16s}
-  .gtile:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.3)}
-  .gcover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-  .gtile::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(6,8,16,.94) 4%,rgba(6,8,16,.45) 40%,transparent 68%)}
-  .gtile.locked .gcover{filter:saturate(.6) brightness(.66)}
-  .gribbon{position:absolute;top:13px;left:13px;z-index:2;font-size:11px;font-weight:800;letter-spacing:.04em;padding:4px 11px;border-radius:999px}
+  /* game cards */
+  .games{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
+  .gcard{background:var(--glass);border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;
+    box-shadow:0 24px 60px -28px rgba(0,0,0,.7);transition:transform .15s,border-color .15s}
+  .gcard:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.24)}
+  .gcover{position:relative;aspect-ratio:16/9;overflow:hidden;background:#11162a}
+  .gcover img{width:100%;height:100%;object-fit:cover;display:block}
+  .gribbon{position:absolute;top:12px;left:12px;font-size:11px;font-weight:800;letter-spacing:.04em;padding:4px 11px;border-radius:999px}
   .gribbon.free{background:rgba(31,196,182,.92);color:#062018}
   .gribbon.transcript{background:rgba(139,108,255,.94);color:#0d0a26}
   .gribbon.fluency{background:rgba(255,205,70,.94);color:#231a02}
-  .glock{position:absolute;top:12px;right:13px;z-index:2;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;
-    background:rgba(8,6,20,.6);color:#fff;font-size:15px;backdrop-filter:blur(4px)}
-  .gov{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 20px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-  .gname{font-family:var(--display);font-weight:700;font-size:23px;line-height:1.05}
-  .gcount{margin-top:5px;color:rgba(255,255,255,.84);font-weight:600;font-size:14px}
-  .gplay{flex:0 0 auto;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-size:16px;color:#06121f;
-    background:linear-gradient(135deg,var(--teal),var(--coral))}
+  .glock{position:absolute;top:11px;right:12px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(8,6,20,.6);color:#fff;font-size:14px;backdrop-filter:blur(4px)}
+  .gcard.locked .gcover img{filter:saturate(.6) brightness(.62)}
+  .gbody{padding:18px 18px 20px;display:flex;flex-direction:column;gap:9px;flex:1}
+  .gtitle{font-family:var(--display);font-weight:700;font-size:21px}
+  .gdesc{color:var(--soft);font-size:14px;line-height:1.5;flex:1}
+  .grow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+  .gbtn{text-decoration:none;font-weight:700;font-size:14px;padding:11px 18px;border-radius:999px;white-space:nowrap}
+  .gbtn.free{color:#07131f;background:linear-gradient(135deg,var(--teal),var(--mint))}
+  .gbtn.lock{color:#231a02;background:linear-gradient(135deg,var(--amber),var(--coral))}
+  .gbtn.play{color:var(--ink);background:var(--glass);border:1px solid var(--line)}
+  .gall{color:var(--soft);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+  .gall:hover{color:var(--ink)}
 
-  footer{text-align:center;color:var(--soft);font-size:12px;margin-top:54px}
+  /* this week */
+  .tw{background:var(--glass);border:1px solid var(--line);border-radius:24px;padding:26px 24px;backdrop-filter:blur(10px)}
+  .tw-ep{font-family:var(--display);font-weight:700;letter-spacing:.08em;font-size:12px;color:var(--amber)}
+  .tw h3{font-family:var(--display);font-weight:700;font-size:clamp(22px,4vw,30px);margin:6px 0 0}
+  .tw-words{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0 22px}
+  .wchip{background:rgba(255,255,255,.07);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px}
+  .tw-games{display:flex;flex-direction:column;gap:10px}
+  .twg{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+  .twg-name{font-family:var(--display);font-weight:600;font-size:16px;flex:1;min-width:0}
+  .twg-tier{font-size:11px;font-weight:800;letter-spacing:.03em;padding:3px 10px;border-radius:999px}
+  .twg-tier.free{background:rgba(31,196,182,.18);color:#7fe6da}
+  .twg-tier.transcript{background:rgba(139,108,255,.22);color:#c3b4ff}
+  .twg-tier.fluency{background:rgba(255,205,70,.22);color:#ffdd80}
+  .twg-btn{text-decoration:none;font-weight:700;font-size:13px;padding:9px 15px;border-radius:999px;white-space:nowrap}
+  .twg-btn.free{color:#07131f;background:linear-gradient(135deg,var(--teal),var(--mint))}
+  .twg-btn.lock{color:#231a02;background:linear-gradient(135deg,var(--amber),var(--coral))}
+  .twg-btn.play{color:var(--ink);background:var(--glass);border:1px solid var(--line)}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .step{background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:24px 22px;text-align:center}
+  .step .num{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;margin:0 auto 12px;font-family:var(--display);font-weight:700;color:#07131f;background:linear-gradient(135deg,var(--teal),var(--mint))}
+  .step h4{font-family:var(--display);font-weight:700;font-size:18px;margin:0 0 6px}
+  .step p{color:var(--soft);font-size:14px;line-height:1.5;margin:0}
+
+  /* coming soon */
+  .soon{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .scard{background:rgba(255,255,255,.04);border:1px dashed var(--line);border-radius:18px;padding:20px;text-align:center;opacity:.92}
+  .scard .ico{font-size:30px}
+  .scard h4{font-family:var(--display);font-weight:700;font-size:17px;margin:10px 0 4px}
+  .scard p{color:var(--soft);font-size:13px;line-height:1.45;margin:0 0 12px}
+  .soonpill{font-size:11px;font-weight:800;letter-spacing:.05em;color:var(--soft);background:var(--glass);border:1px solid var(--line);padding:4px 11px;border-radius:999px}
+
+  /* conversion */
+  .convo{margin-top:54px;background:linear-gradient(135deg,rgba(139,108,255,.16),rgba(31,196,182,.12));border:1px solid var(--line);border-radius:26px;padding:34px 28px;text-align:center;backdrop-filter:blur(10px)}
+  .convo h2{font-family:var(--display);font-weight:700;font-size:clamp(24px,4vw,32px);margin:0 0 12px}
+  .convo p{color:var(--soft);font-size:15.5px;line-height:1.6;max-width:42em;margin:0 auto 22px}
+  .convo .trial{color:var(--soft);font-size:14px;margin-top:16px}
+  .convo .trial b{color:var(--ink)}
+  .code{margin:22px auto 0;max-width:440px;text-align:left;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .code label{display:block;font-size:13px;color:var(--soft);margin-bottom:9px}
+  .code .field{display:flex;gap:8px}
+  .code input{flex:1;background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:12px;padding:12px 13px;color:var(--ink);font:inherit}
+  .code button{border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer;background:var(--teal);color:#062018}
+  .msg{margin-top:10px;font-size:13px;min-height:18px}.msg.err{color:#ff9a9a}.msg.ok{color:var(--teal)}
+
+  footer{text-align:center;color:var(--soft);font-size:12px;margin-top:48px;line-height:1.6}
+  footer .tag{color:var(--ink);font-family:var(--display);font-weight:600}
 </style>
-<link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0a0a14">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="English Leap">
-<script src="/pwa.js" defer></script>
 </head>
 <body>
-<div class="aurora"><b class="a1"></b><b class="a2"></b><b class="a3"></b></div>
 <div class="wrap">
   <div class="topbar">
-    <a class="brandmini" href="/"><span class="dotm"></span> English Leap Club</a>
-    <div class="acct" id="acct"></div>
+    <a class="brandmark" href="/" style="text-decoration:none"><span class="b">&#127918;</span> English Leap Club</a>
+    <div class="acct" id="acct"><a class="signlink" href="/api/auth/login">Member sign in</a></div>
   </div>
 
-  <header>
-    <h1>Practice Arcade</h1>
-    <div class="sub">Play the phrases &mdash; one game per episode.</div>
-  </header>
+  <!-- HERO -->
+  <div class="hero">
+    <div class="eyebrow">PRACTICE ARCADE</div>
+    <h1>Play the episode.<br>Solve the words. Build real English.</h1>
+    <p class="sub">Every English Leap episode becomes a mini practice game. Solve clues, unlock words, build sentences, and practise the English from the podcast.</p>
+    <div class="cta-row">
+      <a class="btn primary" id="playFree" href="/games/clue-room/?ep=ep232"><span class="tri"></span> Play the free Clue Room</a>
+      <a class="btn ghost" href="https://www.patreon.com/c/englishleappracticeclub/membership" target="_blank" rel="noopener">&#10024; Unlock all games with Fluency Club</a>
+    </div>
+  </div>
 
-  <section class="signin" id="gate">
-    <div class="si-main">
-      <div class="si-text"><b>The Clue Room is free</b> &mdash; no account needed. Sign in with Patreon to unlock more games.</div>
-      <a class="si-btn" href="/api/auth/login">&#9654;&nbsp; Continue with Patreon</a>
-    </div>
-    <div class="si-foot"><span class="alt" id="altToggle">Have a member code?</span></div>
-    <div class="codebox" id="codebox">
-      <div class="field"><input id="code" placeholder="ELC-XXXX-XXXX" autocomplete="off" spellcheck="false"><button id="go">Unlock</button></div>
-    </div>
-    <div class="msg" id="msg"></div>
+  <div class="stats">
+    <div class="stat"><div class="n">1.3M+</div><div class="l">YouTube learners</div></div>
+    <div class="stat"><div class="n">50M+</div><div class="l">Video views</div></div>
+    <div class="stat"><div class="n">180+</div><div class="l">Countries reached</div></div>
+  </div>
+
+  <!-- GAMES -->
+  <section>
+    <div class="sec-head"><h2>The games</h2><p>Each one turns the episode's six phrases into something you actually do &mdash; not just read.</p></div>
+    <div class="games" id="games"></div>
   </section>
 
-  <section id="arcade"></section>
-  <footer>&copy; Leap Labs &middot; A practice community - not a replacement for formal English education.</footer>
+  <!-- THIS WEEK -->
+  <section id="thisweekSec">
+    <div class="sec-head"><h2>This week's games</h2><p>Fresh from the latest episode &mdash; the same six phrases, three ways to practise.</p></div>
+    <div id="thisweek"></div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section>
+    <div class="sec-head"><h2>How it works</h2></div>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><h4>Watch the episode</h4><p>Start with the free podcast episode on YouTube.</p></div>
+      <div class="step"><div class="num">2</div><h4>Play the game</h4><p>Solve clues, choose words, build sentences &mdash; the phrases stick.</p></div>
+      <div class="step"><div class="num">3</div><h4>Practise deeper</h4><p>Unlock the full practice pack in Fluency Club for every episode.</p></div>
+    </div>
+  </section>
+
+  <!-- COMING SOON -->
+  <section>
+    <div class="sec-head"><h2>More on the way</h2><p>New game types are being built &mdash; all included with Fluency Club.</p></div>
+    <div class="soon">
+      <div class="scard"><div class="ico">&#129513;</div><h4>Sentence Builder</h4><p>Put the words in the right place and build natural sentences.</p><span class="soonpill">COMING SOON</span></div>
+      <div class="scard"><div class="ico">&#128214;</div><h4>Story Unlock</h4><p>Complete the words to reveal the episode's mini story.</p><span class="soonpill">COMING SOON</span></div>
+      <div class="scard"><div class="ico">&#127917;</div><h4>Role-Play Roulette</h4><p>Choose a situation and practise what you'd actually say.</p><span class="soonpill">COMING SOON</span></div>
+      <div class="scard"><div class="ico">&#9889;</div><h4>Fast Word Challenge</h4><p>Beat the timer and pick the most natural phrase.</p><span class="soonpill">COMING SOON</span></div>
+    </div>
+  </section>
+
+  <!-- CONVERSION -->
+  <div class="convo" id="convo">
+    <h2 id="convoTitle">Unlock the full arcade</h2>
+    <p id="convoCopy">Free players can try the Clue Room. Fluency Club members unlock the full arcade for every episode &mdash; sentence games, story puzzles, role-play challenges, and audio practice.</p>
+    <a class="btn primary" id="convoBtn" href="https://www.patreon.com/c/englishleappracticeclub/membership" target="_blank" rel="noopener">&#10024; Unlock the Full Arcade</a>
+    <div class="trial" id="trial">Not a member yet? Start your <b>7-day free trial</b> in Fluency Club.</div>
+    <div class="code">
+      <label>Have a Fluency Club access code? Enter it here to unlock your games.</label>
+      <div class="field"><input id="code" placeholder="ELC-XXXX-XXXX" autocomplete="off" spellcheck="false"><button id="go">Unlock My Games</button></div>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="tag">Read it. Hear it. Practise it. Use it.</div>
+    <div style="margin-top:8px">&copy; 2024 Leap Labs &middot; A practice community - not a replacement for formal English education.</div>
+  </footer>
 </div>
 
 <script>
@@ -191,53 +217,85 @@ const ERR={auth:'Sign-in did not complete. Please try again.',notmember:'We coul
 function showMsg(t,kind){const m=$('#msg');m.className='msg '+(kind||'');m.textContent=t||'';}
 const eParam=new URLSearchParams(location.search).get('e'); if(eParam&&ERR[eParam]) showMsg(ERR[eParam],'err');
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-
-async function tryLoad(){
-  const r=await fetch('/api/games'); if(!r.ok) return false;
-  const data=await r.json(); if(!data.ok) return false; render(data); return true;
-}
 const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
-function typeTile(gt){
-  const n=(gt.episodes||[]).length;
-  const cnt=n+' '+(n===1?'episode':'episodes');
-  const cover=`/covers/${esc(gt.type)}.png`;
-  return `<a class="gtile ${gt.locked?'locked':''}" href="/arcade-type.html?type=${esc(gt.type)}">
-    <img class="gcover" src="${cover}" alt="${esc(gt.name)}" onerror="this.style.display='none'">
-    <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>
-    ${gt.locked?'<span class="glock">&#128274;</span>':''}
-    <div class="gov">
-      <div><div class="gname">${esc(gt.name)}</div><div class="gcount">${cnt}</div></div>
-      ${gt.locked?'':'<span class="gplay">&#9654;</span>'}
-    </div></a>`;
+const DESC={
+  'clue-room':"Solve six glowing clues to discover the episode's words, then rebuild the sentence.",
+  'phrase-pairs':"Flip the cards and match each phrase to its meaning \u2014 and hear it on every match.",
+  'listening-gap':"Listen to a sentence, then tap the phrase that fills the gap."
+};
+function curEp(gt){ return (gt.episodes||[]).find(e=>e.current) || (gt.episodes||[])[0]; }
+function btnFor(gt){
+  const cur=curEp(gt); const epq=cur?('?ep='+encodeURIComponent(cur.id)):'';
+  if(gt.access==='free') return {label:'Play Free',cls:'free',href:'/games/'+gt.type+'/'+epq};
+  if(gt.locked) return {label:gt.access==='transcript'?'Unlock with Transcript':'Unlock with Fluency Club',cls:'lock',href:CTA,ext:true};
+  return {label:'Play',cls:'play',href:'/games/'+gt.type+'/'+epq};
+}
+function gameCard(gt){
+  const b=btnFor(gt); const n=(gt.episodes||[]).length;
+  const ext=b.ext?' target="_blank" rel="noopener"':'';
+  return `<div class="gcard ${gt.locked?'locked':''}">
+    <div class="gcover"><img src="/covers/${esc(gt.type)}.png" alt="${esc(gt.name)}" onerror="this.style.display='none'">
+      <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>${gt.locked?'<span class="glock">&#128274;</span>':''}</div>
+    <div class="gbody">
+      <div class="gtitle">${esc(gt.name)}</div>
+      <div class="gdesc">${esc(DESC[gt.type]||gt.tagline||'')}</div>
+      <div class="grow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>
+        <a class="gall" href="/arcade-type.html?type=${esc(gt.type)}">${n} ${n===1?'episode':'episodes'} &rsaquo;</a></div>
+    </div></div>`;
+}
+function thisWeek(types){
+  // current episode (prefer the free Clue Room, which carries every episode + words)
+  const cr=types.find(g=>g.type==='clue-room')||types[0]; if(!cr) return '';
+  const cur=curEp(cr); if(!cur) return '';
+  const words=(cur.words||[]);
+  const rows=types.map(gt=>{
+    const e=(gt.episodes||[]).find(x=>x.ep===cur.ep)||curEp(gt);
+    const epq=e?('?ep='+encodeURIComponent(e.id)):'';
+    let cls,label,href,ext='';
+    if(gt.access==='free'){cls='free';label='Play';href='/games/'+gt.type+'/'+epq;}
+    else if(gt.locked){cls='lock';label='Unlock';href=CTA;ext=' target="_blank" rel="noopener"';}
+    else {cls='play';label='Play';href='/games/'+gt.type+'/'+epq;}
+    return `<div class="twg"><span class="twg-name">${gt.icon||''} ${esc(gt.name)}</span>
+      <span class="twg-tier ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>
+      <a class="twg-btn ${cls}" href="${href}"${ext}>${label}</a></div>`;
+  }).join('');
+  return `<div class="tw">
+    <div class="tw-ep">${esc(cur.ep)} &middot; THIS WEEK</div>
+    <h3>${esc(cur.title)}</h3>
+    <div class="tw-words">${words.map(w=>`<span class="wchip">${esc(w)}</span>`).join('')}</div>
+    <div class="tw-games">${rows}</div>
+  </div>`;
 }
 function render(data){
   const signedIn=!!data.name;
-  const root=$('#arcade'); root.style.display='block';
   const acct=$('#acct');
   if(signedIn){
-    $('#gate').style.display='none';
-    acct.innerHTML=`Signed in as <b style="color:var(--ink);font-weight:600">${esc(data.name)}</b> <button class="out" id="signoutBtn">Sign out</button>`;
-    $('#signoutBtn').onclick=async()=>{await fetch('/api/auth/signout',{method:'POST'});location.href='/practice-arcade.html';};
-  } else {
-    acct.innerHTML=''; $('#gate').style.display='block';
-  }
+    acct.innerHTML=`Signed in as <b style="color:var(--ink)">${esc(data.name)}</b><button class="out" id="signoutBtn">Sign out</button>`;
+    $('#signoutBtn').onclick=async()=>{await fetch('/api/auth/signout',{method:'POST'});location.reload();};
+  } else { acct.innerHTML='<a class="signlink" href="/api/auth/login">Member sign in</a>'; }
 
   const types=(data.arcade||[]);
-  let html=`<div class="types">${types.map(typeTile).join('')}</div>`;
+  // hero free CTA -> clue-room current ep
+  const cr=types.find(g=>g.type==='clue-room'); const crCur=cr&&curEp(cr);
+  if(crCur) $('#playFree').href='/games/clue-room/?ep='+encodeURIComponent(crCur.id);
 
-  const lockedTiers=[...new Set(types.filter(g=>g.locked).map(g=>g.access))];
-  if(lockedTiers.length){
-    const wantFluency=lockedTiers.includes('fluency');
-    const copy = data.level==='transcript'
-      ? 'You have the <b>Transcript</b> tier. <b>Fluency Club ($2.99)</b> opens every game.'
-      : '<b>Transcript ($1)</b> adds Phrase Pairs; <b>Fluency Club ($2.99)</b> opens everything.';
-    html+=`<div class="upsell">
-      <div class="ut"><h3>Unlock more games</h3><p>${copy}</p></div>
-      <a class="patreon" href="${CTA}" target="_blank" rel="noopener">${wantFluency?'Join Fluency Club &middot; $2.99':'Join &middot; $1'}</a></div>`;
+  $('#games').innerHTML=types.map(gameCard).join('');
+  $('#thisweek').innerHTML=thisWeek(types);
+
+  // conversion block adapts to tier
+  if(data.level==='fluency'){
+    $('#convoTitle').textContent='You\u2019re all set \u2728';
+    $('#convoCopy').innerHTML='Your Fluency Club membership unlocks every game, for every episode. New game types arrive automatically.';
+    $('#convoBtn').style.display='none'; $('#trial').style.display='none';
+  } else if(data.level==='transcript'){
+    $('#convoTitle').textContent='Unlock the full arcade';
+    $('#convoCopy').innerHTML='You\u2019re on the <b>Transcript</b> tier \u2014 nice! <b>Fluency Club ($2.99)</b> opens the full arcade for every episode: sentence games, story puzzles, role-play challenges, and audio practice.';
+    $('#convoBtn').textContent='\u2728 Upgrade to Fluency Club'; $('#trial').style.display='none';
   }
-  root.innerHTML=html;
 }
-$('#altToggle').addEventListener('click',()=>{const b=$('#codebox');b.style.display=b.style.display==='block'?'none':'block';});
+async function tryLoad(){
+  try{ const r=await fetch('/api/games'); if(!r.ok) return; const data=await r.json(); if(data.ok) render(data); }catch(e){}
+}
 async function unlock(){
   const code=$('#code').value.trim(); if(!code){showMsg('Please enter your code.','err');return;}
   $('#go').disabled=true;
@@ -245,7 +303,7 @@ async function unlock(){
     const r=await fetch('/api/unlock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
     const d=await r.json();
     if(!r.ok||!d.ok){showMsg(d.error||'That code did not work.','err');$('#go').disabled=false;return;}
-    showMsg('Unlocked. Loading...','ok'); await tryLoad();
+    showMsg('Unlocked. Loading your games\u2026','ok'); await tryLoad();
   }catch{showMsg('Something went wrong. Try again.','err');$('#go').disabled=false;}
 }
 $('#go').addEventListener('click',unlock);
