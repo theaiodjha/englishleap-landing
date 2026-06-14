@@ -63,7 +63,8 @@ export default async function handler(req, res) {
         words: ((e.content && (
           (e.content.clues && e.content.clues.map((c) => c.word)) ||
           (e.content.pairs && e.content.pairs.map((p) => p.word)) ||
-          (e.content.rounds && e.content.rounds.map((r) => r.phrase))
+          (e.content.rounds && e.content.rounds.map((r) => r.phrase)) ||
+          (e.content.phrases && e.content.phrases.map((p) => p.word))
         )) || []),
       })),
     }));

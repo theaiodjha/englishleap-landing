@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Story Unlock — English Leap Practice Arcade</title>
+<meta name="theme-color" content="#150b2e">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" href="/icons/icon-192.png">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --space:#150b2e; --ink:#f3efff; --soft:#b3a9d8;
+    --pink:#f6479a; --coral:#ff8a63; --purple:#8b6cff; --electric:#4d8bff; --teal:#1fc4b6; --mint:#57e6c4; --amber:#ffcd46;
+    --glass:rgba(255,255,255,.06); --line:rgba(255,255,255,.14);
+    --display:'Clash Display',system-ui,sans-serif; --body:'General Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--body);color:var(--ink);background:var(--space);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+  #stagebg{position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(110% 70% at 14% 2%, rgba(139,108,255,.30), transparent 56%),
+    radial-gradient(90% 70% at 92% 4%, rgba(77,139,255,.20), transparent 58%),
+    radial-gradient(90% 60% at 50% 110%, rgba(246,71,154,.14), transparent 70%),
+    linear-gradient(180deg,#150b2e 0%,#1d1142 52%,#241a52 100%)}
+  .wrap{max-width:820px;margin:0 auto;padding:14px 18px 60px;min-height:100%}
+  .bar{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:6px 2px 14px}
+  .bar .left{display:flex;align-items:center;gap:12px;min-width:0}
+  .back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--soft);font-weight:600;font-size:14px;
+    background:var(--glass);border:1px solid var(--line);padding:8px 13px;border-radius:999px;white-space:nowrap}
+  .back:hover{color:var(--ink)}
+  .brand{font-family:var(--display);font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand .dot{color:var(--purple)}
+  .out{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--soft);font:inherit;font-size:13px;font-weight:600;padding:8px 13px;border-radius:999px;cursor:pointer}
+  .out:hover{color:var(--ink)}
+
+  .head{text-align:center;margin:6px 0 14px}
+  .ep{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.06em;color:#c3b4ff}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,6vw,40px);margin:4px 0 8px;line-height:1.04}
+  .sub{color:var(--soft);font-size:15px;max-width:34em;margin:0 auto;line-height:1.5}
+
+  .prog{display:flex;gap:10px;justify-content:center;align-items:center;margin:14px 0 18px;flex-wrap:wrap}
+  .pill{background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-weight:600;font-size:14px;color:var(--soft)}
+  .pill b{color:var(--ink);font-family:var(--display)}
+
+  .card{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:24px;padding:30px 28px;backdrop-filter:blur(10px);
+    box-shadow:0 30px 70px -30px rgba(0,0,0,.7);max-width:680px;margin:0 auto;transition:box-shadow .5s,border-color .5s}
+  .card.unlocked{border-color:rgba(139,108,255,.5);box-shadow:0 30px 80px -26px rgba(139,108,255,.5)}
+  .story{font-family:var(--display);font-weight:500;font-size:clamp(18px,3.4vw,23px);line-height:2.1;color:#efeaff;text-align:left}
+
+  .gap{appearance:none;border:0;background:none;cursor:default;font:inherit;font-family:var(--display);font-weight:700;
+    display:inline-block;min-width:108px;text-align:center;color:transparent;border-bottom:3px solid rgba(255,255,255,.28);
+    margin:0 3px;vertical-align:bottom;line-height:1.1;border-radius:8px;transition:background .25s,color .25s}
+  .gap.target{border-bottom-color:var(--amber);box-shadow:0 6px 18px -8px rgba(255,205,70,.7);animation:pulse 1.5s ease-in-out infinite}
+  .gap.filled{color:#fff!important;border-bottom-color:transparent;padding:2px 12px;font-weight:700}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,205,70,.35)}50%{box-shadow:0 0 0 6px rgba(255,205,70,0)}}
+
+  .hintline{margin:16px auto 0;max-width:680px;text-align:center;color:var(--soft);font-size:13.5px}
+  .bank{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin:18px auto 0;max-width:680px}
+  .chip{appearance:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:clamp(15px,3.6vw,18px);
+    padding:13px 20px;border-radius:16px;color:#fff;border:1px solid rgba(255,255,255,.28);
+    background:linear-gradient(135deg,rgba(139,108,255,.95),rgba(77,139,255,.9));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 10px 22px -10px rgba(0,0,0,.5);transition:transform .12s,opacity .25s}
+  .chip:hover{transform:translateY(-2px)}
+  .chip.wrong{animation:shake .4s}
+  .chip.used{opacity:.28;pointer-events:none;background:rgba(255,255,255,.12);border-color:transparent}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+  .readbtn{appearance:none;border:0;cursor:pointer;margin:22px auto 0;display:flex;align-items:center;gap:10px;
+    font-family:var(--display);font-weight:700;font-size:16px;color:#fff;padding:13px 24px;border-radius:999px;
+    background:linear-gradient(110deg,var(--purple),var(--electric));box-shadow:0 16px 34px -14px rgba(139,108,255,.7)}
+  .readbtn:active{transform:translateY(1px)}
+
+  .bonus{max-width:680px;margin:22px auto 0;border-radius:22px;padding:24px 24px;text-align:left;
+    background:linear-gradient(135deg,rgba(255,205,70,.14),rgba(139,108,255,.16));border:1px solid rgba(255,205,70,.4)}
+  .bonus .btag{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.04em;
+    color:#241a04;background:linear-gradient(110deg,var(--amber),#ffae42);padding:5px 13px;border-radius:999px}
+  .bonus h3{font-family:var(--display);font-weight:700;font-size:20px;margin:12px 0 8px}
+  .bonus p{color:#efeaff;font-size:16px;line-height:1.7;margin:0}
+  .bonus .readbtn{background:linear-gradient(110deg,var(--amber),#ffae42);color:#241a04;margin-top:16px}
+
+  .again{display:flex;gap:12px;justify-content:center;margin:22px auto 0;flex-wrap:wrap}
+  .again a,.again button{font:inherit;font-weight:700;font-size:14px;border-radius:999px;padding:11px 20px;cursor:pointer;text-decoration:none}
+  .again .pri{background:linear-gradient(110deg,var(--purple),var(--electric));color:#fff;border:0}
+  .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
+
+  .footer{margin-top:34px;text-align:center;color:var(--soft);font-size:12px;opacity:.8}
+
+  .gateview{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(12,8,28,.9);backdrop-filter:blur(8px)}
+  .gateview.show{display:flex}
+  .gatecard{max-width:420px;text-align:center;background:var(--glass);border:1px solid var(--line);border-radius:24px;padding:34px 28px;backdrop-filter:blur(12px)}
+  .gatecard h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0 0 8px}
+  .gatecard p{color:var(--soft);font-size:15px;line-height:1.55;margin:0 0 20px}
+  .gatebtn{display:inline-block;text-decoration:none;color:#fff;font-weight:700;font-size:15px;background:linear-gradient(110deg,var(--purple),var(--electric));padding:13px 22px;border-radius:999px}
+
+  #fx{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:0;transition:opacity .3s}
+  #fx.show{opacity:1}
+  .nightbanner{position:fixed;left:50%;top:14%;transform:translate(-50%,-12px);z-index:55;text-align:center;opacity:0;transition:opacity .4s,transform .4s;pointer-events:none;max-width:92vw;padding:6px 22px}
+  .nightbanner.show{opacity:1;transform:translate(-50%,0)}
+  .nightbanner .big{font-family:var(--display);font-weight:700;font-size:clamp(26px,6.4vw,38px);line-height:1.05;
+    background:linear-gradient(100deg,var(--purple),var(--mint),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 6px 18px rgba(139,108,255,.4))}
+  .nightbanner .small{color:var(--ink);font-size:15px;margin-top:8px;opacity:.95}
+  @media(prefers-reduced-motion:reduce){.chip.wrong{animation:none}.gap.target{animation:none}}
+</style>
+<script src="/progress.js"></script>
+</head>
+<body>
+<div id="stagebg"></div>
+<div class="wrap">
+  <div class="bar">
+    <div class="left">
+      <a class="back" href="/practice-arcade.html">&#8249;&nbsp;Arcade</a>
+      <div class="brand">English Leap<span class="dot">.</span> Practice Arcade</div>
+    </div>
+    <div id="acct"></div>
+  </div>
+
+  <div class="head">
+    <div class="ep" id="epLabel">EP232</div>
+    <h1>Story Unlock</h1>
+    <p class="sub" id="sub">Fill each gap with the right phrase to unlock the story.</p>
+  </div>
+
+  <div class="prog">
+    <div class="pill">Words placed <b id="pPlaced">0/6</b></div>
+  </div>
+
+  <div id="game">
+    <div class="card" id="storyCard"><div class="story" id="story"></div></div>
+    <div class="hintline" id="hintline">Tap the highlighted gap&rsquo;s missing phrase below.</div>
+    <div class="bank" id="bank"></div>
+    <div id="unlockArea"></div>
+  </div>
+
+  <div class="footer">A practice community - not a replacement for formal English education.</div>
+</div>
+
+<canvas id="fx"></canvas>
+<div class="nightbanner" id="nightbanner"></div>
+
+<div class="gateview" id="gateview">
+  <div class="gatecard">
+    <h2 id="gateTitle">Members only</h2>
+    <p id="gateMsg"></p>
+    <a class="gatebtn" id="gateBtn" href="/practice-arcade.html">Go to Practice Arcade</a>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
+const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const EP=new URLSearchParams(location.search).get('ep')||'ep232';
+const TYPE='story-unlock';
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function textOn(hex){const h=(hex||'#8b6cff').replace('#','');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return (0.2126*r+0.7152*g+0.0722*b)/255>0.62?'#241a04':'#ffffff';}
+
+let voices=[];
+function loadVoices(){try{voices=speechSynthesis.getVoices()||[];}catch(e){voices=[];}}
+loadVoices(); if(typeof speechSynthesis!=='undefined'&&speechSynthesis.onvoiceschanged!==undefined) speechSynthesis.onvoiceschanged=loadVoices;
+function pickVoice(){return voices.find(v=>/en-GB/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang))||voices[0];}
+function speak(t){try{if(typeof speechSynthesis==='undefined')return;const u=new SpeechSynthesisUtterance(t);const v=pickVoice();if(v)u.voice=v;u.lang=(v&&v.lang)||'en-GB';u.rate=.92;speechSynthesis.cancel();speechSynthesis.resume();speechSynthesis.speak(u);}catch(e){}}
+
+let DATA=null, STORY='', BONUS='', keeper='', byWord={}, GAPS=[], placed=0, target=-1;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function plain(){return STORY.replace(/\{([^}]+)\}/g,'$1');}
+
+function renderStory(){
+  const parts=STORY.split(/(\{[^}]+\})/g); let gi=-1; GAPS=[];
+  $('#story').innerHTML=parts.map(p=>{
+    const m=p.match(/^\{(.+)\}$/);
+    if(m){ gi++; const w=m[1]; GAPS.push({w:w,c:byWord[w]||'#8b6cff',filled:false});
+      return '<button class="gap" data-i="'+gi+'">'+('\u2007'.repeat(Math.max(8,w.length)))+'</button>'; }
+    return esc(p);
+  }).join('');
+}
+function renderBank(){
+  const ws=shuffle(GAPS.map(g=>g.w));
+  $('#bank').innerHTML=ws.map(w=>'<button class="chip" data-w="'+esc(w)+'">'+esc(w)+'</button>').join('');
+  $('#bank').querySelectorAll('.chip').forEach(b=>b.onclick=()=>attempt(b));
+}
+function firstEmpty(){return GAPS.findIndex(g=>!g.filled);}
+function setTarget(){
+  target=firstEmpty();
+  document.querySelectorAll('.gap').forEach((el,i)=>el.classList.toggle('target', i===target));
+}
+function attempt(chip){
+  const w=chip.dataset.w; if(target<0) return;
+  if(GAPS[target].w===w){
+    GAPS[target].filled=true; placed++;
+    const el=document.querySelector('.gap[data-i="'+target+'"]');
+    el.textContent=w; el.classList.add('filled'); el.classList.remove('target');
+    el.style.background=GAPS[target].c; el.style.color=textOn(GAPS[target].c);
+    chip.classList.add('used'); chip.disabled=true;
+    speak(w);
+    $('#pPlaced').textContent=placed+'/'+GAPS.length;
+    if(placed>=GAPS.length) unlock(); else setTarget();
+  } else {
+    chip.classList.add('wrong'); setTimeout(()=>chip.classList.remove('wrong'),420);
+  }
+}
+
+function unlock(){
+  target=-1; document.querySelectorAll('.gap').forEach(el=>el.classList.remove('target'));
+  $('#storyCard').classList.add('unlocked');
+  $('#bank').style.display='none'; $('#hintline').style.display='none';
+  const name=(DATA.user||'').trim().split(/\s+/)[0];
+  const head=name?('Story unlocked, '+name+'!'):'Story unlocked!';
+
+  let html='<button class="readbtn" id="readStory"><span>&#9654;</span> Read the story</button>';
+  if(BONUS){
+    html+='<div class="bonus"><span class="btag">&#10024; Bonus ending &middot; Fluency Club</span>'
+        + '<h3>The story continues\u2026</h3><p id="bonusText">'+esc(BONUS)+'</p>'
+        + '<button class="readbtn" id="readBonus"><span>&#9654;</span> Read the bonus ending</button></div>';
+  }
+  if(keeper) html+='<div class="hintline" style="margin-top:22px;font-style:italic;color:#cdbcff">\u201C'+esc(keeper)+'\u201D</div>';
+  html+='<div id="winExtras"></div>';
+  html+='<div class="again"><button class="pri" id="againBtn">Play again</button><a class="sec" href="/arcade-type.html?type='+TYPE+'">More episodes</a></div>';
+  $('#unlockArea').innerHTML=html;
+
+  $('#readStory').onclick=()=>speak(plain());
+  const rb=$('#readBonus'); if(rb) rb.onclick=()=>speak(BONUS);
+  $('#againBtn').onclick=()=>resetGame();
+
+  try{
+    if(window.ELC){
+      ELC.markComplete(TYPE, EP);
+      const host=$('#winExtras'); if(host){
+        const phrase=GAPS.length?GAPS[Math.floor(Math.random()*GAPS.length)].w:'';
+        const epl=$('#epLabel').textContent||EP.toUpperCase();
+        ELC.mountWinActions(host,{shareText:"I unlocked the "+epl+" story in the English Leap Practice Arcade! \uD83D\uDCD6",phrase:phrase,url:'https://englishleap.app'});
+      }
+    }
+  }catch(e){}
+
+  const nb=$('#nightbanner');
+  nb.innerHTML='<div class="big">'+esc(head)+'</div><div class="small">'+esc(BONUS?'A bonus ending is waiting below. \u2728':'Beautiful work. \u2728')+'</div>';
+  nb.classList.add('show'); setTimeout(()=>nb.classList.remove('show'),3200);
+  if(!reduced) fireworks(2200);
+  setTimeout(()=>speak(plain()),400);
+}
+function resetGame(){
+  placed=0; $('#pPlaced').textContent='0/'+GAPS.length;
+  $('#storyCard').classList.remove('unlocked');
+  $('#unlockArea').innerHTML=''; $('#bank').style.display=''; $('#hintline').style.display='';
+  renderStory(); renderBank(); setTarget();
+}
+function fireworks(ms){
+  const cv=$('#fx'),ctx=cv.getContext('2d');
+  function size(){cv.width=innerWidth;cv.height=innerHeight;}size();
+  const onR=()=>size();addEventListener('resize',onR);cv.classList.add('show');
+  const cols=['#f6479a','#ff8a63','#8b6cff','#4d8bff','#1fc4b6','#ffcd46','#57e6c4'];
+  let parts=[],end=performance.now()+ms,last=0;
+  function burst(x,y){const c=cols[(Math.random()*cols.length)|0],n=34;for(let i=0;i<n;i++){const a=(Math.PI*2*i)/n+Math.random()*0.2,sp=2+Math.random()*3.4;parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.1,life:1,col:c});}}
+  function frame(now){ctx.clearRect(0,0,cv.width,cv.height);
+    if(now<end&&now-last>330){last=now;burst(cv.width*(0.2+Math.random()*0.6),cv.height*(0.16+Math.random()*0.3));}
+    for(const p of parts){p.vy+=0.05;p.x+=p.vx;p.y+=p.vy;p.vx*=0.99;p.life-=0.012;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,2.6,0,7);ctx.fill();}
+    ctx.globalAlpha=1;parts=parts.filter(p=>p.life>0);
+    if(now<end||parts.length)requestAnimationFrame(frame);else{cv.classList.remove('show');removeEventListener('resize',onR);}}
+  requestAnimationFrame(frame);
+}
+function gate(title,msg,cta){
+  $('#gateTitle').textContent=title;$('#gateMsg').textContent=msg;
+  const b=$('#gateBtn'); if(cta){b.href=cta.href;b.textContent=cta.label;if(/^https?:/.test(cta.href)){b.target='_blank';b.rel='noopener';}}
+  $('#gateview').classList.add('show');
+}
+function acctBar(name){
+  const acct=$('#acct');
+  if(name){acct.innerHTML='<button class="out" id="signoutMenu">Sign out</button>';$('#signoutMenu').onclick=async()=>{try{await fetch('/api/auth/signout',{method:'POST'});}catch(e){}location.href='/practice-arcade.html';};}
+  else acct.innerHTML='';
+}
+async function load(){
+  let res;
+  try{res=await fetch('/api/games?type='+encodeURIComponent(TYPE)+'&ep='+encodeURIComponent(EP));}
+  catch(e){return gate('Connection problem','We couldn\u2019t reach the arcade. Check your connection and try again.');}
+  if(res.status===401) return gate('Members only','Sign in with Patreon from the Practice Arcade to play Story Unlock.',{href:'/practice-arcade.html',label:'Go to Practice Arcade'});
+  if(res.status===403){let d={};try{d=await res.json();}catch(e){}return gate('A Fluency Club game', d.error||'Story Unlock is part of Fluency Club ($2.99).',{href:CTA,label:'Unlock \u00b7 Fluency $2.99'});}
+  if(!res.ok) return gate('Not available','This game isn\u2019t available right now. Please try again later.');
+  const d=await res.json(); if(!d.ok||!d.content) return gate('Not available','This game isn\u2019t available right now.');
+  DATA=Object.assign({user:d.user}, d.content);
+  STORY=d.content.story||''; BONUS=d.content.bonusEnding||''; keeper=d.content.keeper||'';
+  byWord={}; (d.content.phrases||[]).forEach(p=>byWord[p.word]=p.color);
+  $('#epLabel').textContent=d.ep||EP.toUpperCase();
+  if(d.content.intro) $('#sub').textContent=d.content.intro;
+  acctBar(d.user);
+  try{ window.ELC&&ELC.recordPlay(); }catch(e){}
+  placed=0; $('#pPlaced').textContent='0/'+(d.content.phrases||[]).length;
+  renderStory(); renderBank(); setTarget();
+}
+load();
+</script>
+</body>
+</html>
