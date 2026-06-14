@@ -59,20 +59,6 @@
         else if (r === "shared") sh.textContent = "Shared \u2713";
       };
       wrap.appendChild(sh);
-      if (opts.phrase) {
-        var c = document.createElement("div");
-        c.style.cssText = "background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:15px 18px;max-width:430px;text-align:center";
-        c.innerHTML = '<div style="font-weight:700;margin-bottom:5px">\u270D\uFE0F Your turn</div>' +
-          '<div style="opacity:.85;font-size:14px;line-height:1.5">Write one sentence with <b>\u201C' + opts.phrase + '\u201D</b> and share it in the comments.</div>';
-        var cb = document.createElement("button");
-        cb.textContent = "Copy the challenge";
-        cb.style.cssText = "margin-top:11px;font:inherit;font-weight:600;font-size:13px;padding:9px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);color:inherit;cursor:pointer";
-        cb.onclick = function () {
-          try { navigator.clipboard.writeText('Write one sentence with \u201C' + opts.phrase + '\u201D.'); cb.textContent = "Copied \u2713"; } catch (e) {}
-        };
-        c.appendChild(cb);
-        wrap.appendChild(c);
-      }
       host.appendChild(wrap);
     }
   };

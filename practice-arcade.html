@@ -98,9 +98,12 @@
   .feat .gbtn{font-size:15px;padding:13px 24px}
   @media(max-width:760px){.feat{grid-template-columns:1fr}.feat .fcover{min-height:0;aspect-ratio:16/9}.feat .fbody{padding:24px 22px}}
 
-  /* premium shelf for the remaining games */
-  .shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:20px}
-  .sgame{border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--glass);display:flex;flex-direction:column;
+  /* premium shelf — arrow-nav peek carousel */
+  .shelfwrap{position:relative;margin-top:20px}
+  .shelf{display:flex;gap:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scroll-behavior:smooth;
+    padding:8px 2px 12px;margin:0 -2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .shelf::-webkit-scrollbar{display:none}
+  .sgame{flex:0 0 clamp(258px,80vw,304px);scroll-snap-align:start;border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--glass);display:flex;flex-direction:column;
     box-shadow:0 24px 60px -30px rgba(0,0,0,.7);transition:transform .18s,border-color .18s,box-shadow .18s}
   .sgame:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.26);box-shadow:0 30px 72px -28px rgba(0,0,0,.82)}
   .sgame .scv{position:relative;aspect-ratio:16/9;overflow:hidden;background:#11162a}
@@ -110,12 +113,15 @@
   .sgame .snm{font-family:var(--display);font-weight:700;font-size:18px}
   .sgame .sdesc{color:var(--soft);font-size:13.5px;line-height:1.45;flex:1}
   .sgame .srow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
-  @media(max-width:760px){
-    .shelf{grid-template-columns:1fr;gap:14px}
-    .sgame{flex-direction:row;align-items:stretch}
-    .sgame .scv{flex:0 0 130px;width:130px;aspect-ratio:auto}
-    .sgame .sbody{padding:14px 16px}
-  }
+  .shelf-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:48px;height:48px;border-radius:50%;
+    display:none;place-items:center;cursor:pointer;border:1px solid var(--line);background:rgba(10,9,24,.74);backdrop-filter:blur(10px);
+    color:var(--ink);font-size:22px;line-height:1;box-shadow:0 12px 30px -10px rgba(0,0,0,.85);transition:background .2s,opacity .2s,transform .2s}
+  .shelf-arrow:hover{background:linear-gradient(110deg,var(--purple),var(--electric));border-color:transparent;transform:translateY(-50%) scale(1.06)}
+  .shelf-arrow.left{left:-6px}
+  .shelf-arrow.right{right:-6px}
+  .shelfwrap.scrollable .shelf-arrow{display:grid}
+  .shelf-arrow[disabled]{opacity:.26;pointer-events:none}
+  @media(max-width:760px){.shelf-arrow{width:42px;height:42px;font-size:20px}}
 
   /* this week */
   .tw{background:var(--glass);border:1px solid var(--line);border-radius:24px;padding:26px 24px;backdrop-filter:blur(10px)}
@@ -207,7 +213,11 @@
   <section>
     <div class="sec-head"><h2>The games</h2><p>Each one turns the episode's six phrases into something you actually do &mdash; not just read.</p></div>
     <div id="featured"></div>
-    <div class="shelf" id="games"></div>
+    <div class="shelfwrap" id="shelfWrap">
+      <button class="shelf-arrow left" id="shelfPrev" aria-label="Previous games">&#8249;</button>
+      <div class="shelf" id="games"></div>
+      <button class="shelf-arrow right" id="shelfNext" aria-label="Next games">&#8250;</button>
+    </div>
   </section>
 
   <!-- THIS WEEK -->
@@ -294,6 +304,21 @@ function featuredCard(gt){
         <a class="gall" href="/arcade-type.html?type=${esc(gt.type)}">${n} ${n===1?'episode':'episodes'} &rsaquo;</a></div>
     </div></div>`;
 }
+function setupShelfNav(){
+  const wrap=$('#shelfWrap'), track=$('#games'), prev=$('#shelfPrev'), next=$('#shelfNext');
+  if(!wrap||!track) return;
+  function step(){ const c=track.querySelector('.sgame'); const w=c?c.getBoundingClientRect().width:280; return Math.max(w+18, track.clientWidth*0.8); }
+  function update(){
+    const overflow = track.scrollWidth - track.clientWidth > 4;
+    wrap.classList.toggle('scrollable', overflow);
+    if(prev) prev.disabled = track.scrollLeft <= 2;
+    if(next) next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+  }
+  if(prev) prev.onclick=()=>track.scrollBy({left:-step(),behavior:'smooth'});
+  if(next) next.onclick=()=>track.scrollBy({left:step(),behavior:'smooth'});
+  track.onscroll=update; addEventListener('resize',update);
+  update(); setTimeout(update,300);
+}
 function shelfCard(gt){
   const b=btnFor(gt); const n=(gt.episodes||[]).length;
   const ext=b.ext?' target="_blank" rel="noopener"':'';
@@ -348,6 +373,7 @@ function render(data){
   const rest = types.filter(g=>g!==featured);
   $('#featured').innerHTML = featured ? featuredCard(featured) : '';
   $('#games').innerHTML = rest.map(shelfCard).join('');
+  setupShelfNav();
   $('#thisweek').innerHTML=thisWeek(types);
   try{ if(window.ELC){ const wk=ELC.streakWeeks(); const sc=$('#streakChip');
     if(wk>=1){ sc.textContent='\uD83C\uDF31 '+wk+(wk===1?' week':' weeks')+' of practice'; sc.style.display='inline-flex'; } } }catch(e){}
