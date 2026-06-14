@@ -255,6 +255,7 @@ const TYPE='clue-room';
   $('#epLabel').textContent=data.ep||EP.toUpperCase();
   $('#introEyebrow').textContent=(data.ep||EP.toUpperCase())+' \u00b7 '+(data.title||'Clue Room');
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}
+  try{ window.ELC&&data.walkthrough&&ELC.howToPlay(data.walkthrough,(data.name||"")+" \u2014 how to play"); }catch(e){}
   boot(data);
 })();
 

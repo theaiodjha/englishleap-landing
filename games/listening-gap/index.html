@@ -258,6 +258,7 @@ async function load(){
   if(d.content.intro) $('#sub').textContent=d.content.intro;
   acctBar(d.user);
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}
+  try{ window.ELC&&d.walkthrough&&ELC.howToPlay(d.walkthrough,(d.name||"")+" \u2014 how to play"); }catch(e){}
   idx=0; score=0; $('#pScore').textContent='0';
   renderRound();
 }

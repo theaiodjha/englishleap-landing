@@ -56,7 +56,7 @@ export default async function handler(req, res) {
   // the hub can render them as upsell tiles. Episode meta is always listed.
   if (!type || !ep) {
     const arcade = ARCADE.map((gt) => ({
-      type: gt.type, name: gt.name, icon: gt.icon, accent: gt.accent, tagline: gt.tagline,
+      type: gt.type, name: gt.name, icon: gt.icon, accent: gt.accent, tagline: gt.tagline, walkthrough: gt.walkthrough || "",
       access: gt.access || "fluency", locked: !unlocked(gt),
       episodes: gt.episodes.map((e) => ({
         id: e.id, ep: e.ep, title: e.title, current: !!e.current, cover: e.cover || null,
@@ -82,5 +82,5 @@ export default async function handler(req, res) {
     if (!s) return res.status(401).json({ ok: false, login: true, access: gt.access, error: "Sign in with Patreon to play this game." });
     return res.status(403).json({ ok: false, upgrade: true, access: gt.access, error: "This game is part of " + tierName + "." });
   }
-  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, user: s ? s.name : null, content: e.content });
+  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, walkthrough: gt.walkthrough || "", user: s ? s.name : null, content: e.content });
 }

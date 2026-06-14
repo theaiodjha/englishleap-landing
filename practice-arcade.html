@@ -84,6 +84,8 @@
   .gbtn.play{color:var(--ink);background:var(--glass2);border:1px solid var(--line)}
   .gall{color:var(--soft);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
   .gall:hover{color:var(--ink)}
+  .howlink{align-self:flex-start;background:none;border:0;cursor:pointer;color:var(--soft);font:inherit;font-weight:600;font-size:13px;padding:0;display:inline-flex;align-items:center;gap:6px}
+  .howlink:hover{color:var(--ink)}
 
   /* featured free entry */
   .feat{display:grid;grid-template-columns:1.05fr .95fr;border:1px solid var(--line);border-radius:26px;overflow:hidden;position:relative;
@@ -301,7 +303,8 @@ function featuredCard(gt){
       <p>${esc(DESC[gt.type]||gt.tagline||'')}</p>
       ${doneBadge}
       <div class="frow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>
-        <a class="gall" href="/arcade-type.html?type=${esc(gt.type)}">${n} ${n===1?'episode':'episodes'} &rsaquo;</a></div>
+        <a class="gall" href="/arcade-type.html?type=${esc(gt.type)}">${n} ${n===1?'episode':'episodes'} &rsaquo;</a>
+        ${gt.walkthrough?`<button class="howlink" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play')">&#9654; How to play</button>`:''}</div>
     </div></div>`;
 }
 function setupShelfNav(){
@@ -330,6 +333,7 @@ function shelfCard(gt){
     <div class="sbody">
       <div class="snm">${esc(gt.name)}</div>
       <div class="sdesc">${esc(DESC[gt.type]||gt.tagline||'')}</div>
+      ${gt.walkthrough?`<button class="howlink" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play')">&#9654; How to play</button>`:''}
       <div class="srow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>${doneBadge}</div>
     </div></div>`;
 }
