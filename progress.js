@@ -54,7 +54,8 @@
       row.appendChild(img); row.appendChild(t); host.appendChild(row);
     },
     // Popup player. `src` may be a self-hosted video file (.mp4/.webm) or a YouTube ID/URL.
-    playVideo: function (src, title) {
+    // `poster` is an optional thumbnail shown before a self-hosted video plays.
+    playVideo: function (src, title, poster) {
       if (!src) return;
       var ov = document.createElement("div");
       ov.style.cssText = "position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,3,12,.86);backdrop-filter:blur(6px)";
@@ -65,6 +66,7 @@
       if (/\.(mp4|webm|ogg|ogv|m4v|mov)(\?|#|$)/i.test(src)) {
         media = document.createElement("video");
         media.src = src; media.controls = true; media.autoplay = true; media.preload = "metadata";
+        if (poster) media.poster = poster;
         media.setAttribute("playsinline", ""); media.playsInline = true;
         media.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;object-fit:contain";
       } else {
@@ -85,14 +87,14 @@
       box.appendChild(frame); box.appendChild(x); ov.appendChild(box); document.body.appendChild(ov);
     },
     // Floating "How to play" pill for game pages. No-op if no video id.
-    howToPlay: function (id, title) {
+    howToPlay: function (id, title, poster) {
       if (!id || document.getElementById("elcHowBtn")) return;
       var b = document.createElement("button"); b.id = "elcHowBtn";
       b.innerHTML = "&#9654;&nbsp; How to play";
       b.style.cssText = "position:fixed;right:16px;bottom:16px;z-index:80;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;" +
         "color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:11px 17px;backdrop-filter:blur(10px);" +
         "background:linear-gradient(110deg,rgba(139,108,255,.92),rgba(77,139,255,.92));box-shadow:0 14px 30px -12px rgba(0,0,0,.8)";
-      b.onclick = function () { ELC.playVideo(id, title); };
+      b.onclick = function () { ELC.playVideo(id, title, poster); };
       document.body.appendChild(b);
     }
   };

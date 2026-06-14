@@ -304,7 +304,7 @@ function featuredCard(gt){
       ${doneBadge}
       <div class="frow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>
         <a class="gall" href="/arcade-type.html?type=${esc(gt.type)}">${n} ${n===1?'episode':'episodes'} &rsaquo;</a>
-        ${gt.walkthrough?`<button class="howlink" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play')">&#9654; How to play</button>`:''}</div>
+        ${gt.walkthrough?`<button class="howlink" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play','${esc(gt.walkthroughPoster||('/covers/'+gt.type+'.png'))}')">&#9654; How to play</button>`:''}</div>
     </div></div>`;
 }
 function setupShelfNav(){
@@ -333,7 +333,7 @@ function shelfCard(gt){
     <div class="sbody">
       <div class="snm">${esc(gt.name)}</div>
       <div class="sdesc">${esc(DESC[gt.type]||gt.tagline||'')}</div>
-      ${gt.walkthrough?`<button class="howlink" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play')">&#9654; How to play</button>`:''}
+      ${gt.walkthrough?`<button class="howlink" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play','${esc(gt.walkthroughPoster||('/covers/'+gt.type+'.png'))}')">&#9654; How to play</button>`:''}
       <div class="srow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>${doneBadge}</div>
     </div></div>`;
 }

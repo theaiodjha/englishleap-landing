@@ -286,7 +286,7 @@ async function load(){
   if(d.content.intro) $('#sub').textContent=d.content.intro;
   acctBar(d.user);
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}
-  try{ window.ELC&&d.walkthrough&&ELC.howToPlay(d.walkthrough,(d.name||"")+" \u2014 how to play"); }catch(e){}
+  try{ window.ELC&&d.walkthrough&&ELC.howToPlay(d.walkthrough,(d.name||"")+" \u2014 how to play",(d.walkthroughPoster||("/covers/"+TYPE+".png"))); }catch(e){}
   placed=0; $('#pPlaced').textContent='0/'+(d.content.phrases||[]).length;
   renderStory(); renderBank(); setTarget();
 }

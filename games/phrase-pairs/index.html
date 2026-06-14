@@ -289,7 +289,7 @@ async function load(){
   $('#epLabel').textContent=d.ep||EP.toUpperCase();
   acctBar(d.user);
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}
-  try{ window.ELC&&d.walkthrough&&ELC.howToPlay(d.walkthrough,(d.name||"")+" \u2014 how to play"); }catch(e){}
+  try{ window.ELC&&d.walkthrough&&ELC.howToPlay(d.walkthrough,(d.name||"")+" \u2014 how to play",(d.walkthroughPoster||("/covers/"+TYPE+".png"))); }catch(e){}
   start(d.content);
 }
 $('#restart').addEventListener('click',()=>{ if(DATA) newGame(); });
