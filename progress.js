@@ -59,14 +59,14 @@
       if (!src) return;
       var ov = document.createElement("div");
       ov.style.cssText = "position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,3,12,.86);backdrop-filter:blur(6px)";
-      var box = document.createElement("div"); box.style.cssText = "position:relative;width:min(960px,94vw)";
+      var box = document.createElement("div"); box.style.cssText = "position:relative;width:min(1040px,94vw)";
       var frame = document.createElement("div");
       frame.style.cssText = "position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000;box-shadow:0 30px 90px -30px rgba(0,0,0,.9)";
       var media;
       if (/\.(mp4|webm|ogg|ogv|m4v|mov)(\?|#|$)/i.test(src)) {
         media = document.createElement("video");
-        media.src = src; media.controls = true; media.autoplay = true; media.preload = "metadata";
-        media.muted = false; media.volume = 1;
+        media.src = src; media.controls = true; media.preload = "metadata";
+        media.muted = false; media.defaultMuted = false; media.volume = 1; media.removeAttribute("muted");
         if (poster) media.poster = poster;
         media.setAttribute("playsinline", ""); media.playsInline = true;
         media.setAttribute("controlsList", "nodownload noremoteplayback"); media.controlsList = "nodownload noremoteplayback";

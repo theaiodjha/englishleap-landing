@@ -86,6 +86,16 @@
   .gall:hover{color:var(--ink)}
   .howlink{align-self:flex-start;background:none;border:0;cursor:pointer;color:var(--soft);font:inherit;font-weight:600;font-size:13px;padding:0;display:inline-flex;align-items:center;gap:6px}
   .howlink:hover{color:var(--ink)}
+  .scv img,.fcover img{transition:transform .45s ease}
+  .scv:hover img,.fcover:hover img{transform:scale(1.05)}
+  .gribbon,.glock{pointer-events:none}
+  .coverplay{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;cursor:pointer;border:0;background:transparent;color:#fff;font:inherit;padding:0}
+  .coverplay::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 120% at 50% 50%,rgba(4,3,12,.12),rgba(4,3,12,.5));opacity:0;transition:opacity .3s}
+  .coverplay:hover::before,.coverplay:focus-visible::before{opacity:1}
+  .cpring{position:relative;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:rgba(10,9,24,.5);border:1.5px solid rgba(255,255,255,.92);backdrop-filter:blur(6px);box-shadow:0 10px 26px -10px rgba(0,0,0,.85);transition:transform .25s,background .25s,border-color .25s}
+  .coverplay:hover .cpring,.coverplay:focus-visible .cpring{transform:scale(1.1);background:linear-gradient(110deg,var(--purple),var(--electric));border-color:transparent}
+  .cplabel{position:relative;font-weight:700;font-size:12px;letter-spacing:.04em;text-shadow:0 2px 10px rgba(0,0,0,.75);opacity:0;transform:translateY(5px);transition:opacity .25s,transform .25s}
+  .coverplay:hover .cplabel,.coverplay:focus-visible .cplabel{opacity:1;transform:none}
 
   /* featured free entry */
   .feat{display:grid;grid-template-columns:1.05fr .95fr;border:1px solid var(--line);border-radius:26px;overflow:hidden;position:relative;
@@ -296,15 +306,15 @@ function featuredCard(gt){
   const eyebrow=gt.access==='free'?'Start here &middot; Free to play':'Featured game';
   return `<div class="feat">
     <div class="fcover"><img src="/covers/${esc(gt.type)}.png" alt="${esc(gt.name)}" onerror="this.style.display='none'">
-      <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span></div>
+      <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>
+      ${gt.walkthrough?`<button class="coverplay" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play','${esc(gt.walkthroughPoster||('/covers/'+gt.type+'.png'))}')" aria-label="Watch how to play"><span class="cpring"><svg width="15" height="17" viewBox="0 0 15 17" aria-hidden="true"><path d="M1 1l13 7.5L1 16z" fill="#fff"/></svg></span><span class="cplabel">How to play</span></button>`:''}</div>
     <div class="fbody">
       <div class="feyebrow">${eyebrow}</div>
       <h3>${esc(gt.name)}</h3>
       <p>${esc(DESC[gt.type]||gt.tagline||'')}</p>
       ${doneBadge}
       <div class="frow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>
-        <a class="gall" href="/arcade-type.html?type=${esc(gt.type)}">${n} ${n===1?'episode':'episodes'} &rsaquo;</a>
-        ${gt.walkthrough?`<button class="howlink" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play','${esc(gt.walkthroughPoster||('/covers/'+gt.type+'.png'))}')">&#9654; How to play</button>`:''}</div>
+        <a class="gall" href="/arcade-type.html?type=${esc(gt.type)}">${n} ${n===1?'episode':'episodes'} &rsaquo;</a></div>
     </div></div>`;
 }
 function setupShelfNav(){
@@ -329,11 +339,11 @@ function shelfCard(gt){
   const doneBadge=done>0?`<span class="gdone">&#10003; ${done}/${n}</span>`:'';
   return `<div class="sgame ${gt.locked?'locked':''}">
     <div class="scv"><img src="/covers/${esc(gt.type)}.png" alt="${esc(gt.name)}" onerror="this.style.display='none'">
-      <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>${gt.locked?'<span class="glock">&#128274;</span>':''}</div>
+      <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>${gt.locked?'<span class="glock">&#128274;</span>':''}
+      ${gt.walkthrough?`<button class="coverplay" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play','${esc(gt.walkthroughPoster||('/covers/'+gt.type+'.png'))}')" aria-label="Watch how to play"><span class="cpring"><svg width="15" height="17" viewBox="0 0 15 17" aria-hidden="true"><path d="M1 1l13 7.5L1 16z" fill="#fff"/></svg></span><span class="cplabel">How to play</span></button>`:''}</div>
     <div class="sbody">
       <div class="snm">${esc(gt.name)}</div>
       <div class="sdesc">${esc(DESC[gt.type]||gt.tagline||'')}</div>
-      ${gt.walkthrough?`<button class="howlink" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play','${esc(gt.walkthroughPoster||('/covers/'+gt.type+'.png'))}')">&#9654; How to play</button>`:''}
       <div class="srow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>${doneBadge}</div>
     </div></div>`;
 }
