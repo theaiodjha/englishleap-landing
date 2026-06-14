@@ -94,6 +94,8 @@
   @media(prefers-reduced-motion:reduce){.chip.wrong{animation:none}}
   .gatehow{margin-top:14px;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:999px}
   .gatehow:hover{border-color:rgba(255,255,255,.32)}
+  .howbtn{align-items:center;justify-content:center;gap:8px;margin:14px auto 0;cursor:pointer;border:0;font:inherit;font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px;color:#10121c;background:#fff;box-shadow:0 10px 26px -10px rgba(0,0,0,.55)}
+  .howbtn:hover{transform:translateY(-1px)}
 </style>
 <script src="/progress.js"></script>
 </head>
@@ -111,6 +113,7 @@
   <div class="head">
     <div class="ep" id="epLabel">EP232</div>
     <h1>Listening Gap</h1>
+  <button id="howBtn" class="howbtn" style="display:none">&#9654; How to play</button>
     <p class="sub" id="sub">Press play, listen, then tap the phrase that fits the gap.</p>
   </div>
 

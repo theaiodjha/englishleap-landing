@@ -66,8 +66,12 @@
       if (/\.(mp4|webm|ogg|ogv|m4v|mov)(\?|#|$)/i.test(src)) {
         media = document.createElement("video");
         media.src = src; media.controls = true; media.autoplay = true; media.preload = "metadata";
+        media.muted = false; media.volume = 1;
         if (poster) media.poster = poster;
         media.setAttribute("playsinline", ""); media.playsInline = true;
+        media.setAttribute("controlsList", "nodownload noremoteplayback"); media.controlsList = "nodownload noremoteplayback";
+        media.disablePictureInPicture = true; media.setAttribute("disablepictureinpicture", "");
+        media.oncontextmenu = function () { return false; };
         media.style.cssText = "position:absolute;inset:0;width:100%;height:100%;border:0;background:#000;object-fit:contain";
       } else {
         var id = (src.match(/(?:youtu\.be\/|[?&]v=|embed\/)([A-Za-z0-9_-]{6,})/) || [])[1] || src;
@@ -85,10 +89,14 @@
       x.onclick = close; ov.onclick = function (e) { if (e.target === ov) close(); };
       document.addEventListener("keydown", onKey);
       box.appendChild(frame); box.appendChild(x); ov.appendChild(box); document.body.appendChild(ov);
+      if (media.tagName === "VIDEO") { try { var pp = media.play(); if (pp && pp.catch) pp.catch(function(){}); } catch (e) {} }
     },
     // Floating "How to play" pill for game pages. No-op if no video id.
     howToPlay: function (id, title, poster) {
-      if (!id || document.getElementById("elcHowBtn")) return;
+      if (!id) return;
+      var slot = document.getElementById("howBtn");
+      if (slot) { slot.style.display = "flex"; slot.onclick = function () { ELC.playVideo(id, title, poster); }; return; }
+      if (document.getElementById("elcHowBtn")) return;
       var b = document.createElement("button"); b.id = "elcHowBtn";
       b.innerHTML = "&#9654;&nbsp; How to play";
       b.style.cssText = "position:fixed;right:16px;bottom:16px;z-index:80;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;" +
