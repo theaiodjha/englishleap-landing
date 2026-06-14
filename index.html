@@ -91,6 +91,29 @@ h1,h2,h3,h4{font-family:var(--display);font-weight:600;line-height:1.04;letter-s
 .card{background:var(--panel);border:1px solid var(--line);border-radius:22px;backdrop-filter:blur(14px);transition:transform .4s cubic-bezier(.2,.7,.2,1),border-color .4s,box-shadow .4s}
 .card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.2);box-shadow:0 30px 70px -30px rgba(0,0,0,.7)}
 
+/* latest episodes peek carousel */
+.ep-rail{display:flex;gap:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:6px 4px 18px;margin:0 -4px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.ep-rail::-webkit-scrollbar{height:8px}
+.ep-rail::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:999px}
+.ep-rail::-webkit-scrollbar-track{background:transparent}
+.epcard{flex:0 0 clamp(260px,78vw,322px);scroll-snap-align:start;background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;
+  backdrop-filter:blur(14px);transition:transform .35s cubic-bezier(.2,.7,.2,1),border-color .35s}
+.epcard:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.22)}
+.epcard .epcov{position:relative;aspect-ratio:16/9;overflow:hidden;background:#11111f}
+.epcard .epcov img{width:100%;height:100%;object-fit:cover;display:block}
+.epcard .epbadge{position:absolute;top:12px;left:12px;font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.06em;
+  padding:5px 11px;border-radius:999px;background:rgba(8,8,18,.55);backdrop-filter:blur(6px);color:#fff;border:1px solid var(--line)}
+.epcard .epnow{position:absolute;top:12px;right:12px;font-size:10.5px;font-weight:800;letter-spacing:.05em;padding:5px 10px;border-radius:999px;
+  background:linear-gradient(110deg,var(--violet),var(--electric));color:#fff}
+.epcard .epbody{padding:16px 18px 18px}
+.epcard h3{font-family:var(--display);font-weight:700;font-size:19px;margin:0 0 6px}
+.epcard .epwords{color:var(--muted);font-size:12.5px;line-height:1.5;margin:0 0 14px;min-height:2.5em}
+.epcard .eprow{display:flex;gap:10px;flex-wrap:wrap}
+.epcard .epbtn{text-decoration:none;font-weight:700;font-size:13px;padding:10px 16px;border-radius:999px}
+.epcard .epbtn.play{color:#fff;background:linear-gradient(110deg,var(--violet),var(--electric))}
+.epcard .epbtn.pack{color:var(--ink);background:var(--panel-2);border:1px solid var(--line)}
+
 /* reveal */
 .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
 .reveal.in{opacity:1;transform:none}
@@ -446,6 +469,18 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
   </div>
 </section>
 
+<!-- LATEST EPISODES -->
+<section class="episodes" id="episodes">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>New every week</span>
+      <h2>Latest <span class="grad">episodes</span></h2>
+      <p>Every episode becomes a full practice pack &mdash; transcript, vocabulary and games. Play the latest free, then go deeper in the Club.</p>
+    </div>
+    <div class="ep-rail reveal" id="epRail"></div>
+  </div>
+</section>
+
 <!-- WATCH -->
 <section class="watch" id="watch">
   <div class="wrap">
@@ -740,6 +775,37 @@ document.querySelectorAll('.vid').forEach(v=>{
     thumb.innerHTML='';thumb.appendChild(f);
   });
 });
+</script>
+<script>
+(function(){
+  var CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
+  var rail=document.getElementById('epRail'); if(!rail) return;
+  function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function card(ep){
+    var words=(ep.words||[]).slice(0,4).join(' \u00b7 ');
+    return '<div class="epcard">'
+      +'<div class="epcov"><img src="'+esc(ep.cover)+'" alt="'+esc(ep.title)+'" onerror="this.style.display=\'none\'">'
+      +'<span class="epbadge">'+esc(ep.ep)+'</span>'+(ep.current?'<span class="epnow">THIS WEEK</span>':'')+'</div>'
+      +'<div class="epbody"><h3>'+esc(ep.title)+'</h3><p class="epwords">'+esc(words)+'</p>'
+      +'<div class="eprow"><a class="epbtn play" href="/games/clue-room/?ep='+encodeURIComponent(ep.id)+'">&#9654; Play free</a>'
+      +'<a class="epbtn pack" href="'+CTA+'" target="_blank" rel="noopener">Get the pack</a></div></div></div>';
+  }
+  var FALLBACK=[
+    {id:'ep232',ep:'EP232',title:'Manage Your Time',current:true,cover:'/covers/clue-room-ep232.png',words:['slip away','put off','make the most of','stay on track']},
+    {id:'ep231',ep:'EP231',title:"Maya's Tuesday",current:false,cover:'/covers/clue-room-ep231.png',words:['eventful','turned out','ran into','managed to']}
+  ];
+  function render(list){ rail.innerHTML=list.map(card).join(''); }
+  fetch('/api/games').then(function(r){return r.ok?r.json():null;}).then(function(d){
+    var eps=null;
+    if(d&&d.ok&&d.arcade){
+      var cr=d.arcade.filter(function(g){return g.type==='clue-room';})[0]||d.arcade[0];
+      if(cr&&cr.episodes&&cr.episodes.length){
+        eps=cr.episodes.map(function(e){return {id:e.id,ep:e.ep,title:e.title,current:e.current,cover:e.cover||('/covers/clue-room-'+e.id+'.png'),words:e.words||[]};});
+      }
+    }
+    render(eps&&eps.length?eps:FALLBACK);
+  }).catch(function(){render(FALLBACK);});
+})();
 </script>
 </body>
 </html>

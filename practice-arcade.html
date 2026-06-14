@@ -72,34 +72,50 @@
   .sec-head h2{font-family:var(--display);font-weight:700;font-size:clamp(24px,4vw,32px);margin:0}
   .sec-head p{color:var(--soft);margin:8px auto 0;max-width:38em;font-size:15px;line-height:1.5}
 
-  /* game cards */
-  .games{display:flex;gap:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding-left:2px;
-    padding:8px 2px 16px;margin:0 -2px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
-  .games::-webkit-scrollbar{height:8px}
-  .games::-webkit-scrollbar-track{background:transparent}
-  .games::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:999px}
-  .games:hover::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3)}
-  .gcard{flex:0 0 clamp(256px,80vw,300px);scroll-snap-align:start;background:var(--glass);border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;
-    box-shadow:0 24px 60px -28px rgba(0,0,0,.7);transition:transform .15s,border-color .15s}
-  .gcard:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.24)}
-  .gcover{position:relative;aspect-ratio:16/9;overflow:hidden;background:#11162a}
-  .gcover img{width:100%;height:100%;object-fit:cover;display:block}
+  /* game cards — premium featured + shelf */
   .gribbon{position:absolute;top:12px;left:12px;font-size:11px;font-weight:800;letter-spacing:.04em;padding:4px 11px;border-radius:999px}
   .gribbon.free{background:rgba(31,196,182,.92);color:#062018}
   .gribbon.transcript{background:rgba(139,108,255,.94);color:#0d0a26}
   .gribbon.fluency{background:rgba(255,205,70,.94);color:#231a02}
   .glock{position:absolute;top:11px;right:12px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(8,6,20,.6);color:#fff;font-size:14px;backdrop-filter:blur(4px)}
-  .gcard.locked .gcover img{filter:saturate(.6) brightness(.62)}
-  .gbody{padding:18px 18px 20px;display:flex;flex-direction:column;gap:9px;flex:1}
-  .gtitle{font-family:var(--display);font-weight:700;font-size:21px}
-  .gdesc{color:var(--soft);font-size:14px;line-height:1.5;flex:1}
-  .grow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
-  .gbtn{text-decoration:none;font-weight:700;font-size:14px;padding:11px 18px;border-radius:999px;white-space:nowrap}
+  .gbtn{display:inline-block;text-decoration:none;font-weight:700;font-size:14px;padding:11px 20px;border-radius:999px;white-space:nowrap}
   .gbtn.free{color:#fff;background:linear-gradient(110deg,var(--purple),var(--electric))}
   .gbtn.lock{color:#241a04;background:linear-gradient(110deg,var(--gold),#ffae42)}
   .gbtn.play{color:var(--ink);background:var(--glass2);border:1px solid var(--line)}
   .gall{color:var(--soft);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
   .gall:hover{color:var(--ink)}
+
+  /* featured free entry */
+  .feat{display:grid;grid-template-columns:1.05fr .95fr;border:1px solid var(--line);border-radius:26px;overflow:hidden;position:relative;
+    background:linear-gradient(135deg,rgba(139,108,255,.16),rgba(47,230,214,.07));box-shadow:0 36px 90px -36px rgba(0,0,0,.75)}
+  .feat .fcover{position:relative;min-height:264px;overflow:hidden;background:#11162a}
+  .feat .fcover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .feat .fbody{padding:34px 36px;display:flex;flex-direction:column;justify-content:center;gap:13px}
+  .feat .feyebrow{font-family:var(--display);font-weight:700;letter-spacing:.12em;font-size:12px;color:var(--mint);text-transform:uppercase}
+  .feat h3{font-family:var(--display);font-weight:700;font-size:clamp(26px,3.6vw,34px);margin:0}
+  .feat p{color:var(--soft);font-size:15px;line-height:1.55;margin:0;max-width:34em}
+  .feat .frow{display:flex;align-items:center;gap:16px;margin-top:8px;flex-wrap:wrap}
+  .feat .gbtn{font-size:15px;padding:13px 24px}
+  @media(max-width:760px){.feat{grid-template-columns:1fr}.feat .fcover{min-height:0;aspect-ratio:16/9}.feat .fbody{padding:24px 22px}}
+
+  /* premium shelf for the remaining games */
+  .shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:20px}
+  .sgame{border:1px solid var(--line);border-radius:22px;overflow:hidden;background:var(--glass);display:flex;flex-direction:column;
+    box-shadow:0 24px 60px -30px rgba(0,0,0,.7);transition:transform .18s,border-color .18s,box-shadow .18s}
+  .sgame:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.26);box-shadow:0 30px 72px -28px rgba(0,0,0,.82)}
+  .sgame .scv{position:relative;aspect-ratio:16/9;overflow:hidden;background:#11162a}
+  .sgame .scv img{width:100%;height:100%;object-fit:cover;display:block}
+  .sgame.locked .scv img{filter:saturate(.62) brightness(.6)}
+  .sgame .sbody{padding:16px 17px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .sgame .snm{font-family:var(--display);font-weight:700;font-size:18px}
+  .sgame .sdesc{color:var(--soft);font-size:13.5px;line-height:1.45;flex:1}
+  .sgame .srow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+  @media(max-width:760px){
+    .shelf{grid-template-columns:1fr;gap:14px}
+    .sgame{flex-direction:row;align-items:stretch}
+    .sgame .scv{flex:0 0 130px;width:130px;aspect-ratio:auto}
+    .sgame .sbody{padding:14px 16px}
+  }
 
   /* this week */
   .tw{background:var(--glass);border:1px solid var(--line);border-radius:24px;padding:26px 24px;backdrop-filter:blur(10px)}
@@ -120,11 +136,19 @@
   .twg-btn.play{color:var(--ink);background:var(--glass2);border:1px solid var(--line)}
 
   /* steps */
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
-  .step{background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:24px 22px;text-align:center}
-  .step .num{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;margin:0 auto 12px;font-family:var(--display);font-weight:700;color:#fff;background:linear-gradient(110deg,var(--purple),var(--electric))}
-  .step h4{font-family:var(--display);font-weight:700;font-size:18px;margin:0 0 6px}
-  .step p{color:var(--soft);font-size:14px;line-height:1.5;margin:0}
+  /* journey timeline */
+  .journey{position:relative;display:flex;gap:0;overflow-x:auto;overflow-y:hidden;padding:8px 2px 14px;scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .journey::-webkit-scrollbar{display:none}
+  .jstage{flex:1 1 0;min-width:200px;scroll-snap-align:start;position:relative;text-align:center;padding:0 14px}
+  .jstage::before{content:"";position:absolute;top:30px;left:50%;right:-50%;height:3px;background:linear-gradient(90deg,var(--jc,#8b6cff),rgba(255,255,255,.08));opacity:.5}
+  .jstage:last-child::before{display:none}
+  .jdot{position:relative;z-index:2;width:62px;height:62px;border-radius:50%;margin:0 auto 16px;display:grid;place-items:center;font-size:26px;
+    background:rgba(255,255,255,.05);border:2px solid var(--jc,#8b6cff);box-shadow:0 0 0 6px rgba(255,255,255,.02),0 16px 34px -16px var(--jc,#8b6cff)}
+  .jstep{font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.14em;color:var(--jc,#8b6cff);text-transform:uppercase}
+  .jstage h4{font-family:var(--display);font-weight:700;font-size:18px;margin:6px 0 6px}
+  .jstage p{color:var(--soft);font-size:13.5px;line-height:1.5;margin:0;max-width:22em;margin-inline:auto}
+  @media(max-width:720px){.jstage{flex:0 0 78vw}.jstage::before{display:none}}
 
   /* coming soon */
   .soon{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
@@ -182,7 +206,8 @@
   <!-- GAMES -->
   <section>
     <div class="sec-head"><h2>The games</h2><p>Each one turns the episode's six phrases into something you actually do &mdash; not just read.</p></div>
-    <div class="games" id="games"></div>
+    <div id="featured"></div>
+    <div class="shelf" id="games"></div>
   </section>
 
   <!-- THIS WEEK -->
@@ -191,13 +216,14 @@
     <div id="thisweek"></div>
   </section>
 
-  <!-- HOW IT WORKS -->
+  <!-- JOURNEY -->
   <section>
-    <div class="sec-head"><h2>How it works</h2></div>
-    <div class="steps">
-      <div class="step"><div class="num">1</div><h4>Watch the episode</h4><p>Start with the free podcast episode on YouTube.</p></div>
-      <div class="step"><div class="num">2</div><h4>Play the game</h4><p>Solve clues, choose words, build sentences &mdash; the phrases stick.</p></div>
-      <div class="step"><div class="num">3</div><h4>Practise deeper</h4><p>Unlock the full practice pack in Fluency Club for every episode.</p></div>
+    <div class="sec-head"><h2>Your practice journey</h2><p>Four steps turn a podcast episode into English you can actually use.</p></div>
+    <div class="journey">
+      <div class="jstage" style="--jc:#ff8a63"><div class="jdot">&#127909;</div><div class="jstep">Step 1 &middot; Watch</div><h4>Watch the episode</h4><p>Start with the free podcast episode on YouTube.</p></div>
+      <div class="jstage" style="--jc:#f6479a"><div class="jdot">&#128214;</div><div class="jstep">Step 2 &middot; Read</div><h4>Read the transcript</h4><p>See every phrase in context with the episode transcript.</p></div>
+      <div class="jstage" style="--jc:#8b6cff"><div class="jdot">&#127918;</div><div class="jstep">Step 3 &middot; Play</div><h4>Play the games</h4><p>Solve clues, match phrases and unlock stories &mdash; the words stick.</p></div>
+      <div class="jstage" style="--jc:#1fc4b6"><div class="jdot">&#128172;</div><div class="jstep">Step 4 &middot; Speak</div><h4>Use it out loud</h4><p>Take the phrases into real conversations and make them yours.</p></div>
     </div>
   </section>
 
@@ -247,23 +273,39 @@ function curEp(gt){ return (gt.episodes||[]).find(e=>e.current) || (gt.episodes|
 function btnFor(gt){
   const cur=curEp(gt); const epq=cur?('?ep='+encodeURIComponent(cur.id)):'';
   if(gt.access==='free') return {label:'Play Free',cls:'free',href:'/games/'+gt.type+'/'+epq};
-  if(gt.locked) return {label:gt.access==='transcript'?'Unlock with Transcript':'Unlock with Fluency Club',cls:'lock',href:CTA,ext:true};
+  if(gt.locked) return {label:'Unlock',cls:'lock',href:CTA,ext:true};
   return {label:'Play',cls:'play',href:'/games/'+gt.type+'/'+epq};
 }
-function gameCard(gt){
+function featuredCard(gt){
   const b=btnFor(gt); const n=(gt.episodes||[]).length;
   const ext=b.ext?' target="_blank" rel="noopener"':'';
   let done=0; try{ if(window.ELC) done=ELC.completedCountFor(gt.type,(gt.episodes||[]).map(e=>e.id)); }catch(e){}
   const doneBadge=done>0?`<span class="gdone">&#10003; ${done}/${n} completed</span>`:'';
-  return `<div class="gcard ${gt.locked?'locked':''}">
-    <div class="gcover"><img src="/covers/${esc(gt.type)}.png" alt="${esc(gt.name)}" onerror="this.style.display='none'">
-      <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>${gt.locked?'<span class="glock">&#128274;</span>':''}</div>
-    <div class="gbody">
-      <div class="gtitle">${esc(gt.name)}</div>
+  const eyebrow=gt.access==='free'?'Start here &middot; Free to play':'Featured game';
+  return `<div class="feat">
+    <div class="fcover"><img src="/covers/${esc(gt.type)}.png" alt="${esc(gt.name)}" onerror="this.style.display='none'">
+      <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span></div>
+    <div class="fbody">
+      <div class="feyebrow">${eyebrow}</div>
+      <h3>${esc(gt.name)}</h3>
+      <p>${esc(DESC[gt.type]||gt.tagline||'')}</p>
       ${doneBadge}
-      <div class="gdesc">${esc(DESC[gt.type]||gt.tagline||'')}</div>
-      <div class="grow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>
+      <div class="frow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>
         <a class="gall" href="/arcade-type.html?type=${esc(gt.type)}">${n} ${n===1?'episode':'episodes'} &rsaquo;</a></div>
+    </div></div>`;
+}
+function shelfCard(gt){
+  const b=btnFor(gt); const n=(gt.episodes||[]).length;
+  const ext=b.ext?' target="_blank" rel="noopener"':'';
+  let done=0; try{ if(window.ELC) done=ELC.completedCountFor(gt.type,(gt.episodes||[]).map(e=>e.id)); }catch(e){}
+  const doneBadge=done>0?`<span class="gdone">&#10003; ${done}/${n}</span>`:'';
+  return `<div class="sgame ${gt.locked?'locked':''}">
+    <div class="scv"><img src="/covers/${esc(gt.type)}.png" alt="${esc(gt.name)}" onerror="this.style.display='none'">
+      <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>${gt.locked?'<span class="glock">&#128274;</span>':''}</div>
+    <div class="sbody">
+      <div class="snm">${esc(gt.name)}</div>
+      <div class="sdesc">${esc(DESC[gt.type]||gt.tagline||'')}</div>
+      <div class="srow"><a class="gbtn ${b.cls}" href="${b.href}"${ext}>${b.label}</a>${doneBadge}</div>
     </div></div>`;
 }
 function thisWeek(types){
@@ -302,7 +344,10 @@ function render(data){
   const cr=types.find(g=>g.type==='clue-room'); const crCur=cr&&curEp(cr);
   if(crCur) $('#playFree').href='/games/clue-room/?ep='+encodeURIComponent(crCur.id);
 
-  $('#games').innerHTML=types.map(gameCard).join('');
+  const featured = types.find(g=>g.access==='free') || types[0];
+  const rest = types.filter(g=>g!==featured);
+  $('#featured').innerHTML = featured ? featuredCard(featured) : '';
+  $('#games').innerHTML = rest.map(shelfCard).join('');
   $('#thisweek').innerHTML=thisWeek(types);
   try{ if(window.ELC){ const wk=ELC.streakWeeks(); const sc=$('#streakChip');
     if(wk>=1){ sc.textContent='\uD83C\uDF31 '+wk+(wk===1?' week':' weeks')+' of practice'; sc.style.display='inline-flex'; } } }catch(e){}
