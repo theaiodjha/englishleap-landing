@@ -92,6 +92,8 @@
   .again .pri{background:linear-gradient(135deg,var(--coral),var(--amber));color:#3a1c12;border:0}
   .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
   @media(prefers-reduced-motion:reduce){.chip.wrong{animation:none}}
+  .gatehow{margin-top:14px;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:999px}
+  .gatehow:hover{border-color:rgba(255,255,255,.32)}
 </style>
 <script src="/progress.js"></script>
 </head>
@@ -131,6 +133,7 @@
     <h2 id="gateTitle">Members only</h2>
     <p id="gateMsg"></p>
     <a class="gatebtn" id="gateBtn" href="/practice-arcade.html">Go to Practice Arcade</a>
+    <button class="gatehow" id="gateHow" style="display:none">&#9654; How to play</button>
   </div>
 </div>
 
@@ -233,9 +236,10 @@ function fireworks(ms){
     if(now<end||parts.length)requestAnimationFrame(frame);else{cv.classList.remove('show');removeEventListener('resize',onR);}}
   requestAnimationFrame(frame);
 }
-function gate(title,msg,cta){
+function gate(title,msg,cta,how){
   $('#gateTitle').textContent=title;$('#gateMsg').textContent=msg;
   const b=$('#gateBtn'); if(cta){b.href=cta.href;b.textContent=cta.label;if(/^https?:/.test(cta.href)){b.target='_blank';b.rel='noopener';}}
+  const hb=$('#gateHow'); if(hb){ if(how&&how.src){ hb.style.display='inline-flex'; hb.onclick=function(){ if(window.ELC) ELC.playVideo(how.src,how.title||'How to play',how.poster); }; } else hb.style.display='none'; }
   $('#gateview').classList.add('show');
 }
 function acctBar(name){
@@ -247,8 +251,8 @@ async function load(){
   let res;
   try{res=await fetch('/api/games?type='+encodeURIComponent(TYPE)+'&ep='+encodeURIComponent(EP));}
   catch(e){return gate('Connection problem','We couldn\u2019t reach the arcade. Check your connection and try again.');}
-  if(res.status===401) return gate('Members only','Sign in with Patreon from the Practice Arcade to play Listening Gap.',{href:'/practice-arcade.html',label:'Go to Practice Arcade'});
-  if(res.status===403){let d={};try{d=await res.json();}catch(e){}return gate('A Fluency Club game', d.error||'Listening Gap is part of Fluency Club ($2.99).',{href:CTA,label:'Unlock \u00b7 Fluency $2.99'});}
+  if(res.status===401){let d={};try{d=await res.json();}catch(e){} return gate('Members only','Sign in with Patreon from the Practice Arcade to play Listening Gap.',{href:'/practice-arcade.html',label:'Go to Practice Arcade'},{src:d.walkthrough,poster:d.walkthroughPoster,title:'Listening Gap \u2014 how to play'});}
+  if(res.status===403){let d={};try{d=await res.json();}catch(e){}return gate('A Fluency Club game', d.error||'Listening Gap is part of Fluency Club ($2.99).',{href:CTA,label:'Unlock \u00b7 Fluency $2.99'},{src:d.walkthrough,poster:d.walkthroughPoster,title:'Listening Gap \u2014 how to play'});}
   if(!res.ok) return gate('Not available','This game isn\u2019t available right now. Please try again later.');
   const d=await res.json(); if(!d.ok||!d.content) return gate('Not available','This game isn\u2019t available right now.');
   DATA=Object.assign({user:d.user}, d.content);
