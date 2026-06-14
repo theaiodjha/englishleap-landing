@@ -95,8 +95,9 @@
   .keeper{font-family:var(--display);font-weight:600;font-size:clamp(18px,4.6vw,24px);color:var(--amber);text-align:center;margin:10px 0 18px;line-height:1.35}
   .recap{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:18px}
   .tag{border-radius:12px;padding:6px 12px;font-weight:700;font-size:13.5px}
-  .oriva{display:flex;gap:11px;align-items:center;max-width:340px;margin:0 auto 18px;padding:12px 14px;border-radius:16px;
-    border:1px dashed rgba(255,255,255,.28);color:var(--soft);font-size:12.5px;line-height:1.4;text-align:left}
+  .oriva{display:flex;gap:14px;align-items:center;justify-content:center;max-width:380px;margin:0 auto 18px;padding:12px 16px;border-radius:16px;
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:var(--ink);font-size:14px;line-height:1.45;text-align:left}
+  .oriva img{width:62px;height:62px;object-fit:contain;flex:0 0 auto}
   .center .actions a,.center .actions button{display:block;width:100%}
 
   .loading,.gateview{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:24px;text-align:center}
@@ -200,7 +201,7 @@
   <p class="keeper" id="keeper"></p>
   <div class="recap" id="recap"></div>
   <div id="winExtras"></div>
-  <div class="oriva"><span style="font-size:26px">&#128038;</span><span><b style="color:var(--teal)">Oriva celebrates here.</b> Drop <code>celebrate.png</code> in <code>/public</code> for the real build.</span></div>
+  <div class="oriva"><img src="/assets/oriva/celebrate.png" alt="Oriva celebrating" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'\uD83C\uDF89',style:'font-size:30px'}))"><span><b style="color:var(--teal)">Oriva is cheering for you!</b> Six phrases &mdash; all yours now.</span></div>
   <div class="actions">
     <a class="btn" id="ctaBtn" target="_blank" rel="noopener" style="background:linear-gradient(110deg,var(--pink),var(--coral));color:#fff">Get the full practice pack in Fluency Club</a>
     <a class="btn" href="/practice-arcade.html" style="background:rgba(255,255,255,.12);color:var(--ink)">Back to the Arcade</a>

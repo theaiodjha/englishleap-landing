@@ -38,29 +38,8 @@
       if (start === null) return 0;
       var n = 0; while (weeks[weekAgo(start + n)]) n++; return n;
     },
-    // Native share sheet on mobile; clipboard fallback elsewhere. Returns 'shared'|'copied'|'none'.
-    share: function (text, url) {
-      url = url || "https://englishleap.app";
-      if (navigator.share) { navigator.share({ title: "English Leap Practice Arcade", text: text, url: url }).catch(function () {}); return "shared"; }
-      try { navigator.clipboard.writeText(text + " " + url); return "copied"; } catch (e) { return "none"; }
-    },
-    // Inject Share + Comment-challenge UI into a host element (portable inline styles).
-    mountWinActions: function (host, opts) {
-      if (!host) return;
-      opts = opts || {};
-      var wrap = document.createElement("div");
-      wrap.style.cssText = "margin-top:18px;display:flex;flex-direction:column;gap:12px;align-items:center";
-      var sh = document.createElement("button");
-      sh.textContent = "Share result";
-      sh.style.cssText = "font:inherit;font-weight:700;font-size:14px;padding:11px 22px;border-radius:999px;border:0;cursor:pointer;color:#fff;background:linear-gradient(110deg,#8b6cff,#4d8bff)";
-      sh.onclick = function () {
-        var r = ELC.share(opts.shareText || "I'm practising English in the Practice Arcade!", opts.url);
-        if (r === "copied") sh.textContent = "Copied to clipboard \u2713";
-        else if (r === "shared") sh.textContent = "Shared \u2713";
-      };
-      wrap.appendChild(sh);
-      host.appendChild(wrap);
-    }
+    // Win-screen extras removed (no share / comment challenge). Kept as a no-op so callers don't break.
+    mountWinActions: function () {}
   };
   window.ELC = ELC;
 })();
