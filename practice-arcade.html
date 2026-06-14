@@ -73,8 +73,13 @@
   .sec-head p{color:var(--soft);margin:8px auto 0;max-width:38em;font-size:15px;line-height:1.5}
 
   /* game cards */
-  .games{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
-  .gcard{background:var(--glass);border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;
+  .games{display:flex;gap:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-padding-left:2px;
+    padding:8px 2px 16px;margin:0 -2px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+  .games::-webkit-scrollbar{height:8px}
+  .games::-webkit-scrollbar-track{background:transparent}
+  .games::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:999px}
+  .games:hover::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3)}
+  .gcard{flex:0 0 clamp(256px,80vw,300px);scroll-snap-align:start;background:var(--glass);border:1px solid var(--line);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;
     box-shadow:0 24px 60px -28px rgba(0,0,0,.7);transition:transform .15s,border-color .15s}
   .gcard:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.24)}
   .gcover{position:relative;aspect-ratio:16/9;overflow:hidden;background:#11162a}
