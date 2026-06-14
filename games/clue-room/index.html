@@ -151,6 +151,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="English Leap">
 <script src="/pwa.js" defer></script>
+<script src="/progress.js"></script>
 </head>
 <body>
 <div id="stagebg"></div>
@@ -198,6 +199,7 @@
   <div class="kick">&#9733; Sentence solved &#9733;</div>
   <p class="keeper" id="keeper"></p>
   <div class="recap" id="recap"></div>
+  <div id="winExtras"></div>
   <div class="oriva"><span style="font-size:26px">&#128038;</span><span><b style="color:var(--teal)">Oriva celebrates here.</b> Drop <code>celebrate.png</code> in <code>/public</code> for the real build.</span></div>
   <div class="actions">
     <a class="btn" id="ctaBtn" target="_blank" rel="noopener" style="background:linear-gradient(110deg,var(--pink),var(--coral));color:#fff">Get the full practice pack in Fluency Club</a>
@@ -251,6 +253,7 @@ const TYPE='clue-room';
   $('#loading').classList.add('hide');
   $('#epLabel').textContent=data.ep||EP.toUpperCase();
   $('#introEyebrow').textContent=(data.ep||EP.toUpperCase())+' \u00b7 '+(data.title||'Clue Room');
+  try{ window.ELC&&ELC.recordPlay(); }catch(e){}
   boot(data);
 })();
 
@@ -463,6 +466,16 @@ function boot(data){
     $('#keeper').textContent='\u201C'+puzzle.keeper+'\u201D';
     $('#recap').innerHTML=clues.map(c=>'<span class="tag" style="background:'+c.color+'22;color:'+c.color+';box-shadow:inset 0 0 0 1.5px '+c.color+'88">'+esc(c.word)+'</span>').join('');
     $('#result').classList.add('show');
+    try{
+      if(window.ELC){
+        ELC.markComplete(TYPE, EP);
+        const host=$('#winExtras'); if(host){ host.innerHTML='';
+          const phrase=clues[Math.floor(Math.random()*clues.length)].word;
+          const epl=data.ep||EP.toUpperCase();
+          ELC.mountWinActions(host,{shareText:"I cracked the Clue Room for "+epl+" \u2018"+(data.title||'')+"\u2019 in the English Leap Practice Arcade! \uD83D\uDD75\uFE0F",phrase:phrase,url:'https://englishleap.app'});
+        }
+      }
+    }catch(e){}
   }
 
   // ---- celebration: a banner that lights up the night ----

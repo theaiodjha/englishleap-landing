@@ -51,7 +51,10 @@
   .play{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--coral),var(--pink))}
   .unlock{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--ink);background:var(--glass);border:1px solid var(--line);padding:8px 13px;border-radius:999px;white-space:nowrap}
   .note{color:var(--soft);font-size:14px;background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+  .donebadge{position:absolute;bottom:10px;right:11px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:800;
+    color:#062018;background:var(--teal);border-radius:999px;padding:4px 11px}
 </style>
+<script src="/progress.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -69,6 +72,7 @@ const TYPE=new URLSearchParams(location.search).get('type')||'';
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
 function tile(type,ep,locked,access){
+  let done=false; try{ if(window.ELC) done=ELC.isComplete(type,ep.id); }catch(e){}
   const cover = ep.cover
     ? `<img src="${esc(ep.cover)}" alt="${esc(ep.title)}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'${esc(ep.title)}'}))">`
     : `<div class="ph">${esc(ep.title)}</div>`;
@@ -80,7 +84,7 @@ function tile(type,ep,locked,access){
         <div class="unlock">${label}</div></div></a>`;
   }
   return `<a class="tile" href="/games/${esc(type)}/?ep=${esc(ep.id)}">
-    <div class="cover">${ep.current?'<span class="now">THIS WEEK</span>':''}${cover}</div>
+    <div class="cover">${ep.current?'<span class="now">THIS WEEK</span>':''}${cover}${done?'<span class="donebadge">&#10003; Completed</span>':''}</div>
     <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
       <div class="play">&#9654;</div></div></a>`;
 }

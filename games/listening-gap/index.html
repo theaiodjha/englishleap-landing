@@ -93,6 +93,7 @@
   .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
   @media(prefers-reduced-motion:reduce){.chip.wrong{animation:none}}
 </style>
+<script src="/progress.js"></script>
 </head>
 <body>
 <div id="stagebg"></div>
@@ -198,10 +199,21 @@ function win(){
   $('#game').innerHTML=`<div class="card">
     <div class="sentence">${esc(sc)}</div>
     <div style="color:var(--soft);margin-top:12px;font-size:15px">${esc(keeper||'')}</div>
+    <div id="winExtras"></div>
     <div class="again"><button class="pri" id="againBtn">Play again</button><a class="sec" href="/arcade-type.html?type=${TYPE}">More episodes</a></div>
   </div>`;
   $('#dots').innerHTML=rounds.map(()=>'<span class="dot done"></span>').join('');
   $('#againBtn').onclick=()=>{idx=0;score=0;$('#pScore').textContent='0';renderRound();};
+  try{
+    if(window.ELC){
+      ELC.markComplete(TYPE, EP);
+      const host=$('#winExtras'); if(host){
+        const phrase=rounds.length?rounds[Math.floor(Math.random()*rounds.length)].phrase:'';
+        const epl=$('#epLabel').textContent||EP.toUpperCase();
+        ELC.mountWinActions(host,{shareText:"I scored "+score+"/"+rounds.length+" on "+epl+" Listening Gap at the English Leap Practice Arcade! \uD83C\uDFA7",phrase:phrase,url:'https://englishleap.app'});
+      }
+    }
+  }catch(e){}
   const nb=$('#nightbanner');
   nb.innerHTML='<div class="big">'+esc(head)+'</div><div class="small">'+esc(keeper||'Beautiful work.')+'</div>';
   nb.classList.add('show'); setTimeout(()=>nb.classList.remove('show'),3200);
@@ -245,6 +257,7 @@ async function load(){
   $('#epLabel').textContent=d.ep||EP.toUpperCase();
   if(d.content.intro) $('#sub').textContent=d.content.intro;
   acctBar(d.user);
+  try{ window.ELC&&ELC.recordPlay(); }catch(e){}
   idx=0; score=0; $('#pScore').textContent='0';
   renderRound();
 }

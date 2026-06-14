@@ -104,6 +104,7 @@
   .nightbanner .small{color:var(--ink);font-size:15px;margin-top:8px;opacity:.95}
   @media(prefers-reduced-motion:reduce){.card .inner{transition:none}.card.matched .inner{animation:none}}
 </style>
+<script src="/progress.js"></script>
 </head>
 <body>
 <div id="stagebg"></div>
@@ -129,6 +130,7 @@
   </div>
 
   <div class="grid" id="grid"></div>
+  <div id="winExtras" style="max-width:680px;margin:0 auto"></div>
 
   <div class="footer">A practice community - not a replacement for formal English education.</div>
 </div>
@@ -195,6 +197,7 @@ function start(content){
 function newGame(){
   deck=buildDeck(DATA.pairs); flipped=[]; busy=false; moves=0; matched=0;
   $('#mMoves').textContent='0'; $('#mMatches').textContent='0/'+total;
+  const we=$('#winExtras'); if(we) we.innerHTML='';
   renderDeck();
 }
 function onFlip(idx,el){
@@ -228,6 +231,16 @@ function win(){
   nb.innerHTML='<div class="big">'+esc(head)+'</div><div class="small">'+esc(line)+'</div>';
   nb.classList.add('show'); setTimeout(()=>nb.classList.remove('show'),3200);
   if(!reduced) fireworks(2400);
+  try{
+    if(window.ELC){
+      ELC.markComplete(TYPE, EP);
+      const host=$('#winExtras'); if(host){ host.innerHTML='';
+        const ps=(DATA.pairs||[]); const phrase=ps.length?ps[Math.floor(Math.random()*ps.length)].word:'';
+        const epl=$('#epLabel').textContent||EP.toUpperCase();
+        ELC.mountWinActions(host,{shareText:"I matched every phrase in "+epl+" Phrase Pairs at the English Leap Practice Arcade! \uD83C\uDCCF",phrase:phrase,url:'https://englishleap.app'});
+      }
+    }
+  }catch(e){}
 }
 function fireworks(ms){
   const cv=$('#fx'), ctx=cv.getContext('2d');
@@ -275,6 +288,7 @@ async function load(){
   DATA=Object.assign({user:d.user}, d.content);
   $('#epLabel').textContent=d.ep||EP.toUpperCase();
   acctBar(d.user);
+  try{ window.ELC&&ELC.recordPlay(); }catch(e){}
   start(d.content);
 }
 $('#restart').addEventListener('click',()=>{ if(DATA) newGame(); });
