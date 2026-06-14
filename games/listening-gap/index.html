@@ -210,7 +210,7 @@ function win(){
       const host=$('#winExtras'); if(host){
         const phrase=rounds.length?rounds[Math.floor(Math.random()*rounds.length)].phrase:'';
         const epl=$('#epLabel').textContent||EP.toUpperCase();
-        ELC.mountWinActions(host,{shareText:"I scored "+score+"/"+rounds.length+" on "+epl+" Listening Gap at the English Leap Practice Arcade! \uD83C\uDFA7",phrase:phrase,url:'https://englishleap.app'});
+        ELC.orivaCheer(host,'<b style="color:#ff8a63">Oriva heard that!</b> Great listening.');
       }
     }
   }catch(e){}

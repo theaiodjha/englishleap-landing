@@ -230,7 +230,7 @@ function unlock(){
       const host=$('#winExtras'); if(host){
         const phrase=GAPS.length?GAPS[Math.floor(Math.random()*GAPS.length)].w:'';
         const epl=$('#epLabel').textContent||EP.toUpperCase();
-        ELC.mountWinActions(host,{shareText:"I unlocked the "+epl+" story in the English Leap Practice Arcade! \uD83D\uDCD6",phrase:phrase,url:'https://englishleap.app'});
+        ELC.orivaCheer(host,'<b style="color:#8b6cff">Oriva loved your story!</b>');
       }
     }
   }catch(e){}

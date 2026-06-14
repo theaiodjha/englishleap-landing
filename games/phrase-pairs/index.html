@@ -237,7 +237,7 @@ function win(){
       const host=$('#winExtras'); if(host){ host.innerHTML='';
         const ps=(DATA.pairs||[]); const phrase=ps.length?ps[Math.floor(Math.random()*ps.length)].word:'';
         const epl=$('#epLabel').textContent||EP.toUpperCase();
-        ELC.mountWinActions(host,{shareText:"I matched every phrase in "+epl+" Phrase Pairs at the English Leap Practice Arcade! \uD83C\uDCCF",phrase:phrase,url:'https://englishleap.app'});
+        ELC.orivaCheer(host,'<b style="color:#1fc4b6">Oriva is proud of you!</b> Every phrase matched.');
       }
     }
   }catch(e){}

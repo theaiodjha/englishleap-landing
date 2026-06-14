@@ -38,8 +38,21 @@
       if (start === null) return 0;
       var n = 0; while (weeks[weekAgo(start + n)]) n++; return n;
     },
-    // Win-screen extras removed (no share / comment challenge). Kept as a no-op so callers don't break.
-    mountWinActions: function () {}
+    // Win-screen share/comment removed. Kept as a no-op so callers don't break.
+    mountWinActions: function () {},
+    // Inject the real Oriva (celebrate pose) into a win screen, with emoji fallback.
+    orivaCheer: function (host, msg) {
+      if (!host) return;
+      var row = document.createElement("div");
+      row.style.cssText = "display:flex;gap:14px;align-items:center;justify-content:center;max-width:390px;margin:18px auto 0;padding:12px 16px;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);text-align:left";
+      var img = document.createElement("img");
+      img.src = "/assets/oriva/celebrate.png"; img.alt = "Oriva celebrating";
+      img.style.cssText = "width:60px;height:60px;object-fit:contain;flex:0 0 auto";
+      img.onerror = function () { var s = document.createElement("span"); s.textContent = "\uD83C\uDF89"; s.style.fontSize = "30px"; this.replaceWith(s); };
+      var t = document.createElement("div"); t.style.cssText = "font-size:14px;line-height:1.45;color:#fff";
+      t.innerHTML = msg || "<b>Oriva is cheering for you!</b>";
+      row.appendChild(img); row.appendChild(t); host.appendChild(row);
+    }
   };
   window.ELC = ELC;
 })();
