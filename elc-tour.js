@@ -53,15 +53,15 @@
   '.elct-back:hover{border-color:#1fc4b633}' +
   '.elct-next{background:linear-gradient(135deg,#8b6cff,#1fc4b6);border:none;color:#06201c;' +
     'border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}' +
-  '.elct-launch{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:99990;' +
-    'display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:11px 17px;' +
-    'background:linear-gradient(135deg,#eaff1a,#c6ff00);border:1.5px solid rgba(18,20,6,.6);' +
-    'color:#16180a;font:700 13px/1 "Poppins",system-ui,sans-serif;letter-spacing:.01em;cursor:pointer;' +
-    'box-shadow:0 0 0 3px rgba(234,255,26,.22),0 8px 22px -6px rgba(0,0,0,.45),0 0 26px -2px rgba(220,255,40,.6)}' +
-  '.elct-launch:hover{filter:brightness(1.06);' +
-    'box-shadow:0 0 0 4px rgba(234,255,26,.3),0 10px 26px -6px rgba(0,0,0,.5),0 0 34px 0 rgba(220,255,40,.78)}' +
-  '.elct-launch .d{width:9px;height:9px;border-radius:50%;background:#16180a;animation:elctpulse 1.8s infinite}' +
-  '@keyframes elctpulse{0%{box-shadow:0 0 0 0 rgba(22,24,10,.45)}70%{box-shadow:0 0 0 6px rgba(22,24,10,0)}100%{box-shadow:0 0 0 0 rgba(22,24,10,0)}}' +
+  '.elct-launch{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:99990;' +
+    'display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:11px 18px;' +
+    'background:linear-gradient(110deg,#8b6cff 0%,#e834a0 55%,#ff7848 100%);border:1.5px solid rgba(255,255,255,.55);' +
+    'color:#fff;font:700 13px/1 "Poppins",system-ui,sans-serif;letter-spacing:.01em;cursor:pointer;' +
+    'box-shadow:0 8px 22px -6px rgba(232,52,160,.55),0 0 26px -4px rgba(139,108,255,.6)}' +
+  '.elct-launch:hover{filter:brightness(1.05);transform:translateY(-1px);' +
+    'box-shadow:0 10px 28px -6px rgba(232,52,160,.65),0 0 36px 0 rgba(139,108,255,.72)}' +
+  '.elct-launch .d{width:9px;height:9px;border-radius:50%;background:#ffd27a;animation:elctpulse 1.8s infinite}' +
+  '@keyframes elctpulse{0%{box-shadow:0 0 0 0 rgba(255,210,122,.55)}70%{box-shadow:0 0 0 7px rgba(255,210,122,0)}100%{box-shadow:0 0 0 0 rgba(255,210,122,0)}}' +
   '@media (max-width:560px){.elct-card{left:16px!important;right:16px!important;bottom:16px!important;' +
     'top:auto!important;max-width:none;width:auto}}' +
   '@media (prefers-reduced-motion:reduce){.elct-ov,.elct-spot,.elct-card,.elct-dot{transition:none}.elct-launch .d{animation:none}}';
@@ -205,6 +205,11 @@
     b.innerHTML = '<span class="d"></span>' + CFG.launcherLabel;
     b.onclick = function () { start(tour); };
     document.body.appendChild(b);
+    // Avoid overlapping the theme toggle: stack the launcher above it when present.
+    setTimeout(function () {
+      var tg = document.getElementById('elc-theme-toggle');
+      if (tg) { var h = tg.getBoundingClientRect().height || 40; b.style.bottom = 'calc(' + Math.round(h + 24) + 'px + env(safe-area-inset-bottom))'; }
+    }, 0);
   }
   function autostart() {
     injectStyles();
