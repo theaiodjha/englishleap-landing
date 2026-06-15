@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sentence Builder — English Leap Practice Arcade</title>
+<meta name="theme-color" content="#08201c">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/assets/brand/elc-icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/brand/elc-icon-192.png">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --space:#061714; --ink:#eafcf7; --soft:#9fd0c6;
+    --pink:#f6479a; --coral:#ff8a63; --purple:#8b6cff; --teal:#1fc4b6; --mint:#57e6c4; --amber:#ffcd46;
+    --glass:rgba(255,255,255,.07); --line:rgba(255,255,255,.14);
+    --display:'Clash Display',system-ui,sans-serif; --body:'General Sans',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:var(--body);color:var(--ink);background:var(--space);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+  #stagebg{position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(110% 70% at 14% 2%, rgba(31,196,182,.24), transparent 56%),
+    radial-gradient(90% 70% at 92% 4%, rgba(87,230,196,.16), transparent 58%),
+    radial-gradient(80% 60% at 60% 104%, rgba(139,108,255,.18), transparent 66%),
+    linear-gradient(180deg,#06160f 0%,#0a241d 54%,#0c2a26 100%)}
+  .wrap{max-width:860px;margin:0 auto;padding:14px 18px 60px;min-height:100%}
+  .bar{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:6px 2px 14px}
+  .bar .left{display:flex;align-items:center;gap:12px;min-width:0}
+  .back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--soft);font-weight:600;font-size:14px;
+    background:var(--glass);border:1px solid var(--line);padding:8px 13px;border-radius:999px;white-space:nowrap}
+  .back:hover{color:var(--ink)}
+  .brand{font-family:var(--display);font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand .dot{color:var(--teal)}
+  .out{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--soft);font:inherit;font-size:13px;font-weight:600;padding:8px 13px;border-radius:999px;cursor:pointer}
+  .out:hover{color:var(--ink)}
+
+  .head{text-align:center;margin:6px 0 14px}
+  .ep{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.06em;color:var(--teal)}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,6vw,40px);margin:4px 0 8px;line-height:1.04}
+  .sub{color:var(--soft);font-size:15px;max-width:34em;margin:0 auto;line-height:1.5}
+
+  .prog{display:flex;gap:10px;justify-content:center;align-items:center;margin:14px 0 18px;flex-wrap:wrap}
+  .pill{background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-weight:600;font-size:14px;color:var(--soft)}
+  .pill b{color:var(--ink);font-family:var(--display)}
+  .dots{display:flex;gap:7px}
+  .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.18)}
+  .dot.done{background:var(--teal)}
+  .dot.cur{background:var(--amber);box-shadow:0 0 0 4px rgba(255,205,70,.18)}
+
+  .card{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:24px;padding:26px 22px;backdrop-filter:blur(10px);
+    box-shadow:0 30px 70px -30px rgba(0,0,0,.7);max-width:720px;margin:0 auto}
+  .hint{text-align:center;color:var(--soft);font-size:14px;margin:0 0 16px}
+  .hint b{color:#fff;background:rgba(31,196,182,.18);border:1px solid rgba(31,196,182,.45);padding:3px 11px;border-radius:999px;font-family:var(--display);font-weight:700;white-space:nowrap}
+
+  .tray{min-height:78px;border:2px dashed var(--line);border-radius:18px;padding:14px;display:flex;flex-wrap:wrap;gap:10px;
+    align-items:center;justify-content:center;background:rgba(0,0,0,.16);transition:border-color .2s}
+  .tray.has{border-style:solid;border-color:rgba(31,196,182,.4)}
+  .tray .ph{color:var(--soft);font-size:14px;opacity:.8}
+  .tray.flash-bad{animation:shake .4s}
+
+  .bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px auto 0;max-width:720px;min-height:50px}
+
+  .chip{appearance:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:clamp(15px,3.6vw,18px);
+    padding:11px 16px;border-radius:14px;color:#fff;background:rgba(255,255,255,.08);border:1.5px solid var(--line);
+    box-shadow:0 8px 18px -12px rgba(0,0,0,.6);transition:transform .12s,background .15s,border-color .15s,opacity .12s}
+  .chip:hover{transform:translateY(-2px)}
+  .chip:active{transform:translateY(0)}
+  .tray .chip{border-color:rgba(255,255,255,.28)}
+  .chip.right{color:#06201b;border-color:transparent}
+  .chip.wrong{animation:shake .4s;border-color:#ff6b6b}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+  .actions{display:flex;gap:12px;justify-content:center;margin-top:22px}
+  .check{appearance:none;border:0;cursor:pointer;font-family:var(--display);font-weight:700;font-size:16px;color:#06201b;
+    padding:13px 28px;border-radius:999px;background:linear-gradient(135deg,var(--teal),var(--mint));box-shadow:0 16px 34px -14px rgba(31,196,182,.7)}
+  .check:disabled{opacity:.45;cursor:default;box-shadow:none}
+  .check:not(:disabled):active{transform:translateY(1px)}
+  .clear{appearance:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink);
+    padding:13px 20px;border-radius:999px;background:var(--glass);border:1px solid var(--line)}
+  .clear:hover{border-color:rgba(255,255,255,.32)}
+
+  .footer{margin-top:34px;text-align:center;color:var(--soft);font-size:12px;opacity:.8}
+
+  .gateview{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(6,18,15,.9);backdrop-filter:blur(8px)}
+  .gateview.show{display:flex}
+  .gatecard{max-width:420px;text-align:center;background:var(--glass);border:1px solid var(--line);border-radius:24px;padding:34px 28px;backdrop-filter:blur(12px)}
+  .gatecard h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0 0 8px}
+  .gatecard p{color:var(--soft);font-size:15px;line-height:1.55;margin:0 0 20px}
+  .gatebtn{display:inline-block;text-decoration:none;color:#06201b;font-weight:700;font-size:15px;background:linear-gradient(135deg,var(--teal),var(--mint));padding:13px 22px;border-radius:999px}
+  .gatehow{margin-top:14px;align-items:center;gap:8px;cursor:pointer;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:999px}
+  .gatehow:hover{border-color:rgba(255,255,255,.32)}
+  .howbtn{align-items:center;justify-content:center;gap:8px;margin:14px auto 0;cursor:pointer;border:0;font:inherit;font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px;color:#10121c;background:#fff;box-shadow:0 10px 26px -10px rgba(0,0,0,.55)}
+  .howbtn:hover{transform:translateY(-1px)}
+
+  #fx{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:0;transition:opacity .3s}
+  #fx.show{opacity:1}
+  .nightbanner{position:fixed;left:50%;top:14%;transform:translate(-50%,-12px);z-index:55;text-align:center;opacity:0;transition:opacity .4s,transform .4s;pointer-events:none;max-width:92vw;padding:6px 22px}
+  .nightbanner.show{opacity:1;transform:translate(-50%,0)}
+  .nightbanner .big{font-family:var(--display);font-weight:700;font-size:clamp(26px,6.4vw,38px);line-height:1.05;
+    background:linear-gradient(100deg,var(--mint),var(--teal),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 6px 18px rgba(31,196,182,.4))}
+  .nightbanner .small{color:var(--ink);font-size:15px;margin-top:8px;opacity:.95}
+  .again{display:inline-flex;gap:12px;margin-top:18px}
+  .again a,.again button{font:inherit;font-weight:700;font-size:14px;border-radius:999px;padding:11px 20px;cursor:pointer;text-decoration:none}
+  .again .pri{background:linear-gradient(135deg,var(--teal),var(--mint));color:#06201b;border:0}
+  .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
+  @media(prefers-reduced-motion:reduce){.chip.wrong,.tray.flash-bad{animation:none}}
+</style>
+<script src="/progress.js"></script>
+</head>
+<body>
+<div id="stagebg"></div>
+<div class="wrap">
+  <div class="bar">
+    <div class="left">
+      <a class="back" href="/practice-arcade.html">&#8249;&nbsp;Arcade</a>
+      <div class="brand">English Leap<span class="dot">.</span> Practice Arcade</div>
+    </div>
+    <div id="acct"></div>
+  </div>
+
+  <div class="head">
+    <div class="ep" id="epLabel">EP</div>
+    <h1>Sentence Builder</h1>
+    <button id="howBtn" class="howbtn" style="display:none">&#9654; How to play</button>
+    <p class="sub" id="sub">Tap the words into the right order to build each sentence.</p>
+  </div>
+
+  <div class="prog">
+    <div class="pill">Sentence <b id="pRound">1/6</b></div>
+    <div class="dots" id="dots"></div>
+    <div class="pill">Score <b id="pScore">0</b></div>
+  </div>
+
+  <div id="game"></div>
+
+  <div class="footer">A practice community - not a replacement for formal English education.</div>
+</div>
+
+<canvas id="fx"></canvas>
+<div class="nightbanner" id="nightbanner"></div>
+
+<div class="gateview" id="gateview">
+  <div class="gatecard">
+    <h2 id="gateTitle">Members only</h2>
+    <p id="gateMsg"></p>
+    <a class="gatebtn" id="gateBtn" href="/practice-arcade.html">Go to Practice Arcade</a>
+    <button class="gatehow" id="gateHow" style="display:none">&#9654; How to play</button>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
+const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const EP=new URLSearchParams(location.search).get('ep')||'ep235';
+const TYPE='sentence-builder';
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function textOn(hex){const h=(hex||'#1fc4b6').replace('#','');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return (0.2126*r+0.7152*g+0.0722*b)/255>0.62?'#0f2230':'#ffffff';}
+
+let voices=[];
+function loadVoices(){try{voices=speechSynthesis.getVoices()||[];}catch(e){voices=[];}}
+loadVoices(); if(typeof speechSynthesis!=='undefined'&&speechSynthesis.onvoiceschanged!==undefined) speechSynthesis.onvoiceschanged=loadVoices;
+function pickVoice(){return voices.find(v=>/en-GB/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang))||voices[0];}
+function speak(t){try{if(typeof speechSynthesis==='undefined')return;const u=new SpeechSynthesisUtterance(t);const v=pickVoice();if(v)u.voice=v;u.lang=(v&&v.lang)||'en-GB';u.rate=.92;speechSynthesis.cancel();speechSynthesis.resume();speechSynthesis.speak(u);}catch(e){}}
+
+let DATA=null, sentences=[], idx=0, score=0, keeper='';
+let orig=[], bank=[], tray=[], roundColor='#1fc4b6', perfect=true;
+let uid=0;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function tokenize(t){return (t||'').trim().split(/\s+/);}
+
+function renderRound(){
+  const s=sentences[idx]; perfect=true; roundColor=s.color||'#1fc4b6';
+  orig=tokenize(s.text);
+  bank=shuffle(orig.map((tok,i)=>({tok,id:++uid})));
+  // guard: if a shuffle accidentally matches the original order, reshuffle once
+  if(bank.map(b=>b.tok).join(' ')===orig.join(' ') && orig.length>1) bank=shuffle(bank);
+  tray=[];
+  $('#pRound').textContent=(idx+1)+'/'+sentences.length;
+  $('#dots').innerHTML=sentences.map((_,k)=>`<span class="dot ${k<idx?'done':''} ${k===idx?'cur':''}"></span>`).join('');
+  $('#game').innerHTML=`
+    <div class="card">
+      <p class="hint">Build a sentence using <b>${esc(s.phrase)}</b></p>
+      <div class="tray" id="tray"></div>
+      <div class="bank" id="bank"></div>
+      <div class="actions">
+        <button class="clear" id="clearBtn">Clear</button>
+        <button class="check" id="checkBtn" disabled>Check</button>
+      </div>
+    </div>`;
+  $('#clearBtn').onclick=clearTray;
+  $('#checkBtn').onclick=check;
+  paint();
+}
+function paint(){
+  const tEl=$('#tray'), bEl=$('#bank');
+  tEl.classList.toggle('has',tray.length>0);
+  tEl.innerHTML = tray.length
+    ? tray.map(t=>`<button class="chip" data-id="${t.id}" data-where="tray">${esc(t.tok)}</button>`).join('')
+    : '<span class="ph">Tap the words below in order&hellip;</span>';
+  bEl.innerHTML = bank.map(t=>`<button class="chip" data-id="${t.id}" data-where="bank">${esc(t.tok)}</button>`).join('');
+  tEl.querySelectorAll('.chip').forEach(c=>c.onclick=()=>fromTray(+c.dataset.id));
+  bEl.querySelectorAll('.chip').forEach(c=>c.onclick=()=>fromBank(+c.dataset.id));
+  const cb=$('#checkBtn'); if(cb) cb.disabled = tray.length!==orig.length;
+}
+function fromBank(id){
+  const i=bank.findIndex(b=>b.id===id); if(i<0)return;
+  tray.push(bank.splice(i,1)[0]); paint();
+}
+function fromTray(id){
+  const i=tray.findIndex(b=>b.id===id); if(i<0)return;
+  bank.push(tray.splice(i,1)[0]); paint();
+}
+function clearTray(){ if(!tray.length)return; bank=bank.concat(tray); tray=[]; paint(); }
+function check(){
+  if(tray.length!==orig.length) return;
+  let allRight=true;
+  const chips=$('#tray').querySelectorAll('.chip');
+  tray.forEach((t,i)=>{
+    const ok=t.tok===orig[i]; const el=chips[i];
+    if(ok){ if(el){el.classList.add('right');el.style.background=roundColor;el.style.color=textOn(roundColor);} }
+    else { allRight=false; if(el){el.classList.remove('right');el.style.background='';el.style.color='';el.classList.add('wrong');} }
+  });
+  if(allRight){
+    const s=sentences[idx];
+    $('#checkBtn').disabled=true; $('#clearBtn').disabled=true;
+    $('#tray').querySelectorAll('.chip').forEach(c=>c.onclick=null);
+    speak(s.text);
+    if(perfect) { score++; $('#pScore').textContent=score; }
+    setTimeout(()=>{ idx++; if(idx>=sentences.length) win(); else renderRound(); }, reduced?550:1150);
+  } else {
+    perfect=false;
+    const tr=$('#tray'); tr.classList.add('flash-bad'); setTimeout(()=>tr.classList.remove('flash-bad'),420);
+    setTimeout(()=>{ $('#tray').querySelectorAll('.chip.wrong').forEach(c=>c.classList.remove('wrong')); }, 480);
+  }
+}
+function win(){
+  const name=(DATA.user||'').trim().split(/\s+/)[0];
+  const head=name?('Beautifully built, '+name+'!'):'Beautifully built!';
+  const sc=`You built ${score}/${sentences.length} sentences on the first try.`;
+  $('#game').innerHTML=`<div class="card" style="text-align:center">
+    <div style="font-family:var(--display);font-weight:700;font-size:clamp(20px,4.6vw,28px)">${esc(sc)}</div>
+    <div style="color:var(--soft);margin-top:12px;font-size:15px">${esc(keeper||'')}</div>
+    <div id="winExtras"></div>
+    <div class="again"><button class="pri" id="againBtn">Play again</button><a class="sec" href="/arcade-type.html?type=${TYPE}">More episodes</a></div>
+  </div>`;
+  $('#dots').innerHTML=sentences.map(()=>'<span class="dot done"></span>').join('');
+  $('#againBtn').onclick=()=>{idx=0;score=0;$('#pScore').textContent='0';renderRound();};
+  try{
+    if(window.ELC){
+      ELC.markComplete(TYPE, EP);
+      const host=$('#winExtras'); if(host) ELC.orivaCheer(host,'<b style="color:#1fc4b6">Oriva loves that!</b> You put the words together yourself.');
+    }
+  }catch(e){}
+  const nb=$('#nightbanner');
+  nb.innerHTML='<div class="big">'+esc(head)+'</div><div class="small">'+esc(keeper||'Beautiful work.')+'</div>';
+  nb.classList.add('show'); setTimeout(()=>nb.classList.remove('show'),3200);
+  if(!reduced) fireworks(2200);
+}
+function fireworks(ms){
+  const cv=$('#fx'),ctx=cv.getContext('2d');
+  function size(){cv.width=innerWidth;cv.height=innerHeight;}size();
+  const onR=()=>size();addEventListener('resize',onR);cv.classList.add('show');
+  const cols=['#f6479a','#ff8a63','#8b6cff','#1fc4b6','#ffcd46','#57e6c4'];
+  let parts=[],end=performance.now()+ms,last=0;
+  function burst(x,y){const c=cols[(Math.random()*cols.length)|0],n=34;for(let i=0;i<n;i++){const a=(Math.PI*2*i)/n+Math.random()*0.2,sp=2+Math.random()*3.4;parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1.1,life:1,col:c});}}
+  function frame(now){ctx.clearRect(0,0,cv.width,cv.height);
+    if(now<end&&now-last>330){last=now;burst(cv.width*(0.2+Math.random()*0.6),cv.height*(0.16+Math.random()*0.3));}
+    for(const p of parts){p.vy+=0.05;p.x+=p.vx;p.y+=p.vy;p.vx*=0.99;p.life-=0.012;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,2.6,0,7);ctx.fill();}
+    ctx.globalAlpha=1;parts=parts.filter(p=>p.life>0);
+    if(now<end||parts.length)requestAnimationFrame(frame);else{cv.classList.remove('show');removeEventListener('resize',onR);}}
+  requestAnimationFrame(frame);
+}
+function gate(title,msg,cta,how){
+  $('#gateTitle').textContent=title;$('#gateMsg').textContent=msg;
+  const b=$('#gateBtn'); if(cta){b.href=cta.href;b.textContent=cta.label;if(/^https?:/.test(cta.href)){b.target='_blank';b.rel='noopener';}}
+  const hb=$('#gateHow'); if(hb){ if(how&&how.src){ hb.style.display='inline-flex'; hb.onclick=function(){ if(window.ELC) ELC.playVideo(how.src,how.title||'How to play',how.poster); }; } else hb.style.display='none'; }
+  $('#gateview').classList.add('show');
+}
+function acctBar(name){
+  const acct=$('#acct');
+  if(name){acct.innerHTML=`<button class="out" id="signoutMenu">Sign out</button>`;$('#signoutMenu').onclick=async()=>{try{await fetch('/api/auth/signout',{method:'POST'});}catch(e){}location.href='/practice-arcade.html';};}
+  else acct.innerHTML='';
+}
+async function load(){
+  let res;
+  try{res=await fetch('/api/games?type='+encodeURIComponent(TYPE)+'&ep='+encodeURIComponent(EP));}
+  catch(e){return gate('Connection problem','We couldn\u2019t reach the arcade. Check your connection and try again.');}
+  if(res.status===401){let d={};try{d=await res.json();}catch(e){} return gate('Members only','Sign in with Patreon from the Practice Arcade to play Sentence Builder.',{href:'/practice-arcade.html',label:'Go to Practice Arcade'},{src:d.walkthrough,poster:d.walkthroughPoster,title:'Sentence Builder \u2014 how to play'});}
+  if(res.status===403){let d={};try{d=await res.json();}catch(e){}return gate('A Fluency Club game', d.error||'Sentence Builder is part of Fluency Club ($2.99).',{href:CTA,label:'Unlock \u00b7 Fluency $2.99'},{src:d.walkthrough,poster:d.walkthroughPoster,title:'Sentence Builder \u2014 how to play'});}
+  if(!res.ok) return gate('Not available','This game isn\u2019t available right now. Please try again later.');
+  const d=await res.json(); if(!d.ok||!d.content) return gate('Not available','This game isn\u2019t available right now.');
+  DATA=Object.assign({user:d.user}, d.content);
+  sentences=d.content.sentences||[]; keeper=d.content.keeper||'';
+  $('#epLabel').textContent=d.ep||EP.toUpperCase();
+  if(d.content.intro) $('#sub').textContent=d.content.intro;
+  $('#pRound').textContent='1/'+(sentences.length||1);
+  acctBar(d.user);
+  try{ window.ELC&&ELC.recordPlay(); }catch(e){}
+  try{ window.ELC&&d.walkthrough&&ELC.howToPlay(d.walkthrough,(d.name||"")+" \u2014 how to play",(d.walkthroughPoster||("/covers/"+TYPE+".png"))); }catch(e){}
+  idx=0; score=0; $('#pScore').textContent='0';
+  if(!sentences.length) return gate('Not available','This game isn\u2019t available right now.');
+  renderRound();
+}
+load();
+</script>
+</body>
+</html>
