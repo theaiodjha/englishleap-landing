@@ -351,8 +351,11 @@ function boot(data){
     rr(pad,pad,w,w,r);
     const g=x.createLinearGradient(0,pad,0,pad+w); g.addColorStop(0,lite); g.addColorStop(1,base);
     x.fillStyle=g; x.fill();
-    // top sheen + crisp inner edge
-    rr(pad+w*0.10,pad+w*0.07,w*0.80,w*0.42,r*0.7); x.fillStyle='rgba(255,255,255,0.20)'; x.fill();
+    // top gloss: a soft highlight that fades out (no hard inner edge)
+    x.save(); rr(pad,pad,w,w,r); x.clip();
+    const sg=x.createLinearGradient(0,pad,0,pad+w*0.62);
+    sg.addColorStop(0,'rgba(255,255,255,0.28)'); sg.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=sg; x.fillRect(pad,pad,w,w*0.62); x.restore();
     rr(pad,pad,w,w,r); x.lineWidth=2; x.strokeStyle='rgba(255,255,255,0.24)'; x.stroke();
     // the clue's emoji, centred, with a soft shadow for definition
     x.font='196px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
