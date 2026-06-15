@@ -312,7 +312,7 @@ function boot(data){
   }}
 
   // ---- glassy 2D clue icons as billboard sprites (always face camera, never blow out) ----
-  const ICON_SCALE=1.5;
+  const ICON_SCALE=1.45;
   const texLoader=new THREE.TextureLoader();
   const slugFor=w=>({
     'slip away':'slip-away','put off':'put-off','make the most of':'make-the-most-of',
@@ -331,37 +331,40 @@ function boot(data){
     return s;
   }
   // Build a glassy clue tile from the clue's own emoji (no bespoke PNG needed) —
-  // matches the frosted-tile look and tints a soft glow in the clue colour.
+  // frosted tile + colour identity edge/halo, with a crisp, high-contrast glyph.
   function emojiTexture(c){
-    const S=256, cv=document.createElement('canvas'); cv.width=cv.height=S;
-    const x=cv.getContext('2d'), pad=26, w=S-pad*2, r=52;
+    const S=384, cv=document.createElement('canvas'); cv.width=cv.height=S;
+    const x=cv.getContext('2d'), pad=34, w=S-pad*2, r=76;
+    const C=(c.color||'#8b6cff');
+    const cr=parseInt(C.slice(1,3),16),cg=parseInt(C.slice(3,5),16),cb=parseInt(C.slice(5,7),16);
     function rr(px,py,pw,ph,rad){ if(x.roundRect){x.beginPath();x.roundRect(px,py,pw,ph,rad);} else {
       x.beginPath();x.moveTo(px+rad,py);x.arcTo(px+pw,py,px+pw,py+ph,rad);x.arcTo(px+pw,py+ph,px,py+ph,rad);
       x.arcTo(px,py+ph,px,py,rad);x.arcTo(px,py,px+pw,py,rad);x.closePath(); } }
-    // soft colour glow behind the tile
-    const cr=parseInt((c.color||'#8b6cff').slice(1,3),16),cg=parseInt((c.color||'#8b6cff').slice(3,5),16),cb=parseInt((c.color||'#8b6cff').slice(5,7),16);
-    const rg=x.createRadialGradient(S/2,S/2,20,S/2,S/2,S/2);
-    rg.addColorStop(0,'rgba('+cr+','+cg+','+cb+',0.42)'); rg.addColorStop(1,'rgba('+cr+','+cg+','+cb+',0)');
-    x.fillStyle=rg; x.fillRect(0,0,S,S);
-    // frosted glass tile
+    // frosted glass fill
     rr(pad,pad,w,w,r);
     const g=x.createLinearGradient(pad,pad,pad+w,pad+w);
     g.addColorStop(0,'rgba(255,255,255,0.16)'); g.addColorStop(1,'rgba(255,255,255,0.05)');
     x.fillStyle=g; x.fill();
-    x.lineWidth=3; x.strokeStyle='rgba(255,255,255,0.30)'; x.stroke();
-    // top sheen
-    rr(pad+10,pad+8,w-20,w*0.42,r-14); x.fillStyle='rgba(255,255,255,0.08)'; x.fill();
-    // the clue's emoji, centred
-    x.font='124px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
+    // coloured identity edge with a soft outer halo (vibrancy without washing the centre)
+    x.save();
+    x.shadowColor='rgba('+cr+','+cg+','+cb+',0.65)'; x.shadowBlur=26;
+    x.lineWidth=6; x.strokeStyle='rgba('+cr+','+cg+','+cb+',0.85)'; rr(pad,pad,w,w,r); x.stroke();
+    x.restore();
+    // inner white hairline + top sheen (keeps the glass read)
+    rr(pad+4,pad+4,w-8,w-8,r-4); x.lineWidth=2; x.strokeStyle='rgba(255,255,255,0.40)'; x.stroke();
+    rr(pad+16,pad+13,w-32,w*0.38,r-26); x.fillStyle='rgba(255,255,255,0.10)'; x.fill();
+    // the clue's emoji — big, centred, with a dark contrast shadow so it pops on glass
+    x.font='208px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
     x.textAlign='center'; x.textBaseline='middle';
-    x.fillText((c.emoji||'\u25C7')+'\uFE0F', S/2, S/2+6);
-    const tex=new THREE.CanvasTexture(cv); tex.anisotropy=4; tex.needsUpdate=true;
+    x.shadowColor='rgba(0,0,0,0.55)'; x.shadowBlur=16; x.shadowOffsetY=7;
+    x.fillText((c.emoji||'\u25C7')+'\uFE0F', S/2, S/2+10);
+    const tex=new THREE.CanvasTexture(cv); tex.anisotropy=8; tex.needsUpdate=true;
     return tex;
   }
 
   const room=new THREE.Group(); scene.add(room);
   // tidy, non-overlapping layout (two rows of three) above the grid
-  const LAY=[[-2.4,1.7,-0.4],[0,2.2,-0.9],[2.4,1.7,-0.4],[-2.4,0.5,0.9],[0,0.1,1.25],[2.4,0.5,0.9]];
+  const LAY=[[-2.85,1.95,-0.3],[0,1.95,-0.6],[2.85,1.95,-0.3],[-2.85,-0.15,0.7],[0,-0.15,1.05],[2.85,-0.15,0.7]];
   const relics=[];
   clues.forEach((c,i)=>{
     const p=(clues.length===6 && i<6)?LAY[i]:c.position;
@@ -393,9 +396,9 @@ function boot(data){
   let t=0, roomScale=1;
   (function loop(){ requestAnimationFrame(loop); t+=reduced?0:0.016;
     relics.forEach(g=>{ const d=g.userData; const done=solved.has(d.clue.id);
-      g.position.y=d.base+(reduced?0:Math.sin(t*0.9+d.phase)*0.06); // gentle bob
-      const pulse=0.5+0.5*Math.sin(t*1.6+d.phase);
-      const targ=(hovered===g)?ICON_SCALE*1.12:ICON_SCALE*(1+(done?0:0.03*pulse));
+      g.position.y=d.base+(reduced?0:Math.sin(t*0.7+d.phase)*0.035); // very subtle bob
+      const pulse=0.5+0.5*Math.sin(t*1.2+d.phase);
+      const targ=(hovered===g)?ICON_SCALE*1.1:ICON_SCALE*(1+(done?0:0.015*pulse));
       d.mesh.scale.x+=(targ-d.mesh.scale.x)*0.15; d.mesh.scale.y=d.mesh.scale.x;
       d.mesh.material.opacity=done?0.4:1;
     });
