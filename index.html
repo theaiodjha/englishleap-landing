@@ -9,6 +9,10 @@
 <meta property="og:title" content="English Leap — Experience Life in English" />
 <meta property="og:description" content="One ecosystem to watch, practice, and master English. Confidence, not just grammar." />
 <meta property="og:type" content="website" />
+<meta property="og:image" content="https://englishleap.app/assets/brand/elc-og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="English Leap — Experience Life in English" />
+<meta name="twitter:image" content="https://englishleap.app/assets/brand/elc-og.png" />
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
 <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet" />
@@ -25,8 +29,8 @@
   --muted:#a39fce;
   --muted-2:#76729e;
   --violet:#8b6cff;
-  --electric:#4d8bff;
-  --cyan:#2fe6d6;
+  --electric:#ff7848;
+  --cyan:#1fc4b6;
   --magenta:#ff5ca8;
   --gold:#ffd27a;
   /* English Leap Club brand pillars */
@@ -130,9 +134,12 @@ header.nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:background 
 header.nav.scrolled{background:rgba(8,8,18,.7);backdrop-filter:blur(16px) saturate(140%);border-bottom:1px solid var(--line)}
 .nav-inner{max-width:var(--maxw);margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:11px;font-family:var(--display);font-weight:600;font-size:1.12rem;letter-spacing:.01em}
-.logo .mark{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;
-  background:linear-gradient(140deg,var(--read),var(--practise));box-shadow:0 6px 20px -5px rgba(123,92,255,.65),0 0 22px -7px var(--read)}
+.logo .mark{width:36px;height:36px;border-radius:11px;overflow:hidden;display:grid;place-items:center;
+  box-shadow:0 6px 20px -5px rgba(123,92,255,.55),0 0 22px -8px var(--read)}
+.logo .mark img{width:100%;height:100%;object-fit:cover;display:block}
 .logo .mark svg{width:20px;height:20px}
+.byleap{display:inline-flex;align-items:center;gap:9px;margin-top:18px;color:var(--muted-2);font-size:12.5px;font-weight:600;letter-spacing:.02em}
+.byleap img{height:18px;width:auto;display:block;opacity:.92}
 .nav-links{display:flex;align-items:center;gap:22px}
 .nav-links a{position:relative;font-size:.88rem;color:var(--muted);font-weight:500;transition:color .25s}
 .nav-links a::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:2px;border-radius:2px;
@@ -347,8 +354,10 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
 @media(max-width:520px){.foot-grid{grid-template-columns:1fr}}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="#0a0a14">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#171030">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/elc-icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/brand/elc-icon-192.png">
+<link rel="apple-touch-icon" href="/assets/brand/elc-icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -368,9 +377,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
 <header class="nav" id="nav">
   <div class="nav-inner">
     <a href="#top" class="logo">
-      <span class="mark">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6a2.5 2.5 0 0 1 2.5-2.5h11A2.5 2.5 0 0 1 20 6v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.2 3.8A.6.6 0 0 1 5.8 19v-3.5h-.3A2.5 2.5 0 0 1 4 13V6z" fill="#fff"/><path d="M10.3 7.4l5 3.1-5 3.1V7.4z" fill="#6a3df0"/></svg>
-      </span>
+      <span class="mark"><img src="/assets/brand/elc-icon-64.png" alt="English Leap" width="36" height="36"></span>
       English Leap
     </a>
     <nav class="nav-links">
@@ -692,10 +699,11 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
     <div class="foot-grid">
       <div class="foot-brand">
         <a href="#top" class="logo">
-          <span class="mark"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6a2.5 2.5 0 0 1 2.5-2.5h11A2.5 2.5 0 0 1 20 6v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.2 3.8A.6.6 0 0 1 5.8 19v-3.5h-.3A2.5 2.5 0 0 1 4 13V6z" fill="#fff"/><path d="M10.3 7.4l5 3.1-5 3.1V7.4z" fill="#6a3df0"/></svg></span>
+          <span class="mark"><img src="/assets/brand/elc-icon-64.png" alt="English Leap" width="36" height="36"></span>
           English Leap
         </a>
         <p>Don't study English — experience life in it. Confidence over grammar, for learners in 180+ countries.</p>
+        <div class="byleap"><span>A</span><img src="/assets/brand/leaplabs-wordmark.png" alt="Leap Labs"><span>studio</span></div>
       </div>
       <div class="foot-col">
         <h5>Ecosystem</h5>
