@@ -319,10 +319,44 @@ function boot(data){
     'stay on track':'stay-on-track','carve out time':'carve-out-time','get carried away':'get-carried-away'
   }[(w||'').toLowerCase()] || 'default');
   function buildIcon(c){
-    const tex=texLoader.load('/games/clue-room/icons/'+slugFor(c.word)+'.png');
-    const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
+    const slug=slugFor(c.word);
+    let mat;
+    if(slug!=='default'){
+      const tex=texLoader.load('/games/clue-room/icons/'+slug+'.png');
+      mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
+    } else {
+      mat=new THREE.SpriteMaterial({map:emojiTexture(c),transparent:true,depthWrite:false});
+    }
     const s=new THREE.Sprite(mat); s.scale.set(ICON_SCALE,ICON_SCALE,1);
     return s;
+  }
+  // Build a glassy clue tile from the clue's own emoji (no bespoke PNG needed) —
+  // matches the frosted-tile look and tints a soft glow in the clue colour.
+  function emojiTexture(c){
+    const S=256, cv=document.createElement('canvas'); cv.width=cv.height=S;
+    const x=cv.getContext('2d'), pad=26, w=S-pad*2, r=52;
+    function rr(px,py,pw,ph,rad){ if(x.roundRect){x.beginPath();x.roundRect(px,py,pw,ph,rad);} else {
+      x.beginPath();x.moveTo(px+rad,py);x.arcTo(px+pw,py,px+pw,py+ph,rad);x.arcTo(px+pw,py+ph,px,py+ph,rad);
+      x.arcTo(px,py+ph,px,py,rad);x.arcTo(px,py,px+pw,py,rad);x.closePath(); } }
+    // soft colour glow behind the tile
+    const cr=parseInt((c.color||'#8b6cff').slice(1,3),16),cg=parseInt((c.color||'#8b6cff').slice(3,5),16),cb=parseInt((c.color||'#8b6cff').slice(5,7),16);
+    const rg=x.createRadialGradient(S/2,S/2,20,S/2,S/2,S/2);
+    rg.addColorStop(0,'rgba('+cr+','+cg+','+cb+',0.42)'); rg.addColorStop(1,'rgba('+cr+','+cg+','+cb+',0)');
+    x.fillStyle=rg; x.fillRect(0,0,S,S);
+    // frosted glass tile
+    rr(pad,pad,w,w,r);
+    const g=x.createLinearGradient(pad,pad,pad+w,pad+w);
+    g.addColorStop(0,'rgba(255,255,255,0.16)'); g.addColorStop(1,'rgba(255,255,255,0.05)');
+    x.fillStyle=g; x.fill();
+    x.lineWidth=3; x.strokeStyle='rgba(255,255,255,0.30)'; x.stroke();
+    // top sheen
+    rr(pad+10,pad+8,w-20,w*0.42,r-14); x.fillStyle='rgba(255,255,255,0.08)'; x.fill();
+    // the clue's emoji, centred
+    x.font='124px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
+    x.textAlign='center'; x.textBaseline='middle';
+    x.fillText((c.emoji||'\u25C7')+'\uFE0F', S/2, S/2+6);
+    const tex=new THREE.CanvasTexture(cv); tex.anisotropy=4; tex.needsUpdate=true;
+    return tex;
   }
 
   const room=new THREE.Group(); scene.add(room);
