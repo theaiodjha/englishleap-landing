@@ -13,7 +13,7 @@
   if (window.ELCTour) return;
 
   var CFG = {
-    orivaSrc: function (pose) { return 'assets/oriva-' + pose + '.png'; },
+    orivaSrc: function (pose) { return '/assets/oriva/' + pose + '.png'; },
     showLauncher: true,           // floating "Take the tour" button
     launcherLabel: 'Take the tour',
     storageKey: 'elc_tour_seen_', // + tour id
@@ -54,14 +54,17 @@
   '.elct-next{background:linear-gradient(135deg,#8b6cff,#1fc4b6);border:none;color:#06201c;' +
     'border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}' +
   '.elct-launch{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:99990;' +
-    'display:inline-flex;align-items:center;gap:8px;background:#0e1a20;border:1px solid #1fc4b633;' +
-    'color:#1fc4b6;border-radius:999px;padding:10px 15px;font:600 13px/1 "Poppins",system-ui,sans-serif;' +
-    'cursor:pointer;box-shadow:0 12px 34px -14px rgba(0,0,0,.7)}' +
-  '.elct-launch:hover{border-color:#1fc4b6}' +
-  '.elct-launch .d{width:8px;height:8px;border-radius:50%;background:#1fc4b6;box-shadow:0 0 12px #1fc4b6aa}' +
+    'display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:11px 17px;' +
+    'background:linear-gradient(135deg,#eaff1a,#c6ff00);border:1.5px solid rgba(18,20,6,.6);' +
+    'color:#16180a;font:700 13px/1 "Poppins",system-ui,sans-serif;letter-spacing:.01em;cursor:pointer;' +
+    'box-shadow:0 0 0 3px rgba(234,255,26,.22),0 8px 22px -6px rgba(0,0,0,.45),0 0 26px -2px rgba(220,255,40,.6)}' +
+  '.elct-launch:hover{filter:brightness(1.06);' +
+    'box-shadow:0 0 0 4px rgba(234,255,26,.3),0 10px 26px -6px rgba(0,0,0,.5),0 0 34px 0 rgba(220,255,40,.78)}' +
+  '.elct-launch .d{width:9px;height:9px;border-radius:50%;background:#16180a;animation:elctpulse 1.8s infinite}' +
+  '@keyframes elctpulse{0%{box-shadow:0 0 0 0 rgba(22,24,10,.45)}70%{box-shadow:0 0 0 6px rgba(22,24,10,0)}100%{box-shadow:0 0 0 0 rgba(22,24,10,0)}}' +
   '@media (max-width:560px){.elct-card{left:16px!important;right:16px!important;bottom:16px!important;' +
     'top:auto!important;max-width:none;width:auto}}' +
-  '@media (prefers-reduced-motion:reduce){.elct-ov,.elct-spot,.elct-card,.elct-dot{transition:none}}';
+  '@media (prefers-reduced-motion:reduce){.elct-ov,.elct-spot,.elct-card,.elct-dot{transition:none}.elct-launch .d{animation:none}}';
 
   function injectStyles() {
     if (document.getElementById('elct-css')) return;
@@ -228,6 +231,9 @@
     { sel: '#watch', pose: 'point',
       title: '1 \u00b7 Watch \u2014 always free',
       body: 'New podcast episodes every week. This is where everyone starts \u2014 no account needed.' },
+    { sel: '#episodes', pose: 'happy',
+      title: 'This week\u2019s episodes',
+      body: 'Every episode turns into a practice pack. Play the latest free, or grab the full pack \u2014 new one lands each week.' },
     { sel: '#club', pose: 'think',
       title: '2 \u00b7 The Club \u2014 where you practise',
       body: 'Every episode becomes a pack you keep: read it, hear it, practise it, use it. Transcript Library is $1, Fluency Club is $2.99 \u2014 both start with a free week.' },
@@ -243,29 +249,46 @@
   define('arcade', [
     { sel: null, pose: 'happy',
       title: 'Welcome to the Practice Arcade',
-      body: 'One fun mini-game per episode. First, let\u2019s get you in \u2014 you only do this once.' },
+      body: 'One set of mini-games per episode \u2014 they turn the week\u2019s six phrases into something you actually do. Quick look around?' },
+    { sel: '#playFree', pose: 'point',
+      title: 'Start free, right now',
+      body: 'The Clue Room is free for everyone \u2014 no account needed. Tap this to jump straight into this week\u2019s game.' },
+    { sel: '#featured', pose: 'happy',
+      title: 'Your free game',
+      body: 'Here\u2019s the free Clue Room. Tip: tap the cover to watch a short \u201cHow to play\u201d before you start.' },
+    { sel: '#shelfWrap', pose: 'think',
+      title: 'More games \u2014 some are members-only',
+      body: 'Browse the rest with the arrows. A \ud83d\udd12 means it needs a tier: Phrase Pairs unlocks at $1, the Fluency games at $2.99.' },
+    { sel: '#thisweekSec', pose: 'point',
+      title: 'This week\u2019s phrases',
+      body: 'These are the six phrases from the latest episode, and the games that drill them.' },
+    { sel: '.journey', pose: 'point',
+      title: 'How it all fits',
+      body: 'Watch \u2192 Read \u2192 Play \u2192 Speak. That\u2019s the loop that turns a 10-minute episode into English you can use.' },
+    { sel: '#convo', pose: 'think',
+      title: 'Unlock everything',
+      body: 'Free players get the Clue Room. Fluency Club opens every game for every episode \u2014 and you can start with a free week.' },
+    { sel: '#code', pose: 'happy',
+      title: 'Got a member code?',
+      body: 'If we sent you a code, drop it in here to unlock your games instantly.' },
     { sel: 'a[href*="/api/auth/login"]', pose: 'point',
-      title: 'Connect once with Patreon',
-      body: 'Tap \u201cContinue with Patreon\u201d. After this, the page remembers you \u2014 no logging in every time you come back.' },
-    // The member-code box: add data-elc="member-code" to that element for a precise highlight.
-    { sel: '[data-elc="member-code"]', pose: 'think',
-      title: 'Have a member code?',
-      body: 'If we sent you a code, type it here instead of connecting Patreon.' },
-    // --- Steps below appear AFTER the member logs in (game cards render then). ---
-    // Add data-elc attributes to your game cards, e.g. data-elc="game-clue" etc.,
-    // then this part runs as its own tour. See README for wiring `arcade-games`.
+      title: 'Already a member? Sign in once',
+      body: 'Connect with Patreon a single time \u2014 the page remembers you, so the games just open whenever you come back.' },
   ]);
 
   define('arcade-games', [
-    { sel: '[data-elc="game-clue"]', pose: 'point',
+    { sel: '[data-elc="game-clue-room"]', pose: 'point',
       title: 'Clue Room \u2014 free for everyone',
       body: 'Start here. No tier needed \u2014 warm up with this week\u2019s clues.' },
-    { sel: '[data-elc="game-pairs"]', pose: 'think',
+    { sel: '[data-elc="game-phrase-pairs"]', pose: 'think',
       title: 'Phrase Pairs \u2014 Transcript Library ($1+)',
-      body: 'Match the phrases from the episode. Unlocks with the $1 tier and up.' },
-    { sel: '[data-elc="game-gap"]', pose: 'celebrate',
+      body: 'Match each phrase to its meaning. Unlocks with the $1 tier and up.' },
+    { sel: '[data-elc="game-listening-gap"]', pose: 'point',
       title: 'Listening Gap \u2014 Fluency Club ($2.99)',
-      body: 'The full challenge: listen and fill the gaps. Part of the $2.99 Fluency Club.' },
+      body: 'Listen, then tap the phrase that fills the gap. Part of the $2.99 Fluency Club.' },
+    { sel: '[data-elc="game-story-unlock"]', pose: 'celebrate',
+      title: 'Story Unlock \u2014 Fluency Club ($2.99)',
+      body: 'Place every phrase to unlock the episode\u2019s mini-story \u2014 plus a bonus ending. Also Fluency Club.' },
   ]);
 
   /* ---------- run ---------- */

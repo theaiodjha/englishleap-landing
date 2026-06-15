@@ -304,7 +304,7 @@ function featuredCard(gt){
   let done=0; try{ if(window.ELC) done=ELC.completedCountFor(gt.type,(gt.episodes||[]).map(e=>e.id)); }catch(e){}
   const doneBadge=done>0?`<span class="gdone">&#10003; ${done}/${n} completed</span>`:'';
   const eyebrow=gt.access==='free'?'Start here &middot; Free to play':'Featured game';
-  return `<div class="feat">
+  return `<div class="feat" data-elc="game-${esc(gt.type)}">
     <div class="fcover"><img src="/covers/${esc(gt.type)}.png" alt="${esc(gt.name)}" onerror="this.style.display='none'">
       <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>
       ${gt.walkthrough?`<button class="coverplay" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play','${esc(gt.walkthroughPoster||('/covers/'+gt.type+'.png'))}')" aria-label="Watch how to play"><span class="cpring"><svg width="15" height="17" viewBox="0 0 15 17" aria-hidden="true"><path d="M1 1l13 7.5L1 16z" fill="#fff"/></svg></span><span class="cplabel">How to play</span></button>`:''}</div>
@@ -337,7 +337,7 @@ function shelfCard(gt){
   const ext=b.ext?' target="_blank" rel="noopener"':'';
   let done=0; try{ if(window.ELC) done=ELC.completedCountFor(gt.type,(gt.episodes||[]).map(e=>e.id)); }catch(e){}
   const doneBadge=done>0?`<span class="gdone">&#10003; ${done}/${n}</span>`:'';
-  return `<div class="sgame ${gt.locked?'locked':''}">
+  return `<div class="sgame ${gt.locked?'locked':''}" data-elc="game-${esc(gt.type)}">
     <div class="scv"><img src="/covers/${esc(gt.type)}.png" alt="${esc(gt.name)}" onerror="this.style.display='none'">
       <span class="gribbon ${esc(gt.access||'')}">${RIB[gt.access]||''}</span>${gt.locked?'<span class="glock">&#128274;</span>':''}
       ${gt.walkthrough?`<button class="coverplay" onclick="ELC.playVideo('${esc(gt.walkthrough)}','${esc(gt.name)} \u2014 how to play','${esc(gt.walkthroughPoster||('/covers/'+gt.type+'.png'))}')" aria-label="Watch how to play"><span class="cpring"><svg width="15" height="17" viewBox="0 0 15 17" aria-hidden="true"><path d="M1 1l13 7.5L1 16z" fill="#fff"/></svg></span><span class="cplabel">How to play</span></button>`:''}</div>
