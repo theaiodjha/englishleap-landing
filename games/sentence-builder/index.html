@@ -101,11 +101,12 @@
     background:linear-gradient(100deg,var(--mint),var(--teal),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 6px 18px rgba(31,196,182,.4))}
   .nightbanner .small{color:var(--ink);font-size:15px;margin-top:8px;opacity:.95}
-  .again{display:inline-flex;gap:12px;margin-top:18px}
+  .again{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:18px}
   .again a,.again button{font:inherit;font-weight:700;font-size:14px;border-radius:999px;padding:11px 20px;cursor:pointer;text-decoration:none}
   .again .pri{background:linear-gradient(135deg,var(--teal),var(--mint));color:#06201b;border:0}
   .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
   @media(prefers-reduced-motion:reduce){.chip.wrong,.tray.flash-bad{animation:none}}
+  @media(max-width:380px){.wrap{padding:12px 12px 52px}.card{padding:20px 14px}.prog{gap:7px}}
 </style>
 <script src="/progress.js"></script>
 </head>

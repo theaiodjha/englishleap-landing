@@ -33,7 +33,7 @@
 
   .hint{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:8;text-align:center;pointer-events:none;
     display:flex;align-items:center;gap:9px;padding:9px 17px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--ink);
-    background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(0,0,0,.4);opacity:0;transition:.4s}
+    background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(14px);box-shadow:0 12px 30px rgba(0,0,0,.4);opacity:0;transition:.4s;max-width:92vw}
   .hint.show{opacity:1}
   .hint .gleam{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber);animation:pulseg 1.8s ease-in-out infinite}
   @keyframes pulseg{0%,100%{opacity:.5;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
@@ -372,15 +372,26 @@ function boot(data){
   }
 
   const room=new THREE.Group(); scene.add(room);
-  // tidy, non-overlapping layout (two rows of three) above the grid
-  const LAY=[[-2.85,1.95,-0.3],[0,1.95,-0.6],[2.85,1.95,-0.3],[-2.85,-0.15,0.7],[0,-0.15,1.05],[2.85,-0.15,0.7]];
+  // Responsive layout: 3 columns on wide screens, 2 columns on portrait phones.
+  function buildLayout(n, portrait){
+    const cols = portrait ? 2 : (n <= 4 ? 2 : 3);
+    const rows = Math.ceil(n/cols);
+    const xgap = portrait ? 2.25 : 2.85, ygap = portrait ? 1.95 : 2.05;
+    const pos = [];
+    for(let i=0;i<n;i++){
+      const r=Math.floor(i/cols), c=i%cols, inRow=Math.min(cols, n-r*cols);
+      const x=(c-(inRow-1)/2)*xgap;
+      const y=((rows-1)/2 - r)*ygap + 0.85;
+      const z=(r%2 ? 0.6 : -0.3);
+      pos.push([x,y,z]);
+    }
+    return pos;
+  }
   const relics=[];
   clues.forEach((c,i)=>{
-    const p=(clues.length===6 && i<6)?LAY[i]:c.position;
-    const g=new THREE.Group(); g.position.set(p[0],p[1],p[2]);
-    const mesh=buildIcon(c);
-    g.add(mesh);
-    g.userData={clue:c,mesh,base:p[1],phase:i*1.3};
+    const g=new THREE.Group();
+    const mesh=buildIcon(c); g.add(mesh);
+    g.userData={clue:c,mesh,base:0,phase:i*1.3};
     room.add(g); relics.push(g);
   });
   // atmosphere: colored sparkle stars
@@ -415,13 +426,23 @@ function boot(data){
     camera.lookAt(0,0.85,0);
     renderer.render(scene,camera);
   })();
-  function fit(){
-    const A=innerWidth/innerHeight;
-    camera.aspect=A; camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth,innerHeight);
-    // narrow/portrait screens can't fit the wide clue spread → scale the room down to fit
-    roomScale=Math.min(1, Math.max(0.44, 0.8*A));
+  function applyLayout(){
+    const A=innerWidth/innerHeight, portrait=A<0.95;
+    const pos=buildLayout(clues.length, portrait);
+    relics.forEach((g,i)=>{ g.position.set(pos[i][0],pos[i][1],pos[i][2]); g.userData.base=pos[i][1]; });
+    const dist=camera.position.z;                       // tiles sit near z 0
+    const vHalf=Math.tan((45*Math.PI/180)/2)*dist, hHalf=vHalf*A;
+    let maxX=0, maxYoff=0;
+    pos.forEach(p=>{ maxX=Math.max(maxX,Math.abs(p[0])); maxYoff=Math.max(maxYoff,Math.abs(p[1]-0.85)); });
+    const half=ICON_SCALE*0.62;                          // tile half-size (unscaled)
+    const sH=(hHalf*0.9)/(maxX+half), sV=(vHalf*0.92)/(maxYoff+half);
+    roomScale=Math.min(1, sH, sV);
     room.scale.setScalar(roomScale);
+  }
+  function fit(){
+    camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+    applyLayout();
   }
   fit(); addEventListener('resize',fit);
   // ---- intro / instructions (outside the card) ----

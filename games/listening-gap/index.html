@@ -87,7 +87,7 @@
     background:linear-gradient(100deg,var(--amber),var(--coral),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;
     filter:drop-shadow(0 6px 18px rgba(255,138,99,.4))}
   .nightbanner .small{color:var(--ink);font-size:15px;margin-top:8px;opacity:.95}
-  .again{display:inline-flex;gap:12px;margin-top:18px}
+  .again{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:18px}
   .again a,.again button{font:inherit;font-weight:700;font-size:14px;border-radius:999px;padding:11px 20px;cursor:pointer;text-decoration:none}
   .again .pri{background:linear-gradient(135deg,var(--coral),var(--amber));color:#3a1c12;border:0}
   .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
@@ -96,6 +96,7 @@
   .gatehow:hover{border-color:rgba(255,255,255,.32)}
   .howbtn{align-items:center;justify-content:center;gap:8px;margin:14px auto 0;cursor:pointer;border:0;font:inherit;font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px;color:#10121c;background:#fff;box-shadow:0 10px 26px -10px rgba(0,0,0,.55)}
   .howbtn:hover{transform:translateY(-1px)}
+  @media(max-width:380px){.wrap{padding:12px 12px 52px}.card{padding:22px 16px}.prog{gap:7px}}
 </style>
 <script src="/progress.js"></script>
 </head>
