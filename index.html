@@ -173,6 +173,8 @@ body.menu-open{overflow:hidden}
   .menu-btn{display:grid}
 }
 @media(min-width:1081px){.mobile-menu{display:none}}
+.m-theme{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
+.m-theme-lbl{font-family:var(--display);font-size:1.2rem;font-weight:500;color:var(--ink)}
 
 /* ---------- Hero ---------- */
 .hero{padding:170px 0 90px;text-align:center}
@@ -409,6 +411,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
     <a href="#watch" class="btn btn-ghost">Watch free</a>
     <a href="https://www.patreon.com/c/englishleappracticeclub/membership" target="_blank" rel="noopener" class="btn btn-primary">Join the Club</a>
   </div>
+  <div class="m-theme" id="mThemeSlot"><span class="m-theme-lbl">Appearance</span></div>
 </nav>
 
 <span id="top"></span>
@@ -755,6 +758,19 @@ const setMenu=(open)=>{
   menuBtn.setAttribute('aria-label',open?'Close menu':'Open menu');
 };
 menuBtn.addEventListener('click',()=>setMenu(!mobileMenu.classList.contains('open')));
+
+/* Theme toggle lives in the menu on mobile (≤1080px), floats bottom-right on desktop */
+(function(){
+  var mq=matchMedia('(max-width:1080px)');
+  function place(){
+    var t=document.getElementById('elc-theme-toggle'), slot=document.getElementById('mThemeSlot');
+    if(!t||!slot) return;
+    if(mq.matches){ if(t.parentNode!==slot) slot.appendChild(t); t.classList.add('in-menu'); }
+    else { if(t.parentNode!==document.body) document.body.appendChild(t); t.classList.remove('in-menu'); }
+  }
+  var n=0;(function wait(){ if(document.getElementById('elc-theme-toggle')){ place(); } else if(n++<60){ setTimeout(wait,50); } })();
+  mq.addEventListener ? mq.addEventListener('change',place) : mq.addListener(place);
+})();
 mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
 window.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false);});
 

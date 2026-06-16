@@ -207,11 +207,16 @@
     b.innerHTML = '<span class="d"></span><span class="elct-lbl">' + CFG.launcherLabel + '</span>';
     b.onclick = function () { start(tour); };
     document.body.appendChild(b);
-    // Avoid overlapping the theme toggle: stack the launcher above it when present.
-    setTimeout(function () {
+    // Stack above the theme toggle only when it's actually floating (desktop);
+    // on mobile the toggle lives in the menu, so the launcher uses its base spot.
+    function positionLauncher() {
       var tg = document.getElementById('elc-theme-toggle');
-      if (tg) { var h = tg.getBoundingClientRect().height || 40; b.style.bottom = 'calc(' + Math.round(h + 24) + 'px + env(safe-area-inset-bottom))'; }
-    }, 0);
+      var floating = tg && getComputedStyle(tg).position === 'fixed' && tg.offsetParent !== null;
+      if (floating) { var h = tg.getBoundingClientRect().height || 40; b.style.bottom = 'calc(' + Math.round(h + 24) + 'px + env(safe-area-inset-bottom))'; }
+      else { b.style.bottom = 'calc(16px + env(safe-area-inset-bottom))'; }
+    }
+    setTimeout(positionLauncher, 80);
+    window.addEventListener('resize', positionLauncher);
   }
   function autostart() {
     injectStyles();
