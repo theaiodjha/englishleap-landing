@@ -56,7 +56,11 @@
   .btn{display:block;width:100%;text-align:center;border:none;border-radius:16px;padding:14px;margin-top:18px;cursor:pointer;
     font-family:var(--display);font-weight:700;font-size:16px;color:#10101c;text-decoration:none}
 
-  .center{position:fixed;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:.3s}
+  .center{position:fixed;inset:0;z-index:25;display:flex;align-items:flex-start;justify-content:center;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:max(66px,calc(env(safe-area-inset-top) + 58px)) 18px max(28px,env(safe-area-inset-bottom));
+    opacity:0;pointer-events:none;transition:.3s}
+  .center>*{margin-top:auto;margin-bottom:auto}
   .center.show{opacity:1;pointer-events:auto}
   .panel{width:100%;max-width:560px;border-radius:26px;padding:26px}
   .kick{font-size:12px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--amber)}
@@ -161,7 +165,7 @@
 <div id="scene"></div>
 
 <div class="top hide" id="hud">
-  <a class="back" href="/practice-arcade.html">&#8592; Arcade</a>
+  <a class="back" href="/arcade-type.html?type=clue-room" onclick="if(history.length>1){history.back();return false}">&#8592; Back</a>
   <div class="pill card-glass"><span class="ep" id="epLabel">EP</span><span class="dots" id="dots"></span><span class="frac" id="frac">0/6</span></div>
   <div class="menu-wrap">
     <button class="menubtn card-glass" id="menuBtn" aria-label="Menu">&#8942;</button>
@@ -537,7 +541,7 @@ function boot(data){
     if(filled.some(x=>!x))return;
     const ps=$('#pstatus');
     if(filled.every((w,i)=>w===answers[i])){ ps.textContent='Perfect! \uD83C\uDF89'; ps.className='sb-msg ok pop';
-      $('#checkBtn').disabled=true; celebrate(); setTimeout(showResult,2500); }
+      $('#checkBtn').disabled=true; setTimeout(()=>{ showResult(); celebrate(); }, 800); }
     else { ps.textContent=nudges[Math.floor(Math.random()*nudges.length)]; ps.className='sb-msg nudge pop'; }
   };
 
