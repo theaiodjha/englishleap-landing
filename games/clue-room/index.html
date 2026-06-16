@@ -61,6 +61,9 @@
     padding:max(66px,calc(env(safe-area-inset-top) + 58px)) 18px max(28px,env(safe-area-inset-bottom));
     opacity:0;pointer-events:none;transition:.3s}
   .center>*{margin-top:auto;margin-bottom:auto}
+  #result.show .panel{animation:riseIn .52s cubic-bezier(.2,.8,.25,1) both}
+  @keyframes riseIn{from{opacity:0;transform:translateY(20px) scale(.94)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){#result.show .panel{animation:none}}
   .center.show{opacity:1;pointer-events:auto}
   .panel{width:100%;max-width:560px;border-radius:26px;padding:26px}
   .kick{font-size:12px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--amber)}
@@ -138,7 +141,7 @@
     font-family:var(--display);font-weight:700;font-size:16px;color:#10101c;background:linear-gradient(110deg,var(--teal),var(--coral))}
 
   /* fireworks + night banner */
-  #fx{position:fixed;inset:0;z-index:44;pointer-events:none;opacity:0;transition:.3s}
+  #fx{position:fixed;inset:0;z-index:23;pointer-events:none;opacity:0;transition:.3s}
   #fx.show{opacity:1}
   .nightbanner{position:fixed;left:50%;top:17%;transform:translate(-50%,-12px);z-index:46;text-align:center;
     padding:6px 22px;opacity:0;pointer-events:none;transition:.5s;max-width:92vw}
@@ -541,7 +544,7 @@ function boot(data){
     if(filled.some(x=>!x))return;
     const ps=$('#pstatus');
     if(filled.every((w,i)=>w===answers[i])){ ps.textContent='Perfect! \uD83C\uDF89'; ps.className='sb-msg ok pop';
-      $('#checkBtn').disabled=true; setTimeout(()=>{ showResult(); celebrate(); }, 800); }
+      $('#checkBtn').disabled=true; setTimeout(()=>{ $('#puzzle').classList.remove('show'); celebrate(); setTimeout(showResult,1000); }, 800); }
     else { ps.textContent=nudges[Math.floor(Math.random()*nudges.length)]; ps.className='sb-msg nudge pop'; }
   };
 
