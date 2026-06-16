@@ -64,6 +64,8 @@
   '@keyframes elctpulse{0%{box-shadow:0 0 0 0 rgba(255,210,122,.55)}70%{box-shadow:0 0 0 7px rgba(255,210,122,0)}100%{box-shadow:0 0 0 0 rgba(255,210,122,0)}}' +
   '@media (max-width:560px){.elct-card{left:16px!important;right:16px!important;bottom:16px!important;' +
     'top:auto!important;max-width:none;width:auto}}' +
+  '@media (max-width:640px){.elct-launch{padding:0;width:46px;height:46px;justify-content:center;gap:0}' +
+    '.elct-launch .elct-lbl{display:none}.elct-launch .d{width:12px;height:12px}}' +
   '@media (prefers-reduced-motion:reduce){.elct-ov,.elct-spot,.elct-card,.elct-dot{transition:none}.elct-launch .d{animation:none}}';
 
   function injectStyles() {
@@ -202,7 +204,7 @@
     if (!CFG.showLauncher || document.querySelector('.elct-launch')) return;
     var tour = detectPageTour(); if (!tour) return;
     var b = document.createElement('button'); b.className = 'elct-launch';
-    b.innerHTML = '<span class="d"></span>' + CFG.launcherLabel;
+    b.innerHTML = '<span class="d"></span><span class="elct-lbl">' + CFG.launcherLabel + '</span>';
     b.onclick = function () { start(tour); };
     document.body.appendChild(b);
     // Avoid overlapping the theme toggle: stack the launcher above it when present.

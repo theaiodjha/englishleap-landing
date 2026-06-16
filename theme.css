@@ -146,3 +146,5 @@ html[data-theme="light"] .reset{box-shadow:inset 0 0 0 1.8px rgba(60,50,110,.30)
 html[data-theme="light"] .reset:hover{box-shadow:inset 0 0 0 1.8px #0f9b90}
 html[data-theme="light"] #puzzle .panel{border-color:rgba(60,50,110,.18)}
 html[data-theme="light"] .sentence{color:#241f3a}
+
+@media (max-width:640px){#elc-theme-toggle .lbl{display:none}#elc-theme-toggle button{width:34px;height:30px}}
