@@ -325,7 +325,11 @@ function boot(data){
       const tex=texLoader.load('/games/clue-room/icons/'+slug+'.png');
       mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false});
     } else {
+      // device-independent baked tile (color emoji); canvas version is the instant placeholder + fallback
+      const key=[...(c.emoji||'')].map(ch=>ch.codePointAt(0).toString(16)).join('-')+'_'+(c.color||'#8b6cff').replace('#','');
       mat=new THREE.SpriteMaterial({map:emojiTexture(c),transparent:true,depthWrite:false});
+      texLoader.load('/games/clue-room/icons/auto/'+key+'.png',
+        t=>{ t.anisotropy=8; mat.map=t; mat.needsUpdate=true; }, undefined, ()=>{});
     }
     const s=new THREE.Sprite(mat); s.scale.set(ICON_SCALE,ICON_SCALE,1);
     return s;
@@ -362,11 +366,15 @@ function boot(data){
     bg2.addColorStop(0,'rgba(255,255,255,0)'); bg2.addColorStop(1,'rgba(255,255,255,0.13)');
     x.fillStyle=bg2; x.fillRect(pad,pad+w*0.62,w,w*0.38); x.restore();
     rr(pad,pad,w,w,r); x.lineWidth=2; x.strokeStyle='rgba(255,255,255,0.32)'; x.stroke();
-    // the clue's emoji, centred, with a soft shadow for definition
-    x.font='196px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
-    x.textAlign='center'; x.textBaseline='middle';
+    // the clue's emoji, centred, fit to the tile width, with a soft shadow for definition
+    const glyph=(c.emoji||'\u25C7'); let fs=196;
+    const setFont=()=>{ x.font=fs+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif'; };
+    setFont();
+    const mw=x.measureText(glyph).width;
+    if(mw>w*0.9){ fs=Math.floor(fs*(w*0.9)/mw); setFont(); }
+    x.textAlign='center'; x.textBaseline='middle'; x.fillStyle='#ffffff';
     x.shadowColor='rgba(0,0,0,0.30)'; x.shadowBlur=10; x.shadowOffsetY=4;
-    x.fillText((c.emoji||'\u25C7')+'\uFE0F', S/2, S/2+8);
+    x.fillText(glyph, S/2, S/2+8);
     const tex=new THREE.CanvasTexture(cv); tex.anisotropy=8; tex.needsUpdate=true;
     return tex;
   }
