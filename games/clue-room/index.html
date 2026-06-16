@@ -13,7 +13,8 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   body{font-family:var(--body);color:var(--ink);background:var(--space);overflow:hidden}
-  #scene{position:fixed;inset:0;z-index:0}
+  #scene{position:fixed;inset:0;z-index:0;transition:opacity .55s ease,filter .55s ease}
+  #scene.recede{opacity:.16;filter:blur(8px) saturate(.82)}
   #stagebg{position:fixed;inset:0;z-index:-1;background:
     radial-gradient(120% 80% at 50% 8%, rgba(255,96,168,.20), transparent 58%),
     radial-gradient(90% 60% at 50% 104%, rgba(150,40,130,.55), transparent 72%),
@@ -428,8 +429,8 @@ function boot(data){
   renderer.domElement.addEventListener('pointermove',e=>{ const h=pick(e); hovered=h?relicOf(h.object):null; document.body.style.cursor=hovered?'pointer':'default'; });
   renderer.domElement.addEventListener('click',e=>{ const h=pick(e); const g0=h?relicOf(h.object):null; if(g0) openReveal(g0.userData.clue); });
 
-  let t=0, roomScale=1;
-  (function loop(){ requestAnimationFrame(loop); t+=reduced?0:0.016;
+  let t=0, roomScale=1, solving=false;
+  (function loop(){ requestAnimationFrame(loop); if(solving) return; t+=reduced?0:0.016;
     relics.forEach(g=>{ const d=g.userData; const done=solved.has(d.clue.id);
       g.position.y=d.base+(reduced?0:Math.sin(t*0.7+d.phase)*0.035); // very subtle bob
       const pulse=0.5+0.5*Math.sin(t*1.2+d.phase);
@@ -515,7 +516,7 @@ function boot(data){
   $('#reveal').addEventListener('click',e=>{ if(e.target.id==='reveal' && Date.now()-revealOpenedAt>250) closeReveal(); });
 
   // ---- puzzle ----
-  $('#solveBtn').onclick=()=>{ $('#solveWrap').classList.remove('show'); $('#hint').classList.remove('show'); buildPuzzle(); $('#puzzle').classList.add('show'); };
+  $('#solveBtn').onclick=()=>{ $('#solveWrap').classList.remove('show'); $('#hint').classList.remove('show'); $('#scene').classList.add('recede'); setTimeout(()=>{ solving=true; }, 620); buildPuzzle(); $('#puzzle').classList.add('show'); };
   $('#resetBtn').onclick=()=>{ if(!answers)return; filled=answers.map(()=>null); renderPuzzle('Cleared \u2014 give it a fresh go. \u2728'); };
   function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
   let filled, answers, bank;
