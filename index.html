@@ -764,11 +764,17 @@ menuBtn.addEventListener('click',()=>setMenu(!mobileMenu.classList.contains('ope
   var mq=matchMedia('(max-width:1080px)');
   function place(){
     var t=document.getElementById('elc-theme-toggle'), slot=document.getElementById('mThemeSlot');
-    if(!t||!slot) return;
+    if(!t||!slot) return false;
     if(mq.matches){ if(t.parentNode!==slot) slot.appendChild(t); t.classList.add('in-menu'); }
     else { if(t.parentNode!==document.body) document.body.appendChild(t); t.classList.remove('in-menu'); }
+    return true;
   }
-  var n=0;(function wait(){ if(document.getElementById('elc-theme-toggle')){ place(); } else if(n++<60){ setTimeout(wait,50); } })();
+  if(!place()){                                   // toggle injected later by theme.js
+    var obs=new MutationObserver(function(){ if(place()) obs.disconnect(); });
+    obs.observe(document.documentElement,{childList:true,subtree:true});
+    document.addEventListener('DOMContentLoaded',place);
+    window.addEventListener('load',place);
+  }
   mq.addEventListener ? mq.addEventListener('change',place) : mq.addListener(place);
 })();
 mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
