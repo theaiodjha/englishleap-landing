@@ -213,7 +213,7 @@
     function positionLauncher() {
       var tg = document.getElementById('elc-theme-toggle');
       var floating = tg && getComputedStyle(tg).position === 'fixed' && tg.offsetParent !== null;
-      if (floating) { var h = tg.getBoundingClientRect().height || 40; b.style.bottom = 'calc(' + Math.round(h + 24) + 'px + env(safe-area-inset-bottom))'; }
+      if (floating) { var h = tg.getBoundingClientRect().height || 40; b.style.bottom = 'calc(' + Math.round(h + 34) + 'px + env(safe-area-inset-bottom))'; }
       else { b.style.bottom = 'calc(22px + env(safe-area-inset-bottom))'; }
     }
     [80, 400, 900, 1600].forEach(function (t) { setTimeout(positionLauncher, t); });
