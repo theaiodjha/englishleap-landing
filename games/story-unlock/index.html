@@ -120,6 +120,11 @@
   .su-toast.show{opacity:1;transform:translate(-50%,0)}
   .readingbar{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;color:var(--soft);font-size:15px;margin:20px auto 0;max-width:560px;text-align:center}
   .readingbar .stopbtn{margin-top:0;background:var(--glass);border:1px solid var(--line);color:var(--ink)}
+  .kw{transition:background .12s ease,color .12s ease,box-shadow .12s ease;border-radius:5px;padding:0 1px}
+  .kw.on{background:rgba(255,205,70,.32);color:#fff;box-shadow:0 0 0 2px rgba(255,205,70,.35)}
+  .vctl{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:0 auto 14px;color:var(--soft);font-size:13px}
+  .vctl label{display:inline-flex;align-items:center;gap:6px}
+  .vctl select{background:var(--glass);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:6px 9px;font:inherit;font-size:13px;max-width:190px}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -184,31 +189,60 @@ loadVoices(); if(typeof speechSynthesis!=='undefined'&&speechSynthesis.onvoicesc
 function pickVoice(){return voices.find(v=>/en-GB/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang))||voices[0];}
 function speak(t){try{if(typeof speechSynthesis==='undefined')return;const u=new SpeechSynthesisUtterance(t);const v=pickVoice();if(v)u.voice=v;u.lang=(v&&v.lang)||'en-GB';u.rate=.92;speechSynthesis.cancel();speechSynthesis.resume();speechSynthesis.speak(u);}catch(e){}}
 let curNarrDone=null, narrTimer=null;
+const PREF={ voice:(()=>{try{return localStorage.getItem('elc_voice')||''}catch(e){return ''}})(),
+             rate:(()=>{try{return parseFloat(localStorage.getItem('elc_rate'))||0.85}catch(e){return 0.85}})() };
+function pickVoicePref(){ const w=PREF.voice; let v=w&&(voices.find(x=>x.voiceURI===w)||voices.find(x=>x.name===w)); return v||voices.find(x=>/en-GB/i.test(x.lang))||voices.find(x=>/^en/i.test(x.lang))||voices[0]; }
 function showUnmuteHint(){ const t=document.getElementById('suToast'); if(t){ t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),4200); } }
 function hideUnmuteHint(){ const t=document.getElementById('suToast'); if(t){ t.classList.remove('show'); clearTimeout(t._h); } }
-function narrate(text,onend){
+function narrate(text,onend,onboundary){
   if(curNarrDone){ const prev=curNarrDone; curNarrDone=null; clearTimeout(narrTimer); try{speechSynthesis.cancel();}catch(e){} prev('interrupted'); }
   let done=false; const fin=(r)=>{ if(done)return; done=true; clearTimeout(narrTimer); curNarrDone=null; hideUnmuteHint(); if(onend)onend(r); };
   curNarrDone=fin;
   if(typeof speechSynthesis==='undefined'){ narrTimer=setTimeout(()=>fin('nosupport'),700); return; }
   try{
-    const u=new SpeechSynthesisUtterance(text); const v=pickVoice(); if(v)u.voice=v; u.lang=(v&&v.lang)||'en-GB'; u.rate=.92;
+    const u=new SpeechSynthesisUtterance(text); const v=pickVoicePref(); if(v)u.voice=v; u.lang=(v&&v.lang)||'en-GB'; u.rate=PREF.rate||0.85;
     u.onend=()=>fin('end'); u.onerror=()=>fin('end');
+    if(onboundary) u.onboundary=(e)=>{ if(e&&typeof e.charIndex==='number') onboundary(e.charIndex); };
     speechSynthesis.cancel(); speechSynthesis.resume(); speechSynthesis.speak(u);
     showUnmuteHint();
     const words=(text||'').split(/\s+/).filter(Boolean).length;
-    narrTimer=setTimeout(()=>fin('timeout'), Math.min(60000,Math.max(4000,Math.round(words/2.3*1000)+3000)));
+    narrTimer=setTimeout(()=>fin('timeout'), Math.min(90000,Math.max(4000,Math.round(words/(2.3*((PREF.rate||0.85)/0.85))*1000)+3000)));
   }catch(e){ narrTimer=setTimeout(()=>fin('end'),700); }
 }
 function stopNarration(){ if(!curNarrDone)return; const cb=curNarrDone; curNarrDone=null; clearTimeout(narrTimer); try{speechSynthesis.cancel();}catch(e){} hideUnmuteHint(); cb('stopped'); }
-function bindReadButton(btn,getText){
-  if(!btn) return; const orig=btn.innerHTML;
-  btn.dataset.on='';
+function wrapWords(text){
+  const parts=(text||'').split(/(\s+)/); let idx=0,html='',ranges=[],wi=0;
+  for(const p of parts){ if(p==='')continue; if(/^\s+$/.test(p)){ html+=esc(p); idx+=p.length; }
+    else { ranges.push({s:idx,e:idx+p.length,i:wi}); html+='<span class="kw" data-i="'+wi+'">'+esc(p)+'</span>'; idx+=p.length; wi++; } }
+  return {html:html,ranges:ranges};
+}
+function narrateText(text, container, onend){
+  let ranges=null;
+  if(container){ const w=wrapWords(text); container.innerHTML=w.html; ranges=w.ranges; }
+  let last=-1;
+  const onb=(ci)=>{ if(!ranges||!container)return; let r=null; for(const rr of ranges){ if(ci>=rr.s&&ci<rr.e){r=rr;break;} if(rr.s<=ci) r=rr; } if(!r||last===r.i)return; last=r.i;
+    const prev=container.querySelector('.kw.on'); if(prev) prev.classList.remove('on');
+    const el=container.querySelector('.kw[data-i="'+r.i+'"]'); if(el){ el.classList.add('on'); try{el.scrollIntoView({block:'nearest'});}catch(e){} } };
+  narrate(text, (reason)=>{ if(container){ const e=container.querySelector('.kw.on'); if(e)e.classList.remove('on'); } if(onend)onend(reason); }, onb);
+}
+function bindReadButton(btn, getText, getContainer){
+  if(!btn) return; const orig=btn.innerHTML; btn.dataset.on='';
   btn.onclick=()=>{
     if(btn.dataset.on==='1'){ stopNarration(); return; }
+    const cont=getContainer?getContainer():null;
     btn.dataset.on='1'; btn.innerHTML='<span>&#9632;</span> Stop reading';
-    narrate(getText(), ()=>{ btn.dataset.on=''; btn.innerHTML=orig; });
+    narrateText(getText(), cont, ()=>{ btn.dataset.on=''; btn.innerHTML=orig; });
   };
+}
+function mountVoiceControls(host){
+  if(!host) return; const en=voices.filter(v=>/^en/i.test(v.lang)); const vv=en.length?en:voices; if(!vv.length){ host.innerHTML=''; return; }
+  const opts=vv.map(v=>'<option value="'+esc(v.voiceURI)+'"'+(v.voiceURI===PREF.voice?' selected':'')+'>'+esc(v.name)+'</option>').join('');
+  const speeds=[['0.7','Slow'],['0.85','Relaxed'],['1','Normal'],['1.15','Brisk']];
+  const sopts=speeds.map(sp=>'<option value="'+sp[0]+'"'+(Math.abs(parseFloat(sp[0])-PREF.rate)<0.03?' selected':'')+'>'+sp[1]+'</option>').join('');
+  host.innerHTML='<div class="vctl"><label>&#128483;&#65039; <select id="voiceSel" aria-label="Voice">'+opts+'</select></label>'
+    +'<label>&#9201;&#65039; <select id="speedSel" aria-label="Speed">'+sopts+'</select></label></div>';
+  const vs=host.querySelector('#voiceSel'); if(vs) vs.onchange=()=>{ PREF.voice=vs.value; try{localStorage.setItem('elc_voice',vs.value)}catch(e){} };
+  const ss=host.querySelector('#speedSel'); if(ss) ss.onchange=()=>{ PREF.rate=parseFloat(ss.value)||0.85; try{localStorage.setItem('elc_rate',ss.value)}catch(e){} };
 }
 
 let DATA=null, STORY='', BONUS='', keeper='', byWord={}, GAPS=[], placed=0, target=-1, revealed=false;
@@ -260,7 +294,7 @@ function unlock(){
   $('#unlockArea').innerHTML='<div class="readingbar"><span>&#128266; Reading the story aloud&hellip;</span>'
     +'<button class="readbtn stopbtn" id="stopRead"><span>&#9632;</span>&nbsp;Stop</button></div>';
   const sr=$('#stopRead'); if(sr) sr.onclick=()=>stopNarration();
-  setTimeout(()=>narrate(plain(), revealResult), 350);  // read the whole story aloud (stoppable)
+  setTimeout(()=>narrateText(plain(), $('#story'), revealResult), 350);  // read the whole story aloud, highlight words
 }
 function revealResult(){
   if(revealed) return; revealed=true;
@@ -274,7 +308,7 @@ function revealResult(){
     + '<div class="again"><button class="pri" id="againBtn">Play again</button>'
     + '<a class="sec" href="/arcade-type.html?type='+TYPE+'">More episodes</a></div>'
     + '</div>';
-  html+='<div class="readsec"><button class="readbtn" id="readStory"><span>&#9654;</span> Read the story again</button>';
+  html+='<div class="readsec"><div id="voiceControls"></div><button class="readbtn" id="readStory"><span>&#9654;</span> Read the story again</button>';
   if(BONUS){
     html+='<div class="bonus"><span class="btag">&#10024; Bonus ending &middot; Fluency Club</span>'
         + '<h3>The story continues\u2026</h3><p id="bonusText">'+esc(BONUS)+'</p>'
@@ -282,8 +316,9 @@ function revealResult(){
   }
   html+='</div>';
   $('#unlockArea').innerHTML=html;
-  bindReadButton($('#readStory'), plain);
-  bindReadButton($('#readBonus'), function(){return BONUS;});
+  bindReadButton($('#readStory'), plain, function(){ const sc=$('#storyCard'); if(sc) sc.style.display=''; return $('#story'); });
+  bindReadButton($('#readBonus'), function(){return BONUS;}, function(){ return $('#bonusText'); });
+  mountVoiceControls($('#voiceControls'));
   $('#againBtn').onclick=()=>resetGame();
   try{ if(window.ELC){ const host=$('#winExtras'); if(host) ELC.orivaCheer(host,'<b style="color:#8b6cff">Oriva loved your story!</b>'); } }catch(e){}
   try{ $('#unlockArea').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
