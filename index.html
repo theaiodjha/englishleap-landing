@@ -158,8 +158,9 @@ header.nav.scrolled{background:rgba(8,8,18,.7);backdrop-filter:blur(16px) satura
 .menu-btn.active span::before{transform:translateY(6px) rotate(45deg)}
 .menu-btn.active span::after{transform:translateY(-6px) rotate(-45deg)}
 /* mobile slide-down panel */
-.mobile-menu{position:fixed;top:0;left:0;right:0;z-index:45;padding:84px 22px 28px;
-  background:rgba(8,8,18,.92);backdrop-filter:blur(18px) saturate(140%);border-bottom:1px solid var(--line);
+.mobile-menu{position:fixed;inset:0;z-index:45;padding:84px 22px max(30px,env(safe-area-inset-bottom));
+  background:rgba(8,8,18,.96);backdrop-filter:blur(18px) saturate(140%);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
   transform:translateY(-105%);transition:transform .45s cubic-bezier(.2,.7,.2,1);visibility:hidden}
 .mobile-menu.open{transform:translateY(0);visibility:visible}
 .mobile-menu a.m-link{display:block;font-family:var(--display);font-size:1.35rem;font-weight:500;color:var(--ink);
