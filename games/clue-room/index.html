@@ -547,12 +547,13 @@ function boot(data){
     if(filled.some(x=>!x))return;
     const ps=$('#pstatus');
     if(filled.every((w,i)=>w===answers[i])){ ps.textContent='Perfect! \uD83C\uDF89'; ps.className='sb-msg ok pop';
-      $('#checkBtn').disabled=true; setTimeout(()=>{ $('#puzzle').classList.remove('show'); celebrate(); setTimeout(showResult,1000); }, 800); }
+      $('#checkBtn').disabled=true; setTimeout(()=>{ $('#puzzle').classList.remove('show'); celebrate(); setTimeout(showResult,2200); }, 800); }
     else { ps.textContent=nudges[Math.floor(Math.random()*nudges.length)]; ps.className='sb-msg nudge pop'; }
   };
 
   function showResult(){
     $('#puzzle').classList.remove('show');
+    const nb=$('#nightbanner'); if(nb) nb.classList.remove('show');  // hand off cleanly from the celebration banner — no overlap
     $('#keeper').textContent='\u201C'+puzzle.keeper+'\u201D';
     $('#recap').innerHTML=clues.map(c=>'<span class="tag" style="background:'+c.color+'22;color:'+c.color+';box-shadow:inset 0 0 0 1.5px '+c.color+'88">'+esc(c.word)+'</span>').join('');
     $('#result').classList.add('show');
