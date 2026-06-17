@@ -1,0 +1,14 @@
+#!/bin/sh
+# ELC pre-push gate — runs the site audit and blocks the push on HIGH-severity issues.
+# One-time setup (run once in the repo):  git config core.hooksPath tools/hooks
+echo "→ Running site audit (tools/audit.py)…"
+if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
+"$PY" tools/audit.py
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "✗ Push blocked: HIGH-severity issues found above."
+  echo "  Fix them, or override with:  git push --no-verify"
+  exit 1
+fi
+echo "✓ Audit clean — pushing."
+exit 0

@@ -218,7 +218,9 @@ function fromTray(id){
   const i=tray.findIndex(b=>b.id===id); if(i<0)return;
   bank.push(tray.splice(i,1)[0]); paint();
 }
-function clearTray(){ if(!tray.length)return; bank=bank.concat(tray); tray=[]; paint(); }
+function clearTray(){ if(!tray.length)return; bank=shuffle(bank.concat(tray));
+  if(bank.map(b=>b.tok).join(' ')===orig.join(' ') && orig.length>1) bank=shuffle(bank);
+  tray=[]; paint(); }
 function check(){
   if(tray.length!==orig.length) return;
   let allRight=true;

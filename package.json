@@ -1,6 +1,7 @@
 {
-  "name": "elc-members-oauth",
+  "name": "englishleap-site",
   "private": true,
-  "type": "module",
-  "engines": { "node": ">=18" }
+  "scripts": {
+    "audit": "python3 tools/audit.py"
+  }
 }
