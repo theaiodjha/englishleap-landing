@@ -53,7 +53,7 @@
   '.elct-back:hover{border-color:#1fc4b633}' +
   '.elct-next{background:linear-gradient(135deg,#8b6cff,#1fc4b6);border:none;color:#06201c;' +
     'border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}' +
-  '.elct-launch{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:99990;' +
+  '.elct-launch{position:fixed;right:14px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:99990;' +
     'display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:11px 18px;' +
     'background:linear-gradient(110deg,#8b6cff 0%,#e834a0 55%,#ff7848 100%);border:1.5px solid rgba(255,255,255,.55);' +
     'color:#fff;font:700 13px/1 "Poppins",system-ui,sans-serif;letter-spacing:.01em;cursor:pointer;' +
@@ -66,6 +66,7 @@
     'top:auto!important;max-width:none;width:auto}}' +
   '@media (max-width:640px){.elct-launch{padding:0;width:46px;height:46px;justify-content:center;gap:0}' +
     '.elct-launch .elct-lbl{display:none}.elct-launch .d{width:12px;height:12px}}' +
+  '.elct-launch{transition:opacity .28s ease}.elct-launch.elct-hidden{opacity:0;pointer-events:none}' +
   '@media (prefers-reduced-motion:reduce){.elct-ov,.elct-spot,.elct-card,.elct-dot{transition:none}.elct-launch .d{animation:none}}';
 
   function injectStyles() {
@@ -213,10 +214,17 @@
       var tg = document.getElementById('elc-theme-toggle');
       var floating = tg && getComputedStyle(tg).position === 'fixed' && tg.offsetParent !== null;
       if (floating) { var h = tg.getBoundingClientRect().height || 40; b.style.bottom = 'calc(' + Math.round(h + 24) + 'px + env(safe-area-inset-bottom))'; }
-      else { b.style.bottom = 'calc(16px + env(safe-area-inset-bottom))'; }
+      else { b.style.bottom = 'calc(22px + env(safe-area-inset-bottom))'; }
     }
     setTimeout(positionLauncher, 80);
     window.addEventListener('resize', positionLauncher);
+    var elctLastY = 0;
+    window.addEventListener('scroll', function () {
+      var y = window.scrollY || 0;
+      if (Math.abs(y - elctLastY) < 10) return;
+      if (y > elctLastY && y > 240) b.classList.add('elct-hidden'); else b.classList.remove('elct-hidden');
+      elctLastY = y;
+    }, { passive: true });
   }
   function autostart() {
     injectStyles();

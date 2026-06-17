@@ -26,8 +26,8 @@
   --panel-2:rgba(255,255,255,.055);
   --line:rgba(255,255,255,.10);
   --ink:#f5f3ff;
-  --muted:#a39fce;
-  --muted-2:#76729e;
+  --muted:#b6b2dd;
+  --muted-2:#8e8ab6;
   --violet:#8b6cff;
   --electric:#ff7848;
   --cyan:#1fc4b6;
@@ -178,7 +178,7 @@ body.menu-open{overflow:hidden}
 .m-theme-lbl{font-family:var(--display);font-size:1.2rem;font-weight:500;color:var(--ink)}
 
 /* ---------- Hero ---------- */
-.hero{padding:170px 0 90px;text-align:center}
+.hero{padding:clamp(104px,15vw,170px) 0 90px;text-align:center}
 .hero .eyebrow{animation:rise .8s .05s both}
 .hero h1{font-size:clamp(2.7rem,8vw,5.6rem);font-weight:600;margin:26px auto 0;max-width:14ch}
 .hero h1 .line{display:block;overflow:hidden}
@@ -355,6 +355,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
 .socials a svg{width:18px;height:18px;color:var(--muted)}
 @media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr;gap:30px}}
 @media(max-width:520px){.foot-grid{grid-template-columns:1fr}}
+  /* POLISH-HEADINGS */ h2{letter-spacing:.004em}.eco-card h3{letter-spacing:.006em}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#171030">
