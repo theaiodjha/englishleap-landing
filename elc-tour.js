@@ -216,8 +216,9 @@
       if (floating) { var h = tg.getBoundingClientRect().height || 40; b.style.bottom = 'calc(' + Math.round(h + 24) + 'px + env(safe-area-inset-bottom))'; }
       else { b.style.bottom = 'calc(22px + env(safe-area-inset-bottom))'; }
     }
-    setTimeout(positionLauncher, 80);
+    [80, 400, 900, 1600].forEach(function (t) { setTimeout(positionLauncher, t); });
     window.addEventListener('resize', positionLauncher);
+    try { matchMedia('(max-width:1080px)').addEventListener('change', function () { setTimeout(positionLauncher, 80); }); } catch (e) {}
     var elctLastY = 0;
     window.addEventListener('scroll', function () {
       var y = window.scrollY || 0;
