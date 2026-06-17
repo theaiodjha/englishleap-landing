@@ -175,8 +175,20 @@ function loadVoices(){try{voices=speechSynthesis.getVoices()||[];}catch(e){voice
 loadVoices(); if(typeof speechSynthesis!=='undefined'&&speechSynthesis.onvoiceschanged!==undefined) speechSynthesis.onvoiceschanged=loadVoices;
 function pickVoice(){return voices.find(v=>/en-GB/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang))||voices[0];}
 function speak(t){try{if(typeof speechSynthesis==='undefined')return;const u=new SpeechSynthesisUtterance(t);const v=pickVoice();if(v)u.voice=v;u.lang=(v&&v.lang)||'en-GB';u.rate=.92;speechSynthesis.cancel();speechSynthesis.resume();speechSynthesis.speak(u);}catch(e){}}
+function speakThen(t,done){
+  let called=false; const fin=()=>{ if(called)return; called=true; try{done&&done();}catch(e){} };
+  try{
+    if(typeof speechSynthesis==='undefined'){ return setTimeout(fin,800); }
+    const u=new SpeechSynthesisUtterance(t); const v=pickVoice(); if(v)u.voice=v;
+    u.lang=(v&&v.lang)||'en-GB'; u.rate=.92; u.onend=fin; u.onerror=fin;
+    speechSynthesis.cancel(); speechSynthesis.resume(); speechSynthesis.speak(u);
+    // safety: reveal even if onend never fires (some mobile browsers)
+    const words=(t||'').split(/\s+/).filter(Boolean).length;
+    setTimeout(fin, Math.min(45000, Math.max(4000, Math.round(words/2.3*1000)+3000)));
+  }catch(e){ setTimeout(fin,800); }
+}
 
-let DATA=null, STORY='', BONUS='', keeper='', byWord={}, GAPS=[], placed=0, target=-1;
+let DATA=null, STORY='', BONUS='', keeper='', byWord={}, GAPS=[], placed=0, target=-1, revealed=false;
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function plain(){return STORY.replace(/\{([^}]+)\}/g,'$1');}
 
@@ -219,9 +231,16 @@ function unlock(){
   target=-1; document.querySelectorAll('.gap').forEach(el=>el.classList.remove('target'));
   $('#storyCard').classList.add('unlocked');
   $('#bank').style.display='none'; const hl=$('#hintline'); if(hl) hl.style.display='none';
+  revealed=false;
+  try{ if(window.ELC) ELC.markComplete(TYPE, EP); }catch(e){}
+  if(!reduced) fireworks(2600);                 // fireworks light up the screen
+  setTimeout(()=>speakThen(plain(), revealResult), 350);  // ...and the whole story is read aloud
+}
+function revealResult(){
+  if(revealed) return; revealed=true;
+  const sc=$('#storyCard'); if(sc) sc.style.display='none';   // reading done -> remove the story
   const name=(DATA.user||'').trim().split(/\s+/)[0];
   const head=name?('Story unlocked, '+name+'!'):'Story unlocked!';
-
   let html='<div class="card result">'
     + '<div class="rk">'+esc(head)+'</div>'
     + (keeper?'<div class="rkeeper">\u201C'+esc(keeper)+'\u201D</div>':'')
@@ -229,8 +248,7 @@ function unlock(){
     + '<div class="again"><button class="pri" id="againBtn">Play again</button>'
     + '<a class="sec" href="/arcade-type.html?type='+TYPE+'">More episodes</a></div>'
     + '</div>';
-  // bonus reading prompt sits BELOW the success card
-  html+='<div class="readsec"><button class="readbtn" id="readStory"><span>&#9654;</span> Read the story</button>';
+  html+='<div class="readsec"><button class="readbtn" id="readStory"><span>&#9654;</span> Read the story again</button>';
   if(BONUS){
     html+='<div class="bonus"><span class="btag">&#10024; Bonus ending &middot; Fluency Club</span>'
         + '<h3>The story continues\u2026</h3><p id="bonusText">'+esc(BONUS)+'</p>'
@@ -238,20 +256,12 @@ function unlock(){
   }
   html+='</div>';
   $('#unlockArea').innerHTML=html;
-
   $('#readStory').onclick=()=>speak(plain());
   const rb=$('#readBonus'); if(rb) rb.onclick=()=>speak(BONUS);
   $('#againBtn').onclick=()=>resetGame();
-
-  try{
-    if(window.ELC){
-      ELC.markComplete(TYPE, EP);
-      const host=$('#winExtras'); if(host) ELC.orivaCheer(host,'<b style="color:#8b6cff">Oriva loved your story!</b>');
-    }
-  }catch(e){}
-
+  try{ if(window.ELC){ const host=$('#winExtras'); if(host) ELC.orivaCheer(host,'<b style="color:#8b6cff">Oriva loved your story!</b>'); } }catch(e){}
   try{ $('#unlockArea').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
-  if(!reduced) fireworks(2200);
+  if(!reduced) fireworks(1600);                 // a small burst as the cards appear
 }
 function resetGame(){
   placed=0; $('#pPlaced').textContent='0/'+GAPS.length;
