@@ -125,6 +125,15 @@
   .vctl{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:0 auto 14px;color:var(--soft);font-size:13px}
   .vctl label{display:inline-flex;align-items:center;gap:6px}
   .vctl select{background:var(--glass);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:6px 9px;font:inherit;font-size:13px;max-width:190px}
+  .vctl select{background:#241a3d;color:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font:inherit;font-size:13px;max-width:200px}
+  .vctl select option{background:#241a3d;color:#fff}
+  .readbar{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,12px);z-index:72;
+    display:flex;align-items:center;gap:14px;background:rgba(20,14,40,.96);border:1px solid var(--line);
+    padding:9px 11px 9px 18px;border-radius:999px;box-shadow:0 16px 40px rgba(0,0,0,.5);
+    color:var(--soft);font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;max-width:92vw}
+  .readbar.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  .readbar-stop{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(110deg,var(--purple,#8b6cff),var(--electric,#4d8bff));
+    color:#fff;border:0;font:inherit;font-weight:700;font-size:13px;border-radius:999px;padding:8px 16px;cursor:pointer}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -164,6 +173,7 @@
 <canvas id="fx"></canvas>
 <div class="nightbanner" id="nightbanner"></div>
 <div class="su-toast" id="suToast">&#128266; Turn your volume up to hear the story</div>
+<div class="readbar" id="readBar"><span>&#128266; Reading aloud&hellip;</span><button class="readbar-stop" id="readBarStop"><span>&#9632;</span> Stop</button></div>
 
 <div class="gateview" id="gateview">
   <div class="gatecard">
@@ -284,6 +294,16 @@ function attempt(chip){
   }
 }
 
+function showReadBar(){ const b=document.getElementById('readBar'); if(b){ const s=document.getElementById('readBarStop'); if(s) s.onclick=()=>stopNarration(); b.classList.add('show'); } }
+function hideReadBar(){ const b=document.getElementById('readBar'); if(b) b.classList.remove('show'); }
+function replayStory(){
+  const ua=$('#unlockArea'), sc=$('#storyCard');
+  if(sc) sc.style.display='';
+  if(ua) ua.style.display='none';          // hide the result + bonus while re-reading
+  try{ if(sc) sc.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+  showReadBar();
+  narrateText(plain(), $('#story'), ()=>{ hideReadBar(); if(sc) sc.style.display='none'; if(ua) ua.style.display=''; });
+}
 function unlock(){
   target=-1; document.querySelectorAll('.gap').forEach(el=>el.classList.remove('target'));
   $('#storyCard').classList.add('unlocked');
@@ -291,13 +311,12 @@ function unlock(){
   revealed=false;
   try{ if(window.ELC) ELC.markComplete(TYPE, EP); }catch(e){}
   if(!reduced) fireworks(2600);                 // fireworks light up the screen
-  $('#unlockArea').innerHTML='<div class="readingbar"><span>&#128266; Reading the story aloud&hellip;</span>'
-    +'<button class="readbtn stopbtn" id="stopRead"><span>&#9632;</span>&nbsp;Stop</button></div>';
-  const sr=$('#stopRead'); if(sr) sr.onclick=()=>stopNarration();
+  $('#unlockArea').innerHTML='';
+  showReadBar();
   setTimeout(()=>narrateText(plain(), $('#story'), revealResult), 350);  // read the whole story aloud, highlight words
 }
 function revealResult(){
-  if(revealed) return; revealed=true;
+  if(revealed) return; revealed=true; hideReadBar();
   const sc=$('#storyCard'); if(sc) sc.style.display='none';   // reading done -> remove the story
   const name=(DATA.user||'').trim().split(/\s+/)[0];
   const head=name?('Story unlocked, '+name+'!'):'Story unlocked!';
@@ -316,7 +335,7 @@ function revealResult(){
   }
   html+='</div>';
   $('#unlockArea').innerHTML=html;
-  bindReadButton($('#readStory'), plain, function(){ const sc=$('#storyCard'); if(sc) sc.style.display=''; return $('#story'); });
+  const rsb=$('#readStory'); if(rsb) rsb.onclick=replayStory;
   bindReadButton($('#readBonus'), function(){return BONUS;}, function(){ return $('#bonusText'); });
   mountVoiceControls($('#voiceControls'));
   $('#againBtn').onclick=()=>resetGame();
@@ -325,10 +344,10 @@ function revealResult(){
   if(!reduced) fireworks(1600);                 // a small burst as the cards appear
 }
 function resetGame(){
-  stopNarration(); revealed=false;
+  stopNarration(); hideReadBar(); revealed=false;
   placed=0; $('#pPlaced').textContent='0/'+GAPS.length;
   $('#storyCard').classList.remove('unlocked'); $('#storyCard').style.display='';
-  $('#unlockArea').innerHTML=''; $('#bank').style.display=''; const hl=$('#hintline'); if(hl) hl.style.display='';
+  $('#unlockArea').style.display=''; $('#unlockArea').innerHTML=''; $('#bank').style.display=''; const hl=$('#hintline'); if(hl) hl.style.display='';
   renderStory(); renderBank(); setTarget();
 }
 function fireworks(ms){
