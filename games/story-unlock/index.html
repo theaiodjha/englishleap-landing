@@ -135,6 +135,11 @@
   .readbar.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
   .readbar-stop{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(110deg,var(--purple,#8b6cff),var(--electric,#4d8bff));
     color:#fff;border:0;font:inherit;font-weight:700;font-size:13px;border-radius:999px;padding:8px 16px;cursor:pointer}
+  /* While the floating read bar is up, keep the story clear of it: reserve space at the
+     bottom and pad the scroll so karaoke auto-scroll never tucks a word behind the bar. */
+  .kw{scroll-margin-bottom:130px}
+  html.reading,body.reading{scroll-padding-bottom:calc(130px + env(safe-area-inset-bottom))}
+  body.reading .wrap{padding-bottom:calc(140px + env(safe-area-inset-bottom))}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -295,8 +300,8 @@ function attempt(chip){
   }
 }
 
-function showReadBar(){ const b=document.getElementById('readBar'); if(b){ const s=document.getElementById('readBarStop'); if(s) s.onclick=()=>stopNarration(); b.classList.add('show'); } }
-function hideReadBar(){ const b=document.getElementById('readBar'); if(b) b.classList.remove('show'); }
+function showReadBar(){ const b=document.getElementById('readBar'); if(b){ const s=document.getElementById('readBarStop'); if(s) s.onclick=()=>stopNarration(); b.classList.add('show'); document.documentElement.classList.add('reading'); document.body.classList.add('reading'); } }
+function hideReadBar(){ const b=document.getElementById('readBar'); if(b) b.classList.remove('show'); document.documentElement.classList.remove('reading'); document.body.classList.remove('reading'); }
 function replayStory(){
   const ua=$('#unlockArea'), sc=$('#storyCard');
   if(sc) sc.style.display='';
