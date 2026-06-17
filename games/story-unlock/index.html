@@ -113,6 +113,13 @@
   .card .rk{font-family:var(--display);font-weight:700;font-size:clamp(22px,5vw,30px);color:var(--ink);line-height:1.08}
   .rkeeper{color:var(--soft);font-style:italic;font-size:15px;margin-top:10px;line-height:1.5}
   .readsec{max-width:680px;margin:18px auto 0;text-align:center}
+  .su-toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,10px);z-index:70;
+    background:rgba(20,14,40,.96);border:1px solid var(--line);color:var(--ink);padding:10px 16px;border-radius:999px;
+    font-size:13.5px;font-weight:600;box-shadow:0 14px 34px rgba(0,0,0,.45);opacity:0;pointer-events:none;
+    transition:opacity .3s,transform .3s;max-width:92vw;text-align:center}
+  .su-toast.show{opacity:1;transform:translate(-50%,0)}
+  .readingbar{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;color:var(--soft);font-size:15px;margin:20px auto 0;max-width:560px;text-align:center}
+  .readingbar .stopbtn{margin-top:0;background:var(--glass);border:1px solid var(--line);color:var(--ink)}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -151,6 +158,7 @@
 
 <canvas id="fx"></canvas>
 <div class="nightbanner" id="nightbanner"></div>
+<div class="su-toast" id="suToast">&#128266; Turn your volume up to hear the story</div>
 
 <div class="gateview" id="gateview">
   <div class="gatecard">
@@ -175,17 +183,32 @@ function loadVoices(){try{voices=speechSynthesis.getVoices()||[];}catch(e){voice
 loadVoices(); if(typeof speechSynthesis!=='undefined'&&speechSynthesis.onvoiceschanged!==undefined) speechSynthesis.onvoiceschanged=loadVoices;
 function pickVoice(){return voices.find(v=>/en-GB/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang))||voices[0];}
 function speak(t){try{if(typeof speechSynthesis==='undefined')return;const u=new SpeechSynthesisUtterance(t);const v=pickVoice();if(v)u.voice=v;u.lang=(v&&v.lang)||'en-GB';u.rate=.92;speechSynthesis.cancel();speechSynthesis.resume();speechSynthesis.speak(u);}catch(e){}}
-function speakThen(t,done){
-  let called=false; const fin=()=>{ if(called)return; called=true; try{done&&done();}catch(e){} };
+let curNarrDone=null, narrTimer=null;
+function showUnmuteHint(){ const t=document.getElementById('suToast'); if(t){ t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),4200); } }
+function hideUnmuteHint(){ const t=document.getElementById('suToast'); if(t){ t.classList.remove('show'); clearTimeout(t._h); } }
+function narrate(text,onend){
+  if(curNarrDone){ const prev=curNarrDone; curNarrDone=null; clearTimeout(narrTimer); try{speechSynthesis.cancel();}catch(e){} prev('interrupted'); }
+  let done=false; const fin=(r)=>{ if(done)return; done=true; clearTimeout(narrTimer); curNarrDone=null; hideUnmuteHint(); if(onend)onend(r); };
+  curNarrDone=fin;
+  if(typeof speechSynthesis==='undefined'){ narrTimer=setTimeout(()=>fin('nosupport'),700); return; }
   try{
-    if(typeof speechSynthesis==='undefined'){ return setTimeout(fin,800); }
-    const u=new SpeechSynthesisUtterance(t); const v=pickVoice(); if(v)u.voice=v;
-    u.lang=(v&&v.lang)||'en-GB'; u.rate=.92; u.onend=fin; u.onerror=fin;
+    const u=new SpeechSynthesisUtterance(text); const v=pickVoice(); if(v)u.voice=v; u.lang=(v&&v.lang)||'en-GB'; u.rate=.92;
+    u.onend=()=>fin('end'); u.onerror=()=>fin('end');
     speechSynthesis.cancel(); speechSynthesis.resume(); speechSynthesis.speak(u);
-    // safety: reveal even if onend never fires (some mobile browsers)
-    const words=(t||'').split(/\s+/).filter(Boolean).length;
-    setTimeout(fin, Math.min(45000, Math.max(4000, Math.round(words/2.3*1000)+3000)));
-  }catch(e){ setTimeout(fin,800); }
+    showUnmuteHint();
+    const words=(text||'').split(/\s+/).filter(Boolean).length;
+    narrTimer=setTimeout(()=>fin('timeout'), Math.min(60000,Math.max(4000,Math.round(words/2.3*1000)+3000)));
+  }catch(e){ narrTimer=setTimeout(()=>fin('end'),700); }
+}
+function stopNarration(){ if(!curNarrDone)return; const cb=curNarrDone; curNarrDone=null; clearTimeout(narrTimer); try{speechSynthesis.cancel();}catch(e){} hideUnmuteHint(); cb('stopped'); }
+function bindReadButton(btn,getText){
+  if(!btn) return; const orig=btn.innerHTML;
+  btn.dataset.on='';
+  btn.onclick=()=>{
+    if(btn.dataset.on==='1'){ stopNarration(); return; }
+    btn.dataset.on='1'; btn.innerHTML='<span>&#9632;</span> Stop reading';
+    narrate(getText(), ()=>{ btn.dataset.on=''; btn.innerHTML=orig; });
+  };
 }
 
 let DATA=null, STORY='', BONUS='', keeper='', byWord={}, GAPS=[], placed=0, target=-1, revealed=false;
@@ -234,7 +257,10 @@ function unlock(){
   revealed=false;
   try{ if(window.ELC) ELC.markComplete(TYPE, EP); }catch(e){}
   if(!reduced) fireworks(2600);                 // fireworks light up the screen
-  setTimeout(()=>speakThen(plain(), revealResult), 350);  // ...and the whole story is read aloud
+  $('#unlockArea').innerHTML='<div class="readingbar"><span>&#128266; Reading the story aloud&hellip;</span>'
+    +'<button class="readbtn stopbtn" id="stopRead"><span>&#9632;</span>&nbsp;Stop</button></div>';
+  const sr=$('#stopRead'); if(sr) sr.onclick=()=>stopNarration();
+  setTimeout(()=>narrate(plain(), revealResult), 350);  // read the whole story aloud (stoppable)
 }
 function revealResult(){
   if(revealed) return; revealed=true;
@@ -256,17 +282,18 @@ function revealResult(){
   }
   html+='</div>';
   $('#unlockArea').innerHTML=html;
-  $('#readStory').onclick=()=>speak(plain());
-  const rb=$('#readBonus'); if(rb) rb.onclick=()=>speak(BONUS);
+  bindReadButton($('#readStory'), plain);
+  bindReadButton($('#readBonus'), function(){return BONUS;});
   $('#againBtn').onclick=()=>resetGame();
   try{ if(window.ELC){ const host=$('#winExtras'); if(host) ELC.orivaCheer(host,'<b style="color:#8b6cff">Oriva loved your story!</b>'); } }catch(e){}
   try{ $('#unlockArea').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
   if(!reduced) fireworks(1600);                 // a small burst as the cards appear
 }
 function resetGame(){
+  stopNarration(); revealed=false;
   placed=0; $('#pPlaced').textContent='0/'+GAPS.length;
-  $('#storyCard').classList.remove('unlocked');
-  $('#unlockArea').innerHTML=''; $('#bank').style.display=''; $('#hintline').style.display='';
+  $('#storyCard').classList.remove('unlocked'); $('#storyCard').style.display='';
+  $('#unlockArea').innerHTML=''; $('#bank').style.display=''; const hl=$('#hintline'); if(hl) hl.style.display='';
   renderStory(); renderBank(); setTarget();
 }
 function fireworks(ms){
