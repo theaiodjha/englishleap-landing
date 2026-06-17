@@ -62,12 +62,12 @@
   .card.up .inner,.card.matched .inner{transform:rotateY(180deg)}
   .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;
     display:flex;align-items:center;justify-content:center;text-align:center;padding:11px;overflow:hidden}
-  .back{background:
+  .face.back{background:
       radial-gradient(120% 80% at 50% 0%, rgba(31,196,182,.22), transparent 60%),
       linear-gradient(150deg,#15273a,#1b2f48);
     border:1px solid rgba(255,255,255,.14);color:rgba(150,225,215,.85);font-size:26px;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
-  .front{transform:rotateY(180deg);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+  .face.front{transform:rotateY(180deg);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
   .front.word{background:linear-gradient(150deg,rgba(255,255,255,.24),rgba(0,0,0,.14)),var(--c);
     font-family:var(--display);font-weight:700;font-size:clamp(13px,3.3vw,18px);line-height:1.1;
     border:1px solid rgba(255,255,255,.34)}
@@ -108,6 +108,15 @@
   .howbtn{align-items:center;justify-content:center;gap:8px;margin:14px auto 0;cursor:pointer;border:0;font:inherit;font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px;color:#10121c;background:#fff;box-shadow:0 10px 26px -10px rgba(0,0,0,.55)}
   .howbtn:hover{transform:translateY(-1px)}
   @media(max-width:380px){.wrap{padding:12px 12px 52px}.grid{gap:9px}.prog{gap:7px}}
+  .result-card{position:relative;z-index:60;max-width:560px;margin:10px auto 0;text-align:center;
+    background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:24px;padding:28px 22px;
+    backdrop-filter:blur(10px);box-shadow:0 30px 70px -30px rgba(0,0,0,.7)}
+  .result-card .rk{font-family:var(--display);font-weight:700;font-size:clamp(22px,5vw,30px);color:var(--ink)}
+  .result-card .rkeeper{color:var(--soft);font-size:15px;margin-top:10px;line-height:1.5}
+  .result-card .again{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:20px}
+  .result-card .again a,.result-card .again button{font:inherit;font-weight:700;font-size:14px;border-radius:999px;padding:11px 20px;cursor:pointer;text-decoration:none}
+  .result-card .again .pri{background:linear-gradient(135deg,#1fc4b6,#57e6c4);color:#06201b;border:0}
+  .result-card .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -234,21 +243,25 @@ function onFlip(idx,el){
 function win(){
   const name=(DATA.user||'').trim().split(/\s+/)[0];
   const head=name?('Brilliant, '+name+'!'):'Brilliant!';
-  const line=keeper||'Six phrases — all matched. Beautiful work.';
-  const nb=$('#nightbanner');
-  nb.innerHTML='<div class="big">'+esc(head)+'</div><div class="small">'+esc(line)+'</div>';
-  nb.classList.add('show'); setTimeout(()=>nb.classList.remove('show'),3200);
-  if(!reduced) fireworks(2400);
+  const line=keeper||'Every phrase matched. Beautiful work.';
+  const grid=$('#grid'); if(grid) grid.style.display='none';
+  const we=$('#winExtras');
+  we.innerHTML='<div class="result-card">'+
+    '<div class="rk">'+esc(head)+'</div>'+
+    '<div class="rkeeper">'+esc(line)+'</div>'+
+    '<div id="orivaHost"></div>'+
+    '<div class="again"><button class="pri" id="againBtn">Play again</button>'+
+    '<a class="sec" href="/arcade-type.html?type='+TYPE+'">More episodes</a></div></div>';
   try{
     if(window.ELC){
       ELC.markComplete(TYPE, EP);
-      const host=$('#winExtras'); if(host){ host.innerHTML='';
-        const ps=(DATA.pairs||[]); const phrase=ps.length?ps[Math.floor(Math.random()*ps.length)].word:'';
-        const epl=$('#epLabel').textContent||EP.toUpperCase();
-        ELC.orivaCheer(host,'<b style="color:#1fc4b6">Oriva is proud of you!</b> Every phrase matched.');
-      }
+      const host=document.getElementById('orivaHost');
+      if(host) ELC.orivaCheer(host,'<b style="color:#1fc4b6">Oriva is proud of you!</b> Every phrase matched.');
     }
   }catch(e){}
+  const ab=$('#againBtn'); if(ab) ab.onclick=()=>location.reload();
+  try{ we.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
+  if(!reduced) fireworks(2200);
 }
 function fireworks(ms){
   const cv=$('#fx'), ctx=cv.getContext('2d');
