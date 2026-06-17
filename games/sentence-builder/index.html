@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Sentence Builder — put the words in order to build correct sentences. An English Leap practice game.">
 <title>Sentence Builder — English Leap Practice Arcade</title>
 <meta name="theme-color" content="#08201c">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -107,6 +108,8 @@
   .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
   @media(prefers-reduced-motion:reduce){.chip.wrong,.tray.flash-bad{animation:none}}
   @media(max-width:380px){.wrap{padding:12px 12px 52px}.card{padding:20px 14px}.prog{gap:7px}}
+  .card.result{position:relative;z-index:60;text-align:center}
+  .card .rk{font-family:var(--display);font-weight:700;font-size:clamp(22px,5vw,30px);color:var(--ink);line-height:1.08}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -242,8 +245,9 @@ function win(){
   const name=(DATA.user||'').trim().split(/\s+/)[0];
   const head=name?('Beautifully built, '+name+'!'):'Beautifully built!';
   const sc=`You built ${score}/${sentences.length} sentences on the first try.`;
-  $('#game').innerHTML=`<div class="card" style="text-align:center">
-    <div style="font-family:var(--display);font-weight:700;font-size:clamp(20px,4.6vw,28px)">${esc(sc)}</div>
+  $('#game').innerHTML=`<div class="card result">
+    <div class="rk">${esc(head)}</div>
+    <div style="margin-top:8px;font-size:17px;color:var(--ink)">${esc(sc)}</div>
     <div style="color:var(--soft);margin-top:12px;font-size:15px">${esc(keeper||'')}</div>
     <div id="winExtras"></div>
     <div class="again"><button class="pri" id="againBtn">Play again</button><a class="sec" href="/arcade-type.html?type=${TYPE}">More episodes</a></div>
@@ -256,9 +260,7 @@ function win(){
       const host=$('#winExtras'); if(host) ELC.orivaCheer(host,'<b style="color:#1fc4b6">Oriva loves that!</b> You put the words together yourself.');
     }
   }catch(e){}
-  const nb=$('#nightbanner');
-  nb.innerHTML='<div class="big">'+esc(head)+'</div><div class="small">'+esc(keeper||'Beautiful work.')+'</div>';
-  nb.classList.add('show'); setTimeout(()=>nb.classList.remove('show'),3200);
+  try{ $('#game').scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){}
   if(!reduced) fireworks(2200);
 }
 function fireworks(ms){
