@@ -12,7 +12,7 @@
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --space:#061714; --ink:#eafcf7; --soft:#9fd0c6;
+    --space:#0a1226; --ink:#eafcf7; --soft:#9fd0c6;
     --pink:#f6479a; --coral:#ff8a63; --purple:#8b6cff; --teal:#1fc4b6; --mint:#57e6c4; --amber:#ffcd46;
     --glass:rgba(255,255,255,.07); --line:rgba(255,255,255,.14);
     --display:'Clash Display',system-ui,sans-serif; --body:'General Sans',system-ui,sans-serif;
@@ -20,11 +20,19 @@
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{font-family:var(--body);color:var(--ink);background:var(--space);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
-  #stagebg{position:fixed;inset:0;z-index:-1;background:
-    radial-gradient(110% 70% at 14% 2%, rgba(31,196,182,.24), transparent 56%),
-    radial-gradient(90% 70% at 92% 4%, rgba(87,230,196,.16), transparent 58%),
-    radial-gradient(80% 60% at 60% 104%, rgba(139,108,255,.18), transparent 66%),
-    linear-gradient(180deg,#06160f 0%,#0a241d 54%,#0c2a26 100%)}
+  #stagebg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:
+    radial-gradient(80% 60% at 10% -6%, rgba(31,196,182,.40), transparent 60%),
+    radial-gradient(70% 56% at 96% 4%, rgba(87,230,196,.28), transparent 60%),
+    radial-gradient(92% 70% at 52% 114%, rgba(139,108,255,.26), transparent 66%),
+    radial-gradient(58% 50% at 82% 94%, rgba(77,139,255,.22), transparent 60%),
+    linear-gradient(180deg,#08152c 0%,#0a1f30 50%,#08152a 100%)}
+  #stagebg::before{content:"";position:absolute;inset:-25%;pointer-events:none;
+    background:
+      radial-gradient(38% 38% at 30% 32%, rgba(31,196,182,.32), transparent 62%),
+      radial-gradient(34% 34% at 72% 58%, rgba(87,230,196,.22), transparent 62%),
+      radial-gradient(34% 34% at 54% 82%, rgba(139,108,255,.22), transparent 62%);
+    filter:blur(44px);animation:aurora 30s ease-in-out infinite alternate}
+  @keyframes aurora{from{transform:translate3d(-3%,-2%,0) rotate(0deg) scale(1.06)}to{transform:translate3d(3%,2%,0) rotate(7deg) scale(1.14)}}
   .wrap{max-width:860px;margin:0 auto;padding:14px 18px 60px;min-height:100%}
   .bar{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:6px 2px 14px}
   .bar .left{display:flex;align-items:center;gap:12px;min-width:0}
@@ -49,25 +57,26 @@
   .dot.done{background:var(--teal)}
   .dot.cur{background:var(--amber);box-shadow:0 0 0 4px rgba(255,205,70,.18)}
 
-  .card{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:24px;padding:26px 22px;backdrop-filter:blur(10px);
-    box-shadow:0 30px 70px -30px rgba(0,0,0,.7);max-width:720px;margin:0 auto}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.16);border-radius:26px;padding:26px 22px;backdrop-filter:blur(16px) saturate(1.15);
+    box-shadow:0 36px 90px -36px rgba(0,0,0,.72),0 22px 60px -42px color-mix(in srgb,var(--accent,#1fc4b6) 55%, transparent),inset 0 1px 0 rgba(255,255,255,.2);max-width:720px;margin:0 auto}
   .hint{text-align:center;color:var(--soft);font-size:14px;margin:0 0 16px}
-  .hint b{color:#fff;background:rgba(31,196,182,.18);border:1px solid rgba(31,196,182,.45);padding:3px 11px;border-radius:999px;font-family:var(--display);font-weight:700;white-space:nowrap}
+  .hint b{color:#fff;background:color-mix(in srgb,var(--accent,#1fc4b6) 22%, transparent);border:1px solid color-mix(in srgb,var(--accent,#1fc4b6) 55%, transparent);padding:3px 11px;border-radius:999px;font-family:var(--display);font-weight:700;white-space:nowrap}
 
-  .tray{min-height:78px;border:2px dashed var(--line);border-radius:18px;padding:14px;display:flex;flex-wrap:wrap;gap:10px;
-    align-items:center;justify-content:center;background:rgba(0,0,0,.16);transition:border-color .2s}
-  .tray.has{border-style:solid;border-color:rgba(31,196,182,.4)}
+  .tray{min-height:78px;border:2px dashed color-mix(in srgb,var(--accent,#1fc4b6) 30%, rgba(255,255,255,.16));border-radius:18px;padding:14px;display:flex;flex-wrap:wrap;gap:10px;
+    align-items:center;justify-content:center;background:rgba(4,8,20,.28);transition:border-color .2s}
+  .tray.has{border-style:solid;border-color:color-mix(in srgb,var(--accent,#1fc4b6) 55%, transparent)}
   .tray .ph{color:var(--soft);font-size:14px;opacity:.8}
   .tray.flash-bad{animation:shake .4s}
 
   .bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px auto 0;max-width:720px;min-height:50px}
 
   .chip{appearance:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:clamp(15px,3.6vw,18px);
-    padding:11px 16px;border-radius:14px;color:#fff;background:rgba(255,255,255,.08);border:1.5px solid var(--line);
-    box-shadow:0 8px 18px -12px rgba(0,0,0,.6);transition:transform .12s,background .15s,border-color .15s,opacity .12s}
-  .chip:hover{transform:translateY(-2px)}
+    padding:11px 16px;border-radius:14px;color:#fff;background:rgba(31,196,182,.26);border:1.5px solid rgba(255,255,255,.28);border:1.5px solid color-mix(in srgb,var(--accent,#1fc4b6) 55%, transparent);
+    background:linear-gradient(160deg,color-mix(in srgb,var(--accent,#1fc4b6) 34%, transparent),color-mix(in srgb,var(--accent,#1fc4b6) 12%, transparent));
+    box-shadow:0 10px 22px -14px color-mix(in srgb,var(--accent,#1fc4b6) 75%, transparent),inset 0 1px 0 rgba(255,255,255,.22);transition:transform .12s,background .15s,border-color .15s,opacity .12s}
+  .chip:hover{transform:translateY(-2px);background:linear-gradient(160deg,color-mix(in srgb,var(--accent,#1fc4b6) 48%, transparent),color-mix(in srgb,var(--accent,#1fc4b6) 20%, transparent))}
   .chip:active{transform:translateY(0)}
-  .tray .chip{border-color:rgba(255,255,255,.28)}
+  .tray .chip{border-color:color-mix(in srgb,var(--accent,#1fc4b6) 70%, transparent)}
   .chip.right{color:#06201b;border-color:transparent}
   .chip.wrong{animation:shake .4s;border-color:#ff6b6b}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
@@ -106,7 +115,7 @@
   .again a,.again button{font:inherit;font-weight:700;font-size:14px;border-radius:999px;padding:11px 20px;cursor:pointer;text-decoration:none}
   .again .pri{background:linear-gradient(135deg,var(--teal),var(--mint));color:#06201b;border:0}
   .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
-  @media(prefers-reduced-motion:reduce){.chip.wrong,.tray.flash-bad{animation:none}}
+  @media(prefers-reduced-motion:reduce){.chip.wrong,.tray.flash-bad{animation:none}#stagebg::before{animation:none}}
   @media(max-width:380px){.wrap{padding:12px 12px 52px}.card{padding:20px 14px}.prog{gap:7px}}
   .card.result{position:relative;z-index:60;text-align:center}
   .card .rk{font-family:var(--display);font-weight:700;font-size:clamp(22px,5vw,30px);color:var(--ink);line-height:1.08}
@@ -186,7 +195,7 @@ function renderRound(){
   $('#pRound').textContent=(idx+1)+'/'+sentences.length;
   $('#dots').innerHTML=sentences.map((_,k)=>`<span class="dot ${k<idx?'done':''} ${k===idx?'cur':''}"></span>`).join('');
   $('#game').innerHTML=`
-    <div class="card">
+    <div class="card" style="--accent:${roundColor}">
       <p class="hint">Build a sentence using <b>${esc(s.phrase)}</b></p>
       <div class="tray" id="tray"></div>
       <div class="bank" id="bank"></div>
