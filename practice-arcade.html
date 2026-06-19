@@ -287,9 +287,10 @@
 <script>
 const $=s=>document.querySelector(s);
 const CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
-const ERR={auth:'Sign-in did not complete. Please try again.',notmember:'We could not find an active membership for that Patreon account.'};
+const ERR={auth:'Sign-in did not finish. Please try again. If it keeps happening, allow cookies for this site or try another browser.',notmember:'We could not find an active membership on that Patreon account. If you have more than one Patreon account, sign in with the one that has your pledge.'};
 function showMsg(t,kind){const m=$('#msg');m.className='msg '+(kind||'');m.textContent=t||'';}
-const eParam=new URLSearchParams(location.search).get('e'); if(eParam&&ERR[eParam]) showMsg(ERR[eParam],'err');
+const eParam=new URLSearchParams(location.search).get('e');
+if(eParam&&ERR[eParam]){const m=$('#msg');if(m){m.className='msg err';m.innerHTML=ERR[eParam]+' <a href="https://www.patreon.com/logout" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Log out of Patreon to switch account</a>';}}
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
 const DESC={
