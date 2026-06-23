@@ -30,7 +30,7 @@ export default async function handler(req, res) {
 
   try {
     const tokens = await exchangeCode(code);
-    const { status, name, cents } = await checkMembership(tokens.access_token);
+    const { status, name, cents, id } = await checkMembership(tokens.access_token);
 
     if (status === 'none') {
       res.setHeader('Set-Cookie', clearOauth);
@@ -39,6 +39,7 @@ export default async function handler(req, res) {
 
     const session = {
       name, tier: status === 'paid' ? 'fluency' : 'trial',
+      uid: id ? `p:${id}` : null,           // stable id for per-user monthly AI-minutes quota
       access: status,                       // 'paid' | 'trial'
       cents,                                // current tier price in cents (gates Fluency-only features)
       at: tokens.access_token,

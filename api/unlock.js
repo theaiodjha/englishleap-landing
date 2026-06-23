@@ -15,6 +15,6 @@ export default async function handler(req,res){
   if(!raw) return res.status(401).json({ok:false,error:'That code is not valid (or was turned off).'});
   const rec=typeof raw==='string'?JSON.parse(raw):raw;
   if(!rec.paid) return res.status(403).json({ok:false,error:'Your archive opens after your first payment.'});
-  res.setHeader('Set-Cookie', sessionCookie({name:rec.member||'Member', tier:rec.tier||'fluency', access:'paid', exp:Date.now()+30*864e5}));
+  res.setHeader('Set-Cookie', sessionCookie({name:rec.member||'Member', tier:rec.tier||'fluency', uid:`c:${code}`, access:'paid', exp:Date.now()+30*864e5}));
   return res.json({ok:true});
 }
