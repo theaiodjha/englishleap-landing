@@ -32,19 +32,21 @@
   .wrap{position:relative;z-index:2;max-width:720px;margin:0 auto;padding:22px 20px 80px}
   a{color:var(--teal)}
 
-  .topnav{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .back{display:inline-flex;align-items:center;gap:6px;color:var(--soft);text-decoration:none;font-family:var(--display);font-weight:600;font-size:13.5px;
-    padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--glass2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-  .back:hover{color:var(--ink)}
+  .hd{display:flex;align-items:center;justify-content:space-between;gap:14px 18px;flex-wrap:wrap;padding:18px 0 6px}
+  .hd-l{display:flex;align-items:center;gap:12px}
+  .iback{width:38px;height:38px;flex:0 0 38px;border-radius:50%;display:grid;place-items:center;color:var(--soft);text-decoration:none;
+    border:1px solid var(--line);background:var(--glass2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:.2s}
+  .iback:hover{color:var(--ink);border-color:rgba(255,255,255,.22)}
+  .iback svg{width:18px;height:18px}
   .brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);font-family:var(--display);font-weight:600;font-size:15px}
   .brand .d{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--cyan)}
-
-  .tabs{display:flex;flex-wrap:wrap;gap:5px;padding:5px;border-radius:999px;background:var(--glass2);border:1px solid var(--line);
-    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);margin:16px 0 2px;box-shadow:0 10px 30px -16px rgba(0,0,0,.6)}
-  .tabs a{display:inline-flex;align-items:center;gap:7px;padding:10px 17px;border-radius:999px;font-family:var(--display);font-weight:600;
-    font-size:13.5px;color:var(--soft);text-decoration:none;transition:.2s;white-space:nowrap}
-  .tabs a:hover{color:var(--ink)}
-  .tabs a.active{background:linear-gradient(100deg,var(--teal),var(--purple));color:#fff;box-shadow:0 8px 22px -8px rgba(139,108,255,.6)}
+  .hd-tabs{display:inline-flex;gap:2px;padding:4px;border-radius:999px;background:var(--glass2);border:1px solid var(--line);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .hd-tabs a{padding:8px 15px;border-radius:999px;font-family:var(--display);font-weight:600;font-size:13px;color:var(--soft);
+    text-decoration:none;transition:.2s;white-space:nowrap}
+  .hd-tabs a:hover{color:var(--ink)}
+  .hd-tabs a.active{background:linear-gradient(100deg,var(--teal),var(--purple));color:#fff}
+  @media(max-width:560px){.hd{justify-content:flex-start}.hd-tabs{width:100%;justify-content:space-between}.hd-tabs a{flex:1;text-align:center}}
 
   .eyebrow{font-family:var(--display);font-weight:700;letter-spacing:.16em;font-size:12.5px;color:var(--teal);
     display:inline-flex;align-items:center;gap:8px;text-transform:uppercase}
@@ -133,15 +135,17 @@
 <div class="vignette"></div>
 
 <div class="wrap">
-  <div class="topnav">
-    <a class="back" href="/" id="back">&#8592; Back</a>
-    <a class="brand" href="/"><span class="d"></span>English Leap Club</a>
-  </div>
-  <nav class="tabs" aria-label="Sections">
-    <a href="/practice-arcade.html">&#127918; Practice Arcade</a>
-    <a href="/use-it-live.html" class="active" aria-current="page">&#127897;&#65039; Use It Live</a>
-    <a href="/archive.html">&#128218; Member Archive</a>
-  </nav>
+  <header class="hd">
+    <div class="hd-l">
+      <a class="iback" href="/" id="back" aria-label="Go back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+      <a class="brand" href="/"><span class="d"></span>English Leap Club</a>
+    </div>
+    <nav class="hd-tabs" aria-label="Sections">
+      <a href="/practice-arcade.html">Arcade</a>
+      <a href="/use-it-live.html" class="active" aria-current="page">Use It Live</a>
+      <a href="/archive.html">Archive</a>
+    </nav>
+  </header>
 
   <div id="app" class="hidden">
     <div class="hero">
@@ -263,16 +267,23 @@ function pickMime(){
   return '';
 }
 // Reach the mic in a way that works across browsers/devices, with clear failures.
-function getMicStream(){
+async function getMicStream(){
   // polyfill the modern API onto older engines that only expose the prefixed one
   if(typeof navigator.mediaDevices==='undefined') navigator.mediaDevices={};
   if(typeof navigator.mediaDevices.getUserMedia==='undefined'){
     const legacy=navigator.getUserMedia||navigator.webkitGetUserMedia||navigator.mozGetUserMedia;
     if(legacy) navigator.mediaDevices.getUserMedia=c=>new Promise((res,rej)=>legacy.call(navigator,c,res,rej));
   }
-  if(typeof window.isSecureContext!=='undefined' && !window.isSecureContext) return Promise.reject({name:'InsecureError'});
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.reject({name:'UnsupportedError'});
-  if(typeof MediaRecorder==='undefined') return Promise.reject({name:'NoRecorderError'});
+  if(typeof window.isSecureContext!=='undefined' && !window.isSecureContext) throw {name:'InsecureError'};
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw {name:'UnsupportedError'};
+  if(typeof MediaRecorder==='undefined') throw {name:'NoRecorderError'};
+  // if the system lists devices but none are a microphone, say so before prompting
+  try{
+    if(navigator.mediaDevices.enumerateDevices){
+      const devs=await navigator.mediaDevices.enumerateDevices();
+      if(devs.length && !devs.some(d=>d.kind==='audioinput')) throw {name:'NotFoundError'};
+    }
+  }catch(e){ if(e && e.name==='NotFoundError') throw e; }
   return navigator.mediaDevices.getUserMedia({audio:true});
 }
 function micErrorMessage(err){
@@ -285,13 +296,25 @@ function micErrorMessage(err){
   if(n==='NoRecorderError') return 'Your browser is a little old for recording. Please update it, or use the latest Chrome or Safari.';
   return 'I could not reach your microphone. Please allow microphone access and try again.';
 }
+function micHelp(n){
+  if(n==='NotFoundError') return ['Windows: Settings \u2192 System \u2192 Sound \u2192 Input \u2014 choose your built-in microphone and test it.','Windows: Settings \u2192 Privacy & security \u2192 Microphone \u2014 turn ON \u201cMicrophone access\u201d and \u201cLet desktop apps access your microphone\u201d.','Then reload this page and tap the mic again.'];
+  if(n==='NotAllowedError'||n==='SecurityError') return ['Click the lock or camera icon at the left of the address bar.','Set Microphone to \u201cAllow\u201d for this site, then reload.'];
+  if(n==='NotReadableError'||n==='AbortError') return ['Close any app that may be using the mic (Zoom, Teams, Discord, OBS\u2026), then try again.'];
+  return null;
+}
+function showMicError(err){
+  const n=(err&&err.name)||''; const m=$('#msg'); m.className='msg show err';
+  const steps=micHelp(n);
+  if(steps){ m.innerHTML='<b>'+esc(micErrorMessage(err))+'</b><ul style="margin:9px 0 0;padding-left:18px;line-height:1.65">'+steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul>'; }
+  else { m.textContent=micErrorMessage(err); }
+}
 $('#mic').onclick=async()=>{
   if($('#mic').disabled || remainingMin<=0) return;
   if(mediaRec && mediaRec.state==='recording'){ stopRec(); return; }
   clearMsg(); $('#fb').classList.add('hidden');
   let stream;
   try{ stream=await getMicStream(); }
-  catch(err){ showMsg(micErrorMessage(err),'err'); return; }
+  catch(err){ showMicError(err); return; }
   const type=pickMime();
   try{ mediaRec=type?new MediaRecorder(stream,{mimeType:type}):new MediaRecorder(stream); }
   catch{ mediaRec=new MediaRecorder(stream); }
