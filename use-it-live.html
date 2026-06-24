@@ -26,6 +26,15 @@
   a{color:var(--teal)}
   .brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);font-weight:600;font-size:15px}
   .brand .d{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal-glow)}
+  .topnav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .back{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;
+    padding:8px 12px;border-radius:11px;border:1px solid var(--line);background:var(--card)}
+  .back:hover{color:var(--ink);border-color:var(--teal-dim)}
+  .tabs{display:flex;flex-wrap:wrap;gap:5px;padding:5px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin:14px 0 2px}
+  .tabs a{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:11px;font-weight:600;font-size:13.5px;
+    color:var(--muted);text-decoration:none;transition:.2s;white-space:nowrap}
+  .tabs a:hover{color:var(--ink)}
+  .tabs a.active{background:linear-gradient(100deg,var(--teal),var(--violet));color:#06201c}
   .eyebrow{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-size:12px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--teal);font-weight:600}
   h1{font-size:29px;line-height:1.12;margin:.45rem 0 .3rem;font-weight:700;letter-spacing:-.01em}
@@ -100,7 +109,15 @@
 </head>
 <body>
 <div class="wrap">
-  <a class="brand" href="/"><span class="d"></span>English Leap Club</a>
+  <div class="topnav">
+    <a class="back" href="/" id="back">&#8592; Back</a>
+    <a class="brand" href="/"><span class="d"></span>English Leap Club</a>
+  </div>
+  <nav class="tabs" aria-label="Sections">
+    <a href="/practice-arcade.html">&#127918; Practice Arcade</a>
+    <a href="/use-it-live.html" class="active" aria-current="page">&#127897;&#65039; Use It Live</a>
+    <a href="/archive.html">&#128218; Member Archive</a>
+  </nav>
 
   <div id="app" class="hidden">
     <span class="eyebrow">Use it · Live practice</span>
@@ -155,6 +172,8 @@
 
 <script>
 const $=s=>document.querySelector(s);
+const backEl=document.getElementById('back');
+if(backEl) backEl.addEventListener('click',e=>{ if(history.length>1){ e.preventDefault(); history.back(); } });
 const MAX_SEC=180;
 let mediaRec=null, chunks=[], startMs=0, durationSec=0, blob=null, mimeType='audio/webm', autostop=null, remainingMin=0, words=[];
 
@@ -206,17 +225,41 @@ function gate(html){ $('#app').classList.add('hidden'); $('#gate').innerHTML=htm
 
 // ---- recording ----
 function pickMime(){
-  const c=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
-  for(const t of c){ if(window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t; }
+  if(typeof MediaRecorder==='undefined' || !MediaRecorder.isTypeSupported) return '';
+  const c=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus','audio/aac'];
+  for(const t of c){ try{ if(MediaRecorder.isTypeSupported(t)) return t; }catch(e){} }
   return '';
 }
+// Reach the mic in a way that works across browsers/devices, with clear failures.
+function getMicStream(){
+  // polyfill the modern API onto older engines that only expose the prefixed one
+  if(typeof navigator.mediaDevices==='undefined') navigator.mediaDevices={};
+  if(typeof navigator.mediaDevices.getUserMedia==='undefined'){
+    const legacy=navigator.getUserMedia||navigator.webkitGetUserMedia||navigator.mozGetUserMedia;
+    if(legacy) navigator.mediaDevices.getUserMedia=c=>new Promise((res,rej)=>legacy.call(navigator,c,res,rej));
+  }
+  if(typeof window.isSecureContext!=='undefined' && !window.isSecureContext) return Promise.reject({name:'InsecureError'});
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return Promise.reject({name:'UnsupportedError'});
+  if(typeof MediaRecorder==='undefined') return Promise.reject({name:'NoRecorderError'});
+  return navigator.mediaDevices.getUserMedia({audio:true});
+}
+function micErrorMessage(err){
+  const n=(err&&err.name)||'';
+  if(n==='NotAllowedError'||n==='SecurityError') return 'Microphone access is blocked. Tap the lock or camera icon near the address bar, allow the microphone, then try again.';
+  if(n==='NotFoundError'||n==='OverconstrainedError') return 'No microphone was found on this device.';
+  if(n==='NotReadableError'||n==='AbortError') return 'Your microphone is busy in another app. Close it and try again.';
+  if(n==='InsecureError') return 'Recording needs a secure (https) page. Please open https://englishleap.app/use-it-live.html directly.';
+  if(n==='UnsupportedError') return 'This browser can\u2019t record audio here. If you opened this inside another app (like a messenger), tap \u201cOpen in Safari/Chrome\u201d and try again.';
+  if(n==='NoRecorderError') return 'Your browser is a little old for recording. Please update it, or use the latest Chrome or Safari.';
+  return 'I could not reach your microphone. Please allow microphone access and try again.';
+}
 $('#mic').onclick=async()=>{
-  if(remainingMin<=0) return;
+  if($('#mic').disabled || remainingMin<=0) return;
   if(mediaRec && mediaRec.state==='recording'){ stopRec(); return; }
   clearMsg(); $('#fb').classList.add('hidden');
   let stream;
-  try{ stream=await navigator.mediaDevices.getUserMedia({audio:true}); }
-  catch{ showMsg('I could not reach your microphone. Please allow microphone access and try again.','err'); return; }
+  try{ stream=await getMicStream(); }
+  catch(err){ showMsg(micErrorMessage(err),'err'); return; }
   const type=pickMime();
   try{ mediaRec=type?new MediaRecorder(stream,{mimeType:type}):new MediaRecorder(stream); }
   catch{ mediaRec=new MediaRecorder(stream); }
