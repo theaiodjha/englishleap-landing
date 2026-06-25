@@ -79,7 +79,25 @@ async function analyzeAudio(base64, mimeType, ep) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Use POST.' });
 
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+  body = body || {};
   const s = readSession(req);
+
+  // --- feature flag: hidden from the audience until tested & verified ---
+  // Turn the feature on for everyone by setting env  UIL_ENABLED=true
+  // While off, you can still preview it yourself via either:
+  //   • open /use-it-live.html?preview=TOKEN  where TOKEN === env UIL_PREVIEW_TOKEN
+  //   • add your Patreon uid (e.g. p:12345) to env UIL_PREVIEW_UIDS (comma-separated)
+  const ENABLED = ['true', '1'].includes(String(process.env.UIL_ENABLED));
+  const previewToken = process.env.UIL_PREVIEW_TOKEN || '';
+  const token = String(body.preview || (req.query && req.query.preview) || '');
+  const previewUids = String(process.env.UIL_PREVIEW_UIDS || '').split(',').map(x => x.trim()).filter(Boolean);
+  const preview = (previewToken && token && token === previewToken) || (s && s.uid && previewUids.includes(s.uid));
+  if (!ENABLED && !preview) {
+    return res.status(503).json({ ok: false, coming_soon: true, message: 'Use It Live is coming soon \u2014 we\u2019re testing it now.' });
+  }
+
   if (!fluencyOK(s)) {
     return res.status(s ? 403 : 401).json({
       ok: false, login: !s, upgrade: !!s,
@@ -87,9 +105,7 @@ export default async function handler(req, res) {
     });
   }
 
-  let body = req.body;
-  if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
-  const { action } = body || {};
+  const { action } = body;
   const ep = EPISODES[body.episodeId] || EPISODES[DEFAULT_EP];
 
   // --- usage: how many minutes are left this month ---

@@ -208,13 +208,14 @@
 
 <script>
 const $=s=>document.querySelector(s);
+const PREVIEW=new URLSearchParams(location.search).get('preview')||'';
 const backEl=document.getElementById('back');
 if(backEl) backEl.addEventListener('click',e=>{ if(history.length>1){ e.preventDefault(); history.back(); } });
 const MAX_SEC=180;
 let mediaRec=null, chunks=[], startMs=0, durationSec=0, blob=null, mimeType='audio/webm', autostop=null, remainingMin=0, words=[];
 
 async function api(payload){
-  const r=await fetch('/api/use-it-live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  const r=await fetch('/api/use-it-live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(PREVIEW?{...payload,preview:PREVIEW}:payload)});
   const d=await r.json().catch(()=>({}));
   if(!r.ok){const e=new Error(d.error||'error');e.status=r.status;e.data=d;throw e;}
   return d;
@@ -245,7 +246,11 @@ function gate(html){ $('#app').classList.add('hidden'); $('#gate').innerHTML=htm
     setUsage(u);
     if(u.name) $('#title').textContent=`Hi ${u.name} — record, get feedback, improve.`;
   }catch(err){
-    if(err.status===401){
+    if(err.data && err.data.coming_soon){
+      gate(`<div class="gate"><span class="eyebrow">&#10024; Coming soon</span><h2>&#127897;&#65039; Use It Live is almost ready</h2>
+        <p>We&rsquo;re putting the finishing touches on your speaking practice and testing it carefully. It will open to Fluency Club members very soon &mdash; thank you for your patience! &#128156;</p>
+        <a class="cta" href="/practice-arcade.html">&#127918; Try the Practice Arcade meanwhile</a></div>`);
+    } else if(err.status===401){
       gate(`<div class="gate"><span class="eyebrow">&#128172; Fluency Club</span><h2>Speak and get feedback</h2>
         <p>Sign in with Patreon to record your English and get gentle, friendly feedback.</p>
         <a class="cta" href="/api/auth/login?next=/use-it-live.html">Continue with Patreon</a></div>`);
