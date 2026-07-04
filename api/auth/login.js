@@ -16,9 +16,9 @@ export default function handler(req, res) {
   const state = crypto.randomBytes(16).toString('hex');
   const next = safePath(req.query && req.query.next);
   const cookies = [
-    `elc_oauth_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`,
+    `elc_oauth_state=${state}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=600`,
   ];
-  if (next) cookies.push(`elc_oauth_next=${encodeURIComponent(next)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`);
+  if (next) cookies.push(`elc_oauth_next=${encodeURIComponent(next)}; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=600`);
   res.setHeader('Set-Cookie', cookies);
   res.redirect(302, patreonAuthUrl(state));
 }

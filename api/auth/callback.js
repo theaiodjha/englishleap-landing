@@ -19,8 +19,8 @@ export default async function handler(req, res) {
   // where the member started (e.g. /practice-arcade.html); default to the archive
   const next = safePath(getCookie(req, 'elc_oauth_next')) || '/archive.html';
   const clearOauth = [
-    'elc_oauth_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0',
-    'elc_oauth_next=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0',
+    'elc_oauth_state=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0',
+    'elc_oauth_next=; HttpOnly; Secure; SameSite=None; Path=/; Max-Age=0',
   ];
 
   if (!code || !state || state !== cookieState) {
