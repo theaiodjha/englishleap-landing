@@ -290,8 +290,27 @@ const $=s=>document.querySelector(s);
 const CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
 const ERR={auth:'Sign-in did not finish. Please try again. If it keeps happening, allow cookies for this site or try another browser.',notmember:'We could not find an active membership on that Patreon account. If you have more than one Patreon account, sign in with the one that has your pledge.'};
 function showMsg(t,kind){const m=$('#msg');m.className='msg '+(kind||'');m.textContent=t||'';}
-const eParam=new URLSearchParams(location.search).get('e');
-if(eParam&&ERR[eParam]){const m=$('#msg');if(m){m.className='msg err';m.innerHTML=ERR[eParam]+' <a href="https://www.patreon.com/logout" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Log out of Patreon to switch account</a>';}}
+const qp=new URLSearchParams(location.search);
+const eParam=qp.get('e');
+if(eParam){
+  const m=$('#msg');
+  if(m){
+    m.className='msg err';
+    if(eParam==='notmember'){
+      const who=qp.get('who');
+      const acct=who?('the account <b>'+esc(who)+'</b>'):'that Patreon account';
+      const pill='display:inline-block;padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;text-decoration:none;line-height:1';
+      m.innerHTML="We couldn't find an active English Leap membership on "+acct+"."+
+        "<div style=\"display:flex;gap:10px;flex-wrap:wrap;margin-top:12px\">"+
+          "<a href=\"https://www.patreon.com/logout\" target=\"_blank\" rel=\"noopener\" style=\""+pill+";background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25)\">Log out of Patreon</a>"+
+          "<a href=\"/api/auth/login?next=/practice-arcade.html\" style=\""+pill+";background:linear-gradient(135deg,#1fc4b6,#8b6cff);color:#fff\">Sign in with another account</a>"+
+        "</div>"+
+        "<div style=\"margin-top:8px;opacity:.72;font-size:13px\">Log out of Patreon first, then sign in with the account that has your pledge.</div>";
+    } else if(ERR[eParam]){
+      m.innerHTML=ERR[eParam]+' <a href="https://www.patreon.com/logout" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">Log out of Patreon to switch account</a>';
+    }
+  }
+}
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
 const DESC={

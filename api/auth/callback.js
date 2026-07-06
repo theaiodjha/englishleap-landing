@@ -12,6 +12,14 @@ function safePath(n) {
   return n;
 }
 function withParam(url, kv) { return url + (url.includes('?') ? '&' : '?') + kv; }
+// Mask an email for display so the user can spot a wrong account without exposing the
+// full address in a URL / browser history / logs: jane@gmail.com -> ja***@gmail.com
+function maskEmail(e) {
+  if (!e || typeof e !== 'string' || e.indexOf('@') < 1) return '';
+  const [u, d] = e.split('@');
+  const head = u.length <= 2 ? u.slice(0, 1) : u.slice(0, 2);
+  return `${head}***@${d}`;
+}
 
 export default async function handler(req, res) {
   const { code, state } = req.query;
@@ -30,11 +38,12 @@ export default async function handler(req, res) {
 
   try {
     const tokens = await exchangeCode(code);
-    const { status, name, cents, id } = await checkMembership(tokens.access_token);
+    const { status, name, email, cents, id } = await checkMembership(tokens.access_token);
 
     if (status === 'none') {
       res.setHeader('Set-Cookie', clearOauth);
-      return res.redirect(302, withParam(next, 'e=notmember'));
+      const who = maskEmail(email);
+      return res.redirect(302, withParam(next, 'e=notmember' + (who ? '&who=' + encodeURIComponent(who) : '')));
     }
 
     const session = {
