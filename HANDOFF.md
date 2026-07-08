@@ -1,58 +1,144 @@
-# English Leap Club — Practice Arcade · Handoff / Resume Notes
+# English Leap Club — Practice Arcade & Site · HANDOFF
 
-_Last updated: this session. Attach this file + `englishleap-merged.zip` to a new chat (in the same Project) to resume._
+Single "start here" for continuing in a fresh chat. The full, current codebase is
+this folder (`englishleap-landing/`). Hand this whole folder (zipped) to the next
+session along with any new episode transcript.
 
-## What this is
-B1–B2 English-learning brand (parent: Leap Labs, UAE). YouTube → Patreon funnel.
-- Site: **englishleap.app** (Vercel). Member area links to Patreon.
-- Hosts: Anna & Jake. Mascot: **Oriva** (teal bird, "oh-REE-vah") — never redraw; use the 6 canonical PNG poses from the starter kit.
-- Patreon tiers: Transcript ($1), Fluency Club ($2.99). Disclaimer on all materials: "A practice community - not a replacement for formal English education."
-- Brand (warm, NO blue/cyan): Ink #171030, Violet #8b6cff, Pink/Read #f6479a, Coral/Hear #ff8a63, Practise #8b6cff, Teal/Use #1fc4b6, Mint #57e6c4. Fonts: Clash Display + General Sans (web), Poppins TTFs for PIL.
+---
 
-## Tech / workflow
-- Static HTML + Vercel serverless (`api/`). Upstash KV storage. Patreon OAuth.
-- Working dir: `/home/claude/site`. Re-zip each round:
-  `cd /home/claude && rm -f /mnt/user-data/outputs/englishleap-merged.zip && zip -rq /mnt/user-data/outputs/englishleap-merged.zip site -x 'site/.git/*' 'site/node_modules/*'`
-- Deploy: user runs `git add -A; commit; push` → Vercel. KV reseed (`tools/seed-arcade.js`) ONLY when `lib/arcade-data.js` changed.
-- **Always give a one-line commit message with every change.**
-- Validate inline JS (`node --check`) before zipping. Run `python3 tools/audit.py` before shipping (pre-push hook installed; one-time: `git config core.hooksPath tools/hooks`).
+## 1. What this project is
 
-## Pages / files
-- `index.html` homepage (dark aurora). Mobile menu `#mobileMenu` is full-height + scrollable; theme toggle relocated INTO the menu on mobile (≤1080px) via MutationObserver, floats bottom-right on desktop.
-- `practice-arcade.html` hub (data-driven from `/api/games`). Member Login → `/api/auth/login?next=/practice-arcade.html`.
-- `arcade-type.html` episode picker. `archive.html` Member Archive.
-- `games/{clue-room,phrase-pairs,listening-gap,story-unlock,sentence-builder}/index.html`
-- `lib/arcade-data.js` (ARCADE array, 5 game types). `api/games.js` (catalog + gating).
-- `api/auth/{login,callback,signout}.js` — OAuth now honors a validated `?next=` return URL (cookie `elc_oauth_next`), redirect_uri stays `/api/auth/callback`.
-- Shared JS: `progress.js` (ELC.markComplete/orivaCheer/playVideo/howToPlay), `nav-progress.js` (top progress bar + held highlight), `elc-tour.js` (tour FAB; icon-only on mobile, stacks above theme toggle on desktop, hides on scroll-down), `theme.js`/`theme.css`, `pwa.js`/`sw.js`.
-- `tools/audit.py` (site audit) + `tools/hooks/pre-push` (gate). `package.json` has `npm run audit`.
-- PIL/ffmpeg generators live in `/home/claude` (not in repo): `make_covers.py`, `make_posts.py`, `render_walkthroughs.py`, `make_clue_tiles.py`.
+- **englishleap.app** — a B1–B2 English-learning brand (parent: Leap Labs, UAE).
+  YouTube podcast → Patreon funnel. Mascot: **Oriva** (teal bird).
+- **Stack:** static HTML on **Vercel** + serverless functions in `api/` +
+  **Upstash KV** + **Patreon OAuth**. Vanilla JS, no framework.
+  Fonts: Clash Display + General Sans (Fontshare). Dark "aurora" aesthetic.
+- **Practice Arcade** — every episode becomes **5 web games**:
+  `clue-room` (free), `phrase-pairs` (Transcript tier),
+  `listening-gap` / `story-unlock` / `sentence-builder` (Fluency tier).
 
-## State of the 5 games (all consistent now)
-- Unified WIN: clean centered result card (headline + keeper + Oriva, fireworks BEHIND via z-index:60), no floating banner. Back button is a small pill (`.back`; in phrase-pairs scoped card faces to `.face.back`/`.face.front`).
-- **Clue Room**: 3D, responsive layout, pre-baked emoji PNG tiles, celebration choreography.
-- **Phrase Pairs / Listening Gap / Sentence Builder**: card games; Sentence Builder Clear re-shuffles the bank (no longer reveals order).
-- **Story Unlock**: on solve → fireworks + 2s pause → auto-read whole story with **karaoke word highlighting** (Web Speech `onboundary`; graceful fallback where unsupported) → on finish, hide story, reveal result + bonus cards. Stoppable narration (floating "Stop" bar + read buttons toggle). **Voice picker + speed control** (`#voiceControls`, persisted in localStorage `elc_voice`/`elc_rate`, default rate 0.85). Unmute reminder toast (lifted above the read bar so they don't overlap). "Read the story again" = clean reading view (hides result/bonus, shows story + Stop). Play Again restores the story card.
+## 2. Current state (as of this handoff)
 
-## Polish pass done this session (homepage)
-- Hero top padding responsive `clamp(104px,15vw,170px)`.
-- Lighter muted text tokens (`--muted #b6b2dd`, `--muted-2 #8e8ab6`) for AA contrast.
-- `h2` + `.eco-card h3` letter-spacing.
-- Tour FAB: higher offset, hide-on-scroll-down, and reliably stacks above the theme toggle on desktop (positionLauncher re-runs at intervals + on breakpoint change; gap = toggle height + 34).
-- Verified live via Claude-in-Chrome at phone + desktop widths.
+**Episodes live** (newest → oldest; `*` = current / "THIS WEEK"):
+`ep249*` Confidence · `ep248` Modern Love · `ep247` Calm Nights · `ep246` Speaking
+· `ep243` Change · `ep242` Climate · `ep239` Workday · `ep238` Exercise · `ep235`
+· `ep234` · `ep232` · `ep231`.
 
-## Open / next
-- **Games screenshot sweep** (NOT yet done): win screens + Story Unlock reading/karaoke view at phone/tablet/desktop via connected Chrome. Connect Chrome (desktop only, paid plan), grant site access in the extension side panel (not Chrome privacy settings).
-- **Premium narration** (recommended): pre-generate story/bonus MP3 + word timestamps via ElevenLabs/Gemini at build time; build a hybrid player that uses the MP3 + timings when present (consistent expressive voice + reliable karaoke on all devices) and falls back to the browser voice when absent.
-- **Member Hub** on members.englishleap.app: branded recommended library from ELC's own catalog. Needs: same repo or separate deploy? + per-episode Patreon post URLs.
-- "Use It Live" AI roleplay (episode-anchored) — pending deployment/live backend verification.
-- Walkthrough video audio (videos are silent) — mux user VO or render longer cut.
-- `byleap` footer → Leap Labs URL (pending).
+**Tiers** (must match Patreon):
+- **Transcript Library** — $1/mo, **has a 1-week free trial**. Transcripts + Word Tour.
+- **Fluency Club** — $2.99/mo, **NO free trial**. Unlocks the full Practice Arcade
+  (all 5 interactive games) + role-play, shadowing, quizzes, etc.
+- **Free:** the Clue Room only.
 
-## Key principles
-- Mobile-first; pre-baked emoji PNGs (never live canvas emoji on mobile).
-- Differentiator = episode-anchored roleplay w/ target-word activation, not generic chat.
-- Content protection = the weekly stream + community, not download-blocking; don't delete old posts.
-- EPUB: numeric XML entities only; mimetype stored first (ZIP_STORED); EPUB3 + EPUB2 fallback.
-- TTS prompts: Google AI Studio (Gemini) format (Scene/Sample Context/Audio Profile/Speaker), remove contractions, append no-text line, "Pronounce the name Oriva as oh-REE-vah" in every scene.
-- New chat per episode build, starting with starter-kit zip + transcript.
+**Auth (Patreon OAuth) — all fixes applied:**
+- OAuth handshake cookies use `SameSite=None` (survive Safari/ITP round-trip).
+- `checkMembership()` filters memberships by **`PATREON_CAMPAIGN_ID`** so members
+  who back multiple creators (and free-trial members) resolve to the right
+  membership. Campaign id = **16096836**.
+- Requests `identity[email]`; on "no membership" it shows the (masked) account
+  email + a "Log out of Patreon / Sign in with another account" switch flow.
+
+## 3. Environment variables (Vercel)
+
+Required: `PATREON_CLIENT_ID`, `PATREON_CLIENT_SECRET`, `PATREON_REDIRECT_URI`,
+`SESSION_SECRET`, and **`PATREON_CAMPAIGN_ID=16096836`** (without this the
+multi-membership / free-trial fix is inert).
+Present but optional for this workflow: `KV_REST_API_URL`, `KV_REST_API_TOKEN`
+(only used if you seed KV — see §4).
+
+## 4. Deploy workflow (IMPORTANT — how the site actually ships)
+
+Download the files produced → update the repo → `git push` → Vercel redeploys.
+**That's the whole process.**
+
+**No KV seed is needed.** `lib/arcade-store.js` reads the catalogue from KV *only*
+if the `arcade:catalog` key is populated; it isn't, so the app falls back to the
+bundled `lib/arcade-data.js` — i.e. **the deployed file is live**. Do **NOT** run
+`tools/seed-arcade.js` unless you deliberately adopt the KV workflow: seeding once
+flips the site to KV-first, after which every episode would then require a reseed.
+
+## 5. How to add a new episode (the pipeline)
+
+Given a transcript `.txt`:
+
+1. **Identify the 6 words/phrases** (the "Word Tour"). If the episode only taught
+   5, add a 6th that's genuinely discussed in the transcript — the games are built
+   for **exactly 6** (Phrase Pairs needs 6 pairs for its 3x4 grid).
+2. **Assign colors in order:** pink `#f6479a`, violet `#8b6cff`, coral `#ff8a63`,
+   teal `#1fc4b6`, deep-teal `#1ca8a2`, mint `#57e6c4`.
+3. **Author content** per game and prepend an episode object to each of the 5 game
+   types in `lib/arcade-data.js` (set the new one `current:true`, flip the previous
+   `current:false`). Shapes:
+   - `clue-room`: `intro`, `clues[6]` `{id,word,color,emoji,geo,clue,example,position}`,
+     `puzzle{segments[7], answers[6], keeper}`. geos cycle
+     `ico,box,sphere,torus,octa,dodeca`; positions mirror the standard 6 (copy an
+     existing episode).
+   - `phrase-pairs`: `intro`, `pairs[6]` `{word,meaning,color}`, `keeper`.
+   - `listening-gap`: `intro`, `rounds[6]` `{text,phrase,color}`, `keeper`.
+   - `story-unlock`: `intro`, `phrases[6]` `{word,color}`, `story` (with 6 `{word}`
+     gaps), `bonusEnding`, `keeper`.
+   - `sentence-builder`: `intro`, `sentences[6]` `{text,phrase,color}`, `keeper`.
+   - **Rules:** `listening-gap` and `sentence-builder` share the *identical* 6
+     sentences; each listening `text` must contain its `phrase` verbatim; the clue
+     `puzzle.answers` order matches the `segments` blanks.
+4. **Covers (5):** one per game, seeded by the EP number. `clue-room` shows the
+   first 3 clue emojis; `phrase-pairs` shows a representative word/meaning; the
+   other 3 are branded/seeded. Save to `covers/<type>-ep<N>.png` (1280x720).
+5. **Clue tiles (6):** pre-baked glossy app-icons at
+   `games/clue-room/icons/auto/<key>.png`, where `key` =
+   emoji codepoints joined by `-`, then `_`, then the color hex **without** `#`
+   (e.g. `1f4aa_f6479a.png`; VS16 emoji like `♻️` -> `267b-fe0f_...`).
+6. **Render-review before shipping** (see §6).
+
+The renderers/harness used to build covers, bake tiles, and screenshot games are
+**not** in the repo — they live in the build chat. In a new chat, ask the
+assistant to regenerate them (standard headless-Chromium + Pillow scripts; the
+assistant knows the exact patterns from prior episodes).
+
+## 6. Conventions & gotchas (learned the hard way)
+
+- **Emojis for clue tiles:** prefer single-codepoint, **color-rendering** emoji
+  (faces, objects, people, hearts). **Avoid symbol/arrow emoji** — `🔄 ↔️ ⏸ 🔀`
+  render **monochrome/white** in Noto. VS16 object emoji (`♻️ 🗑️`) are fine.
+  Don't repeat an emoji within the same episode; reuse across episodes is OK.
+- **Overflow:** long single words (e.g. "overconsumption", "vulnerability") can
+  clip. `phrase-pairs` already has `overflow-wrap:break-word; hyphens:auto` on the
+  card faces to handle this. Always render-review Phrase Pairs, the Story bank, and
+  the Clue Room sentence slots. Two-sentence keepers are fine.
+- **Keeper** = one short memorable line (em-dash style works well).
+- **Gating:** `api/games.js` unlocks by `cents >= 200` (Fluency). A trial member
+  carries their tier's entitled cents, so a valid membership unlocks correctly.
+- **Title on covers:** short/theme-only (auto-fits). One or two words.
+
+## 7. Key files
+
+| File | Purpose |
+|---|---|
+| `lib/arcade-data.js` | The catalogue (episodes + all game content). Edit to add episodes. |
+| `lib/arcade-store.js` | `getArcade()` — KV with static fallback (see §4). |
+| `lib/session.js` | Patreon OAuth helpers + `checkMembership` (campaign filter, email scope). |
+| `api/auth/login.js`, `callback.js` | OAuth start / callback (SameSite=None, masked-account switch). |
+| `api/games.js`, `api/list.js` | Serve catalogue + tier gating. |
+| `games/<type>/index.html` | The 5 game engines (generic — read `content`). |
+| `index.html` | Landing page (tiers, pillars, legend). |
+| `practice-arcade.html` | Arcade hub + login/error messaging. |
+| `archive.html`, `use-it-live.html` | Transcript archive; speaking-feedback feature. |
+| `tools/seed-arcade.js` | Optional KV seeder (NOT needed for deploy-only). |
+| `covers/`, `games/clue-room/icons/auto/` | Per-episode covers and clue tiles. |
+
+## 8. On the horizon / not yet built
+
+- **Shadowing player** (interactive transcript + optional custom voiceover, speed
+  control, loop-N, "listen & repeat"): designed but not built. Recommended path —
+  vanilla component + forced-alignment (aeneas/WhisperX) build step for timings +
+  PWA "save for offline". Audio comes from Google AI Studio (Gemini TTS) -> ffmpeg
+  to mono mp3/m4a.
+- **Use It Live** (record + AI speaking feedback) exists but nav is gated behind an
+  `UIL_ENABLED` flag.
+
+## 9. What the next chat needs from you
+
+- The **episode transcript** `.txt` for each new episode (that's all you've been
+  uploading; the assistant builds on the latest codebase).
+- **Only if the repo changed outside the assistant's deliveries**, upload the
+  latest zip too, so it doesn't build on a stale base.
