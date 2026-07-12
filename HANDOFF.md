@@ -20,7 +20,7 @@ session along with any new episode transcript.
 ## 2. Current state (as of this handoff)
 
 **Episodes live** (newest → oldest; `*` = current / "THIS WEEK"):
-`ep249*` Confidence · `ep248` Modern Love · `ep247` Calm Nights · `ep246` Speaking
+`ep251*` Purpose · `ep250` Online Reviews · `ep249` Confidence · `ep248` Modern Love · `ep247` Calm Nights · `ep246` Speaking
 · `ep243` Change · `ep242` Climate · `ep239` Workday · `ep238` Exercise · `ep235`
 · `ep234` · `ep232` · `ep231`.
 
