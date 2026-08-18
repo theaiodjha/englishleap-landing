@@ -8,6 +8,7 @@ import {
   checkMembership, refreshToken, RECHECK_HOURS,
 } from "../lib/session.js";
 import { getArcade } from "../lib/arcade-store.js";
+import { fullTitleFor } from "../lib/episode-titles.js";
 
 // Same 24h live re-check used by /api/list. Returns the (possibly updated)
 // session, or null if membership is now inactive (cookie cleared).
@@ -59,7 +60,7 @@ export default async function handler(req, res) {
       type: gt.type, name: gt.name, icon: gt.icon, accent: gt.accent, tagline: gt.tagline, walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "",
       access: gt.access || "fluency", locked: !unlocked(gt),
       episodes: gt.episodes.map((e) => ({
-        id: e.id, ep: e.ep, title: e.title, current: !!e.current, cover: e.cover || null,
+        id: e.id, ep: e.ep, title: e.title, fullTitle: fullTitleFor(e.id, e.title), current: !!e.current, cover: e.cover || null,
         words: ((e.content && (
           (e.content.clues && e.content.clues.map((c) => c.word)) ||
           (e.content.pairs && e.content.pairs.map((p) => p.word)) ||

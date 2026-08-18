@@ -50,6 +50,8 @@
   .body{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
   .ep{font-family:var(--display);font-weight:700;font-size:13px;color:var(--teal);letter-spacing:.04em}
   .ttl{font-family:var(--display);font-weight:600;font-size:17px;line-height:1.15;margin-top:2px}
+  .words{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .words .w{font-size:11px;color:var(--soft);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
   .play{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--coral),var(--pink))}
   .unlock{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--ink);background:var(--glass);border:1px solid var(--line);padding:8px 13px;border-radius:999px;white-space:nowrap}
   .note{color:var(--soft);font-size:14px;background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
@@ -62,7 +64,10 @@
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="back" href="/practice-arcade.html">&#8249;&nbsp;Practice Arcade</a>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="back" href="/practice-arcade.html">&#8249;&nbsp;Practice Arcade</a>
+      <a class="back" href="/arcade-browse.html">&#9636;&nbsp;Browse all</a>
+    </div>
     <div class="acct" id="acct"></div>
   </div>
   <div class="head" id="head"></div>
@@ -73,6 +78,7 @@ const $=s=>document.querySelector(s);
 const CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
 const TYPE=new URLSearchParams(location.search).get('type')||'';
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function wordsHtml(ep){const w=(ep.words||[]);return w.length?'<div class="words">'+w.map(x=>'<span class="w">'+esc(x)+'</span>').join('')+'</div>':'';}
 const RIB={free:'Free',transcript:'Transcript \u00b7 $1',fluency:'Fluency \u00b7 $2.99'};
 function tile(type,ep,locked,access){
   let done=false; try{ if(window.ELC) done=ELC.isComplete(type,ep.id); }catch(e){}
@@ -83,12 +89,12 @@ function tile(type,ep,locked,access){
     const label = access==='transcript' ? 'Unlock &middot; $1' : 'Unlock &middot; $2.99';
     return `<a class="tile locked" href="${CTA}" target="_blank" rel="noopener">
       <div class="cover">${cover}<span class="lockbadge">&#128274;</span></div>
-      <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
+      <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.fullTitle||ep.title)}</div>${wordsHtml(ep)}</div>
         <div class="unlock">${label}</div></div></a>`;
   }
   return `<a class="tile" href="/games/${esc(type)}/?ep=${esc(ep.id)}">
     <div class="cover">${cover}<div class="status">${ep.current?'<span class="now">THIS WEEK</span>':''}${done?'<span class="donebadge">&#10003; Completed</span>':''}</div></div>
-    <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.title)}</div></div>
+    <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.fullTitle||ep.title)}</div>${wordsHtml(ep)}</div>
       <div class="play">&#9654;</div></div></a>`;
 }
 async function load(){
