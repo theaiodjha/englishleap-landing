@@ -43,11 +43,16 @@
   .eplist{display:grid;grid-template-columns:1fr;gap:16px}
   .epcard{display:grid;grid-template-columns:150px 1fr;gap:0;background:var(--glass);border:1px solid var(--line);
     border-radius:20px;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 18px 50px rgba(0,0,0,.36)}
-  .epcover{position:relative;aspect-ratio:16/9;background:linear-gradient(120deg,#1a1430,#241a3e);overflow:hidden;text-decoration:none;display:block}
-  .epcover img{width:100%;height:100%;object-fit:cover;display:block}
-  .epcover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:10px;text-align:center;
-    font-family:var(--display);font-weight:700;font-size:16px;color:#fff;background:linear-gradient(120deg,var(--purple),var(--teal))}
-  .epcover .now{position:absolute;left:9px;bottom:9px;font-size:10px;font-weight:800;letter-spacing:.04em;color:#06121f;background:var(--teal);border-radius:999px;padding:3px 9px}
+  .epcover{position:relative;aspect-ratio:16/9;overflow:hidden;text-decoration:none;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;color:#fff}
+  .epcover::after{content:"";position:absolute;inset:0;pointer-events:none;background:
+    radial-gradient(120% 90% at 24% 18%,rgba(255,255,255,.26),transparent 55%),
+    radial-gradient(120% 120% at 92% 120%,rgba(0,0,0,.32),transparent 58%)}
+  .epcover .lab{position:relative;z-index:1;font-size:9.5px;font-weight:800;letter-spacing:.22em;opacity:.92;margin-bottom:3px}
+  .epcover .num{position:relative;z-index:1;font-family:var(--display);font-weight:700;font-size:clamp(26px,3.6vw,34px);line-height:1;text-shadow:0 2px 14px rgba(0,0,0,.3)}
+  .epcover .dots{position:absolute;top:10px;right:11px;z-index:1;display:flex;gap:4px}
+  .epcover .dots i{width:7px;height:7px;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .epcover .now{position:absolute;left:10px;bottom:10px;z-index:1;font-size:10px;font-weight:800;letter-spacing:.04em;color:#06121f;background:#fff;border-radius:999px;padding:3px 9px}
   .epbody{padding:14px 16px;min-width:0}
   .ephead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
   .ep{font-family:var(--display);font-weight:700;font-size:12.5px;color:var(--teal);letter-spacing:.04em}
@@ -111,6 +116,8 @@
 const $=s=>document.querySelector(s);
 const CTA='https://www.patreon.com/c/englishleappracticeclub/membership';
 const ORDER=['clue-room','phrase-pairs','listening-gap','story-unlock','sentence-builder'];
+const GRADS=[['#8b6cff','#1fc4b6'],['#f6479a','#8b6cff'],['#ff8a63','#f6479a'],['#1fc4b6','#57e6c4'],['#8b6cff','#ff8a63'],['#1ca8a2','#1fc4b6'],['#f6479a','#ff8a63']];
+function gradFor(ep){const n=parseInt(String(ep||'').replace(/\D/g,''),10)||0;return GRADS[n%GRADS.length];}
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 let EPISODES=[], GAMES=[], view='episode';
 
@@ -126,14 +133,15 @@ function gamePill(g, epId){
 }
 function epCard(e){
   const title=esc(e.fullTitle||e.title);
-  const cover = e.cover
-    ? `<img loading="lazy" src="${esc(e.cover)}" alt="${title}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph',textContent:'${esc(e.title)}'}))">`
-    : `<div class="ph">${esc(e.title)}</div>`;
+  const [g0,g1]=gradFor(e.ep); const num=String(e.ep||'').replace(/\D/g,'')||esc(e.ep);
   const words=(e.words||[]).map(w=>`<span class="w">${esc(w)}</span>`).join('');
   const games=e.games.slice().sort((a,b)=>ORDER.indexOf(a.type)-ORDER.indexOf(b.type)).map(g=>gamePill(g,e.id)).join('');
   const firstType=(e.games.find(g=>!g.locked)||e.games[0]||{}).type||'clue-room';
   return `<article class="epcard" data-s="${esc((e.ep+' '+e.id+' '+(e.fullTitle||'')+' '+e.title+' '+(e.words||[]).join(' ')).toLowerCase())}">
-    <a class="epcover" href="/games/${esc(firstType)}/?ep=${esc(e.id)}">${cover}${e.current?'<span class="now">THIS WEEK</span>':''}</a>
+    <a class="epcover" href="/games/${esc(firstType)}/?ep=${esc(e.id)}" style="background:linear-gradient(135deg,${g0},${g1})">
+      <span class="dots"><i style="background:#f6479a"></i><i style="background:#ff8a63"></i><i style="background:#8b6cff"></i><i style="background:#1fc4b6"></i></span>
+      <span class="lab">EPISODE</span><span class="num">${esc(num)}</span>
+      ${e.current?'<span class="now">THIS WEEK</span>':''}</a>
     <div class="epbody">
       <div class="ephead"><span class="ep">${esc(e.ep)}</span><h3 class="eptitle">${title}</h3></div>
       <div class="epwords">${words}</div>

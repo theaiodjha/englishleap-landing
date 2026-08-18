@@ -207,7 +207,10 @@
   <div class="topbar">
     <a class="brandmark" href="/" style="text-decoration:none"><span class="b">&#127918;</span> English Leap Club</a>
     <!-- Use It Live hidden until verified -->
-    <div class="acct" id="acct"><a class="signlink" href="/api/auth/login?next=/practice-arcade.html"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6Z"/></svg>Member Login</a></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="/arcade-browse.html" style="display:inline-flex;align-items:center;gap:6px;color:#eef3fb;font-weight:700;text-decoration:none;font-size:13.5px;background:rgba(31,196,182,.15);border:1px solid rgba(31,196,182,.45);padding:8px 14px;border-radius:999px">&#9636;&nbsp;Browse games</a>
+      <div class="acct" id="acct"><a class="signlink" href="/api/auth/login?next=/practice-arcade.html"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6Z"/></svg>Member Login</a></div>
+    </div>
   </div>
 
   <!-- HERO -->
@@ -217,6 +220,7 @@
     <p class="sub">Every English Leap episode becomes a mini practice game. Solve clues, unlock words, build sentences, and practise the English from the podcast.</p>
     <div class="cta-row">
       <a class="btn primary" id="playFree" href="/games/clue-room/?ep=ep232"><span class="tri"></span> Play the free Clue Room</a>
+      <a class="btn ghost" href="/arcade-browse.html">&#9636;&nbsp;Browse all games</a>
       <a class="btn gold" href="https://www.patreon.com/c/englishleappracticeclub/membership" target="_blank" rel="noopener">&#10024; Unlock all games with Fluency Club</a>
     </div>
     <div id="streakChip" class="streakchip" style="display:none"></div>
@@ -230,7 +234,7 @@
 
   <!-- GAMES -->
   <section>
-    <div class="sec-head"><h2>The games</h2><p>Each one turns the episode's six phrases into something you actually do &mdash; not just read.</p><a href="/arcade-browse.html" style="display:inline-block;margin-top:10px;text-decoration:none;font-weight:600;font-size:14px;color:#1fc4b6">Browse all games by episode &rsaquo;</a></div>
+    <div class="sec-head"><h2>The games</h2><p>Each one turns the episode's six phrases into something you actually do &mdash; not just read.</p><a href="/arcade-browse.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;text-decoration:none;font-weight:700;font-size:13.5px;color:#06121f;background:linear-gradient(135deg,#1fc4b6,#8b6cff);padding:9px 16px;border-radius:999px">&#9636;&nbsp;Browse all games by episode &rsaquo;</a></div>
     <div id="featured"></div>
     <div class="shelfwrap" id="shelfWrap">
       <button class="shelf-arrow left" id="shelfPrev" aria-label="Previous games">&#8249;</button>
