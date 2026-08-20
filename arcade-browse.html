@@ -12,7 +12,7 @@
 <style>
   :root{
     --ink:#eef3fb; --soft:#9fb1c7; --teal:#1fc4b6; --coral:#ff8a63; --pink:#f6479a; --purple:#8b6cff;
-    --glass:rgba(255,255,255,.07); --line:rgba(255,255,255,.13);
+    --glass:rgba(255,255,255,.07); --line:rgba(255,255,255,.13); --gold:#ffcd46;
     --display:'Clash Display',system-ui,sans-serif; --body:'General Sans',system-ui,sans-serif;
   }
   *{box-sizing:border-box}
@@ -37,7 +37,7 @@
   .seg{display:inline-flex;background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:4px;gap:3px;flex:0 0 auto}
   .seg button{font-family:var(--body);font-weight:600;font-size:13.5px;color:var(--soft);background:transparent;border:0;cursor:pointer;
     padding:8px 15px;border-radius:999px;transition:background .15s,color .15s}
-  .seg button.on{color:#06121f;background:var(--teal)}
+  .seg button.on{color:#fff;background:linear-gradient(135deg,var(--purple),var(--pink));box-shadow:0 6px 16px -6px rgba(246,71,154,.55)}
   .count{color:var(--soft);font-size:13px;margin:-6px 0 16px}
   /* episode view */
   .eplist{display:grid;grid-template-columns:1fr;gap:16px}
@@ -55,7 +55,7 @@
   .epcover .now{position:absolute;left:10px;bottom:10px;z-index:1;font-size:10px;font-weight:800;letter-spacing:.04em;color:#06121f;background:#fff;border-radius:999px;padding:3px 9px}
   .epbody{padding:14px 16px;min-width:0}
   .ephead{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
-  .ep{font-family:var(--display);font-weight:700;font-size:12.5px;color:var(--teal);letter-spacing:.04em}
+  .ep{font-family:var(--display);font-weight:700;font-size:12.5px;color:var(--pink);letter-spacing:.04em}
   .eptitle{font-family:var(--display);font-weight:600;font-size:18px;line-height:1.15;margin:0}
   .epwords{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0 12px}
   .w{font-size:11.5px;color:var(--soft);background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
@@ -65,8 +65,8 @@
   .gpill:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.28)}
   .gpill .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
   .gpill.locked{color:var(--soft)}
-  .gpill.done{border-color:rgba(31,196,182,.5)}
-  .gpill .chk{color:var(--teal);font-weight:800}
+  .gpill.done{border-color:rgba(255,205,70,.55)}
+  .gpill .chk{color:var(--gold);font-weight:800}
   /* game view */
   .gamelist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
   .gamecard{position:relative;display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:var(--ink);
@@ -76,7 +76,7 @@
   .gi{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:24px;flex:0 0 auto;background:rgba(255,255,255,.05);border:1px solid var(--line)}
   .gamecard h3{font-family:var(--display);font-weight:700;font-size:19px;margin:2px 0 4px}
   .gamecard p{color:var(--soft);font-size:13.5px;margin:0 0 8px;line-height:1.35}
-  .cnt{color:var(--teal);font-size:13px;font-weight:600}
+  .cnt{color:var(--pink);font-size:13px;font-weight:600}
   .ribbon{position:absolute;top:14px;right:14px;font-size:10.5px;font-weight:800;letter-spacing:.03em;padding:3px 9px;border-radius:999px}
   .ribbon.transcript{background:rgba(139,108,255,.22);color:#c3b4ff}
   .ribbon.fluency{background:rgba(255,205,70,.22);color:#ffdd80}
@@ -129,7 +129,7 @@ function gamePill(g, epId){
     return `<a class="gpill locked" href="${CTA}" target="_blank" rel="noopener" title="Unlock with ${tier}">&#128274; ${label}</a>`;
   }
   return `<a class="gpill${done?' done':''}" href="/games/${esc(g.type)}/?ep=${esc(epId)}">`+
-    `<span class="dot" style="background:var(--teal)"></span>${label}${done?' <span class="chk">&#10003;</span>':''}</a>`;
+    `<span class="dot" style="background:var(--purple)"></span>${label}${done?' <span class="chk">&#10003;</span>':''}</a>`;
 }
 function epCard(e){
   const title=esc(e.fullTitle||e.title);
