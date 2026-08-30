@@ -1,3 +1,4 @@
+import "../lib/quiet-deprecations.js";
 // /api/download — validates the short-lived signed link from /api/list, then serves the private file.
 import { checkLink } from '../lib/session.js';
 

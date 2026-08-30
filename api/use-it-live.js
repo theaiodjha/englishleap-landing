@@ -1,3 +1,4 @@
+import "../lib/quiet-deprecations.js";
 // /api/use-it-live — record-and-review speaking practice.
 //   POST { action:'usage' }                                  → minutes left this month
 //   POST { action:'analyze', audio, mimeType, durationSec, episodeId }

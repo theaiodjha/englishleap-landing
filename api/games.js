@@ -1,3 +1,4 @@
+import "../lib/quiet-deprecations.js";
 // /api/games — Practice Arcade.
 //   GET /api/games                      → catalogue the member can access
 //   GET /api/games?type=clue-room&ep=ep232 → the gated content for one game

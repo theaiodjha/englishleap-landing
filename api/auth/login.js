@@ -1,3 +1,4 @@
+import "../../lib/quiet-deprecations.js";
 // /api/auth/login — kick off "Continue with Patreon".
 // Accepts ?next=/some/path to return the member to where they started after auth.
 import crypto from 'crypto';

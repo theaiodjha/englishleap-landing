@@ -1,3 +1,4 @@
+import "../../lib/quiet-deprecations.js";
 // /api/auth/callback — Patreon sends the member back here with ?code & ?state.
 import { exchangeCode, checkMembership, sessionCookie, RECHECK_HOURS } from '../../lib/session.js';
 
