@@ -42,26 +42,35 @@ function promptFor(id, title) {
     || `Talk for a minute or two about this episode’s theme — “${title}”. What does it mean to you, and can you share a real example from your own life?`;
 }
 
-// Resolve a requested episode id, else the one flagged `current`, else the newest.
-async function episodeFor(wanted) {
+const epNum = (e) => Number(String(e.ep || e.id).replace(/\D/g, '')) || 0;
+const epWords = (e) => ((e.content && e.content.clues) || []).map((c) => c.word).filter(Boolean);
+
+async function clueRoomEpisodes() {
   try {
     const arcade = await getArcade();
-    const eps = (arcade.find((g) => g.type === 'clue-room') || {}).episodes || [];
-    if (!eps.length) return FALLBACK_EP;
-    const e = (wanted && eps.find((x) => x.id === wanted)) || eps.find((x) => x.current) || eps[0];
-    const words = ((e.content && e.content.clues) || []).map((c) => c.word).filter(Boolean);
-    if (!words.length) return FALLBACK_EP;
-    const title = EPISODE_TITLES[e.id] || e.title;
-    return {
-      id: e.id,
-      number: Number(String(e.ep || e.id).replace(/\D/g, '')) || 0,
-      title,
-      prompt: promptFor(e.id, title),
-      words,
-    };
+    return (arcade.find((g) => g.type === 'clue-room') || {}).episodes || [];
   } catch {
-    return FALLBACK_EP;
+    return [];
   }
+}
+
+// Resolve a requested episode id, else the one flagged `current`, else the newest.
+async function episodeFor(wanted) {
+  const eps = await clueRoomEpisodes();
+  if (!eps.length) return FALLBACK_EP;
+  const e = (wanted && eps.find((x) => x.id === wanted)) || eps.find((x) => x.current) || eps[0];
+  const words = epWords(e);
+  if (!words.length) return FALLBACK_EP;
+  const title = EPISODE_TITLES[e.id] || e.title;
+  return { id: e.id, number: epNum(e), title, prompt: promptFor(e.id, title), words };
+}
+
+// Everything the member can practise, newest first — feeds the episode picker.
+async function episodeChoices() {
+  const eps = await clueRoomEpisodes();
+  return eps
+    .filter((e) => epWords(e).length)
+    .map((e) => ({ id: e.id, n: epNum(e), title: EPISODE_TITLES[e.id] || e.title }));
 }
 
 function fluencyOK(s) {
@@ -184,7 +193,11 @@ export default async function handler(req, res) {
   // --- usage: how many minutes are left this month ---
   if (action === 'usage') {
     const u = await getUsage(s.uid);
-    return res.json({ ok: true, name: s.name, ...publicUsage(u), prompt: ep.prompt, episode: ep.number, episodeId: ep.id, title: ep.title, words: ep.words });
+    return res.json({
+      ok: true, name: s.name, ...publicUsage(u),
+      prompt: ep.prompt, episode: ep.number, episodeId: ep.id, title: ep.title, words: ep.words,
+      episodes: await episodeChoices(),
+    });
   }
 
   // --- analyze: review a recording, then meter its length ---

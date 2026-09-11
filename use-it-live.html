@@ -61,6 +61,16 @@
   .card h2{font-family:var(--display);font-weight:600;font-size:18px;margin:0 0 8px;display:flex;align-items:center;gap:9px}
   .task{color:var(--soft);font-size:15px;line-height:1.55;margin:.2rem 0 0}
   .epline{font-family:var(--display);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--soft2);margin:0 0 7px}
+  .picker{margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+  .picklbl{display:block;font-family:var(--display);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;
+    font-weight:700;color:var(--soft2);margin:0 0 8px}
+  .eppick{appearance:none;-webkit-appearance:none;width:100%;padding:12px 40px 12px 14px;border-radius:13px;cursor:pointer;
+    font-family:var(--display);font-weight:600;font-size:13.5px;color:var(--ink);border:1px solid var(--line);background-color:var(--glass2);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a39fce' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 13px center;background-size:17px;transition:.2s}
+  .eppick:hover{border-color:rgba(255,255,255,.22)}
+  .eppick:disabled{opacity:.5;cursor:not-allowed}
+  .eppick option{background:#0a0918;color:#f5f3ff}
 
   /* minutes meter */
   .meter .row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px;color:var(--soft)}
@@ -188,6 +198,10 @@
       <p class="epline" id="epline"></p>
       <p class="task" id="prompt">&mdash;</p>
       <div class="chips" id="words"></div>
+      <div class="picker hidden" id="picker">
+        <label class="picklbl" for="epPick">&#127911; Practise a different episode</label>
+        <select class="eppick" id="epPick"></select>
+      </div>
     </div>
 
     <div class="card">
@@ -238,6 +252,7 @@
 <script>
 const $=s=>document.querySelector(s);
 const PREVIEW=new URLSearchParams(location.search).get('preview')||'';
+const WANT_EP=new URLSearchParams(location.search).get('ep')||'';  // deep-link straight to an episode
 const backEl=document.getElementById('back');
 if(backEl) backEl.addEventListener('click',e=>{ if(history.length>1){ e.preventDefault(); history.back(); } });
 const MIN_SEC=60, MAX_SEC=180;
@@ -268,16 +283,50 @@ function setUsage(u){
 
 function gate(html){ $('#app').classList.add('hidden'); $('#gate').innerHTML=html; }
 
+function renderTask(u){
+  $('#prompt').textContent=u.prompt;
+  episodeId=u.episodeId||'';
+  $('#epline').textContent=u.episode?`Episode ${u.episode}${u.title?' · '+u.title:''}`:'';
+  words=u.words||[];
+  $('#words').innerHTML=words.map(w=>`<span class="chip" data-w="${w}"><span class="tick">✓</span>${w}</span>`).join('');
+}
+function renderPicker(list){
+  if(!Array.isArray(list)||list.length<2) return;            // nothing to switch between
+  $('#epPick').innerHTML=list.map(e=>`<option value="${e.id}">EP${e.n} · ${esc(e.title)}</option>`).join('');
+  $('#epPick').value=episodeId;
+  $('#picker').classList.remove('hidden');
+}
+// Switching mid-session would score takes against the wrong six words, so clear them.
+$('#epPick').addEventListener('change',async ev=>{
+  const next=ev.target.value, prev=episodeId;
+  if(!next||next===prev) return;
+  if(recording){ ev.target.value=prev; return; }
+  if(takes.length && !confirm('Switching episode clears the takes you have recorded. Continue?')){
+    ev.target.value=prev; return;
+  }
+  clearTakes(); $('#fb').classList.add('hidden'); clearMsg();
+  ev.target.disabled=true;
+  try{
+    const u=await api({action:'usage',episodeId:next});
+    renderTask(u); setUsage(u);
+    $('#epPick').value=episodeId;
+    try{
+      const q=new URLSearchParams(location.search); q.set('ep',episodeId);
+      history.replaceState(null,'',location.pathname+'?'+q.toString());
+    }catch(e){}
+  }catch(err){
+    ev.target.value=prev;
+    showMsg('Could not switch episode. Please try again.','err');
+  }finally{ ev.target.disabled=false; updateUI(); }
+});
+
 // ---- load: usage + task ----
 (async()=>{
   try{
-    const u=await api({action:'usage'});
+    const u=await api(WANT_EP?{action:'usage',episodeId:WANT_EP}:{action:'usage'});
     $('#app').classList.remove('hidden');
-    $('#prompt').textContent=u.prompt;
-    episodeId=u.episodeId||'';
-    $('#epline').textContent=u.episode?`Episode ${u.episode}${u.title?' · '+u.title:''}`:'';
-    words=u.words||[];
-    $('#words').innerHTML=words.map(w=>`<span class="chip" data-w="${w}"><span class="tick">✓</span>${w}</span>`).join('');
+    renderTask(u);
+    renderPicker(u.episodes);
     setUsage(u);
     if(u.name) $('#title').textContent=`Hi ${u.name} — record, get feedback, improve.`;
   }catch(err){
@@ -402,6 +451,11 @@ $('#takes').addEventListener('click',e=>{
     hitMax=false; pendingWav=null; busyTries=0; clearMsg(); renderTakes(); updateUI();
   } else playTake(i);
 });
+function clearTakes(){
+  takes.forEach(x=>URL.revokeObjectURL(x.url)); takes=[];
+  pendingWav=null; busyTries=0; retrying=false; hitMax=false;
+  stopPlayback(); renderTakes(); updateUI();
+}
 function stopPlayback(){ const p=$('#player'); p.pause(); playingIdx=-1; markPlaying(); }
 function playTake(i){
   const p=$('#player');
@@ -540,8 +594,7 @@ async function submit(){
     const b64=await blobToB64(new Blob([pendingWav],{type:'audio/wav'}));
     const d=await api({action:'analyze', audio:b64, mimeType:'audio/wav', durationSec:Math.round(t), episodeId});
     clearMsg(); setUsage(d); renderFeedback(d.feedback);
-    pendingWav=null; busyTries=0;
-    takes.forEach(x=>URL.revokeObjectURL(x.url)); takes=[]; stopPlayback(); renderTakes();
+    clearTakes();
   }catch(err){
     const d=err.data||{};
     if(d.busy && busyTries<2){ busyTries++; return waitThenRetry(Number(d.retryAfter)||15); }

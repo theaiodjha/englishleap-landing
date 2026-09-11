@@ -120,6 +120,10 @@ clue-room block of the catalogue (`getArcade()`), takes the episode flagged `cur
 (or the requested `episodeId`) and uses its six clue words. Long titles come from
 `lib/episode-titles.js`. Per-episode hand-written prompts live in `PROMPTS` in
 `api/use-it-live.js`; anything absent gets a generic prompt built from the title.
+Members switch episodes with the picker in the task card (`episodeChoices()` ships the
+list with the usage response); `?ep=ep277` deep-links straight to one, and the picker
+keeps the URL in step. Switching clears any recorded takes — they would otherwise be
+scored against the wrong six words.
 
 **Recorder is multi-take:** each take is decoded to an `AudioBuffer` and held client-side;
 on submit every take is concatenated, downmixed to mono and encoded as a single 16-bit PCM
