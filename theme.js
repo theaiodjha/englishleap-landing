@@ -112,6 +112,22 @@
       b.classList.toggle("active", b.dataset.mode === mode);
     });
   }
+  /* How much bottom offset another floating corner button needs to clear this toggle.
+     Returns 0 when the toggle is not actually floating — moved into a menu, or hidden.
+     NOTE: do not test offsetParent for this. Per CSSOM, offsetParent is null for ANY
+     position:fixed element, so `offsetParent !== null` is always false here and the
+     caller silently concludes there is nothing to avoid. */
+  window.ELCToggleClearance = function () {
+    var el = document.getElementById("elc-theme-toggle");
+    if (!el || !window.getComputedStyle) return 0;
+    var cs = getComputedStyle(el);
+    if (cs.position !== "fixed") return 0;                       // in the mobile menu
+    if (cs.display === "none" || cs.visibility === "hidden") return 0;
+    if (cs.opacity === "0" || cs.pointerEvents === "none") return 0;  // hidden by the mobile rule
+    if (!el.getClientRects().length) return 0;
+    return Math.round(el.getBoundingClientRect().height) + 20;   // its height plus a gap
+  };
+
   function build() {
     el = document.createElement("div");
     el.id = "elc-theme-toggle";

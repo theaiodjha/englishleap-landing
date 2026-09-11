@@ -211,10 +211,8 @@
     // Stack above the theme toggle only when it's actually floating (desktop);
     // on mobile the toggle lives in the menu, so the launcher uses its base spot.
     function positionLauncher() {
-      var tg = document.getElementById('elc-theme-toggle');
-      var floating = tg && getComputedStyle(tg).position === 'fixed' && tg.offsetParent !== null;
-      if (floating) { var h = tg.getBoundingClientRect().height || 40; b.style.bottom = 'calc(' + Math.round(h + 34) + 'px + env(safe-area-inset-bottom))'; }
-      else { b.style.bottom = 'calc(22px + env(safe-area-inset-bottom))'; }
+      var clear = (window.ELCToggleClearance && window.ELCToggleClearance()) || 0;
+      b.style.bottom = 'calc(' + (clear ? clear + 14 : 22) + 'px + env(safe-area-inset-bottom))';
     }
     [80, 400, 900, 1600].forEach(function (t) { setTimeout(positionLauncher, t); });
     window.addEventListener('resize', positionLauncher);

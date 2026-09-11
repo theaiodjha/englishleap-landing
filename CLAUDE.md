@@ -33,6 +33,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **Validate before packaging:** `node --check` every changed JS; extract and
   `node --check` inline `<script>` blocks in changed HTML; then run `python3 tools/audit.py`
   (wired into the pre-push hook). Fix HIGH/MED; LOW at discretion.
+- **Floating bottom-right buttons measure, they don't re-parent.** `window.ELCToggleClearance()`
+  (in `theme.js`, on every page) returns the offset needed to clear the theme toggle; the tour
+  launcher and the game "How to play" pill each set their own `bottom` from it. Do **not** test
+  `offsetParent` to decide whether the toggle is floating — CSSOM returns null for every
+  `position:fixed` element, so the check silently always fails. A shared dock that re-parented
+  these was tried and reverted: it broke clicks site-wide.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
   (celebrate, exercise, happy, point, read, think). If a PNG is absent, hide it gracefully.
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).

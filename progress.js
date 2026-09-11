@@ -137,6 +137,14 @@
         "background:linear-gradient(110deg,rgba(139,108,255,.92),rgba(77,139,255,.92));box-shadow:0 14px 30px -12px rgba(0,0,0,.8)";
       b.onclick = function () { ELC.playVideo(id, title, poster); };
       document.body.appendChild(b);
+      /* Sit above the theme toggle, which shares this corner. Measured rather than
+         hardcoded, so it also does the right thing when the toggle is hidden. */
+      function position() {
+        var clear = (window.ELCToggleClearance && window.ELCToggleClearance()) || 0;
+        b.style.bottom = (clear ? clear + 16 : 16) + "px";
+      }
+      [0, 120, 600, 1500].forEach(function (t) { setTimeout(position, t); });
+      window.addEventListener("resize", position);
     }
   };
   window.ELC = ELC;
