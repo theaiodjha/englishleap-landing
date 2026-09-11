@@ -26,8 +26,41 @@ const FLUENCY_MIN_CENTS = 200; // Transcript = 100¢, Fluency Club = 299¢ (mirr
 // clue-room is the free-tier game, so it carries every episode — reading it there keeps
 // Use It Live in step with the arcade automatically, with no second list to maintain.
 // Hand-written prompts win where they exist; everything else gets a warm generic one.
+// Per-episode speaking tasks. Each one asks for a specific memory or opinion rather
+// than "the theme", because a nervous B1 learner can start a story immediately but
+// stalls on an abstraction — and each is built so the episode's six words are the
+// natural vocabulary for answering it. Drafts: rewrite in Anna & Jake's voice.
 const PROMPTS = {
+  ep280: 'Think about the last time you had to speak English with no time to prepare. What happened when the word you wanted would not come — and what do you do now when that happens?',
+  ep279: 'Tell us about a plan you made with someone recently — where to eat, what to buy, how to get somewhere. How did the two of you decide, and did either of you change your mind?',
+  ep278: 'Talk about a time you listened to English that felt far too fast — a film, a podcast, or a stranger speaking to you. How much did you actually catch, and what helps you now?',
+  ep277: 'Talk about someone or something you decided to step back from. How did it feel at the time, and how do you feel about it now?',
+  ep276: 'Tell us about something you worked at for a long time before it paid off. Was there a moment you nearly gave up?',
+  ep275: 'Talk about a time you changed direction — a job, a city, a habit, a friendship. What made you stop and rethink?',
+  ep274: 'Is there a part of your life that feels stuck at the moment, and another part that feels alive? Talk about both.',
+  ep273: 'Talk about something you have kept doing even on the days you did not feel like it. What keeps you going?',
+  ep272: 'If you could do any job for one year, with no need to earn money, what would you choose? What are you already good at that would help you?',
+  ep271: 'Talk about a friend you trust completely. What do they do that earns that trust — and have you ever misjudged someone?',
+  ep270: 'What unsettles you most easily? Talk about the last time it happened and how you got calm again.',
+  ep269: 'Think about meeting someone new — at work, at a party, or online. How do you start, and what do you do when the conversation goes quiet?',
+  ep268: 'Tell us about a goal you are working towards right now. What is the very next step, and what got in the way last time?',
+  ep267: 'Talk about a moment when you knew exactly what you wanted to say, but it came out wrong. What were you worried about?',
+  ep263: 'Talk about a time you misunderstood someone, or they misunderstood you. How did the two of you sort it out?',
+  ep262: 'Talk about a small thing that lifted your mood recently, and a small thing that spoiled a day. Why do the bad ones feel bigger?',
+  ep251: 'Which part of your life feels most meaningful right now? Talk about whether the way you spend your days matches that.',
+  ep250: 'Talk about the last thing you bought after reading reviews. Did you believe them — and how do you spot a fake one?',
+  ep249: 'Talk about a time you had to explain something important — at work, to a doctor, or to a friend. How did you keep it clear?',
+  ep248: 'Do you think it is harder to build a lasting relationship now than it was for your parents? Talk about why.',
+  ep247: 'What happens in your head when you get into bed? Talk about a night you could not switch off, and what you try now.',
+  ep246: 'In which situation does speaking English frighten you most? Talk about what you are afraid will happen.',
+  ep243: 'Talk about a habit you have tried to change more than once. What stops you, and what would actually help?',
+  ep242: 'What is one thing you have changed about how you live for the sake of the planet — and one thing you know you should change but have not?',
+  ep239: 'Walk us through yesterday at work or at your studies. When were you most productive, and what pulled you away?',
+  ep238: 'Talk about how your body moves through a normal week. Is there something you used to do that you have stopped?',
+  ep235: 'Talk about something from your upbringing you are grateful for, and something you would do differently in your own family.',
   ep234: 'Talk for up to a minute about your morning routine. What is the first thing you do, and how does it make you feel?',
+  ep232: 'Where does your time actually go? Talk about a day that disappeared on you, and one thing you keep putting off.',
+  ep231: 'Tell us about yesterday, from the moment you woke up. Did anything happen that you did not expect?',
 };
 
 // Last resort only: used if the catalogue is unreachable AND the static seed is empty.
