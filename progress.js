@@ -5,6 +5,38 @@
   function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
   function save(o) { try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} }
 
+  /* Durable, cross-device copy of progress against the member's ACCOUNT.
+     localStorage above stays the source of truth on this device: anonymous players
+     finish the free Clue Room with no account, and this simply 401s and stays local. */
+  var SYNCED = "elc:synced";
+  function post(payload) {
+    try {
+      return fetch("/api/progress", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(function (r) { return r.ok ? r.json() : null; })
+        .catch(function () { return null; });
+    } catch (e) { return Promise.resolve(null); }
+  }
+  /* One-time migration of everything this device already completed. Only marked done
+     on success, so a logged-out player syncs on their next visit after signing in. */
+  function backfill() {
+    var o = load();
+    if (!o.completed) return;
+    try { if (localStorage.getItem(SYNCED) || sessionStorage.getItem(SYNCED)) return; } catch (e) {}
+    try { sessionStorage.setItem(SYNCED, "1"); } catch (e) {}   // one attempt per tab
+    var items = [];
+    for (var k in o.completed) {
+      if (!Object.prototype.hasOwnProperty.call(o.completed, k)) continue;
+      var i = k.indexOf(":"); if (i < 1) continue;
+      items.push({ type: k.slice(0, i), ep: k.slice(i + 1), ts: o.completed[k] });
+    }
+    if (!items.length) return;
+    post({ action: "backfill", items: items }).then(function (r) {
+      if (r && r.ok) { try { localStorage.setItem(SYNCED, "1"); } catch (e) {} }
+    });
+  }
+
   // ISO week key for a given Date, e.g. "2026-W24"
   function isoWeek(d) {
     d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -20,6 +52,7 @@
     markComplete: function (type, ep) {
       var o = load(); o.completed = o.completed || {};
       o.completed[type + ":" + ep] = Date.now(); save(o); this.recordPlay();
+      post({ action: "complete", type: type, ep: ep });   // best-effort account copy
     },
     isComplete: function (type, ep) { var o = load(); return !!(o.completed && o.completed[type + ":" + ep]); },
     completedCountFor: function (type, epIds) {
@@ -107,4 +140,5 @@
     }
   };
   window.ELC = ELC;
+  try { backfill(); } catch (e) {}
 })();

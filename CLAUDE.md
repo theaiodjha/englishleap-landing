@@ -59,10 +59,12 @@ use-it-live.html           Use It Live — record & get AI feedback (FLAGGED OFF
 elc-tour.js                guided Oriva tour (home + arcade); auto-runs first visit
 api/auth/{login,callback,signout}.js   Patreon OAuth flow
 api/{games,list,download,unlock}.js    arcade data, archive list/download, code redemption
+api/progress.js            records game completions + returns a member's practice history
 api/use-it-live.js         Use It Live: usage + audio analysis (Gemini), flag-gated
 lib/session.js             session cookie (HMAC), readSession(), checkMembership() → tier/uid/email,
                            revalidateSession() → shared 24h live Patreon re-check
 lib/quota.js               monthly 100-min audio quota (Upstash), keyed to session.uid
+lib/history.js             practice history (sessions, aggregates, game completions)
 lib/arcade-store.js        KV read/write for arcade data (static fallback)
 lib/arcade-data.js         static arcade catalogue (short cover titles)
 lib/episode-titles.js      long/searchable episode titles for the arcade browser
@@ -178,6 +180,31 @@ UIL_PREVIEW_UIDS         comma-separated uids that bypass the flag
    (MP4/AAC) analyses end-to-end, and desktop mics work once OS/browser permission is
    granted (the page shows step-by-step OS guidance on failure).
 4. **Launch:** `UIL_ENABLED=true` + uncomment nav/tour.
+
+## Practice history (feeds the future progress dashboard)
+
+`lib/history.js` keeps a bounded record per member, so the free Upstash tier (256MB,
+500K commands/month) can't run away:
+
+```
+uil:log:{uid}    list  last 100 sessions, newest first (~110-250B each, hard cap)
+uil:agg:{uid}    hash  NEVER trimmed: {YYYY-MM}:sec, {YYYY-MM}:n, w:{word} counts
+elc:games:{uid}  hash  `{type}:{ep}` → ts, bounded by the catalogue (5 types x episodes)
+```
+
+The aggregates are the point: trimming old detail never destroys the long-term growth
+story. Ceiling is **~40KB per member, forever**; measured cost is ~9 KV commands per
+practice session. **Metadata only — no transcript is stored** (5x the size, and it means
+holding members' speech); revisit only as an explicit opt-in.
+
+Writes **fail open and never throw** — history must never break a practice session.
+Failures `console.warn` into the Vercel log.
+
+`markComplete()` in `progress.js` is the single choke point all 5 games call, so the
+account copy is hooked there; `localStorage` stays the device source of truth (anonymous
+players need no account) and a one-time `backfill` migrates it on first signed-in visit.
+
+**The dashboard itself is NOT built** — this is capture only, so history accrues from now.
 
 ## Open decisions
 

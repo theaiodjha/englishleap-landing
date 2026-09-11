@@ -11,6 +11,7 @@ import "../lib/quiet-deprecations.js";
 import { readSession, revalidateSession } from '../lib/session.js';
 import { getUsage, addUsage, clampRecordingSec, LIMIT_MIN, MAX_REC_SEC } from '../lib/quota.js';
 import { getArcade } from '../lib/arcade-store.js';
+import { logSession } from '../lib/history.js';
 import { EPISODE_TITLES } from '../lib/episode-titles.js';
 
 // Audio analysis of a 3-minute clip can take well past the platform default, and a
@@ -221,6 +222,18 @@ export default async function handler(req, res) {
 
     // Meter only after a successful analysis, so failures never cost minutes.
     const after = await addUsage(s.uid, durationSec);
+
+    // Keep the session in the member's practice history (metadata only, no transcript).
+    // logSession fails open and never throws, so history can't break a practice session.
+    await logSession(s.uid, {
+      episodeId: ep.id,
+      episode: ep.number,
+      durationSec,
+      wordsUsed: feedback && feedback.words_used,
+      wins: feedback && Array.isArray(feedback.wins) ? feedback.wins.length : 0,
+      tweak: feedback && feedback.tweak,
+    });
+
     return res.json({ ok: true, feedback, ...publicUsage(after) });
   }
 
