@@ -39,6 +39,10 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   `offsetParent` to decide whether the toggle is floating — CSSOM returns null for every
   `position:fixed` element, so the check silently always fails. A shared dock that re-parented
   these was tried and reverted: it broke clicks site-wide.
+- **`--gold` / `--amber` are dark-ground colours.** As TEXT on light they measure ~1.2:1
+  (a pale label on a gold pill was 1.09:1). Fills may stay gold; the ink must become
+  **`#7a5100`** — `theme.css` carries the light overrides. Same for teal text: `#0f9b90`
+  is 3.0:1, use **`#0b6f68`**. Check any new accent against the composited background.
 - **Light theme is daylight, not an inverted night.** The aurora is `display:none` on
   `html[data-theme="light"]` — by day the page is paper. Do not reintroduce blobs there.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit

@@ -100,11 +100,11 @@ html[data-theme="light"] .tier.featured-tier{
 }
 html[data-theme="light"] .tier:hover{border-color:rgba(240,160,30,.45) !important}
 /* readable accents on light */
-html[data-theme="light"] .tier .ribbon{color:#b07514; border-color:rgba(240,160,30,.5)}
+html[data-theme="light"] .tier .ribbon{color:#7a5100; border-color:rgba(240,160,30,.5)}
 html[data-theme="light"] .tier .ribbon.plain{color:var(--muted); border-color:var(--line)}
-html[data-theme="light"] .tier .trial{color:#0f9b90}
-html[data-theme="light"] .tier li svg{color:#0f9b90}
-html[data-theme="light"] .legend .trial-note{color:#0f9b90}
+html[data-theme="light"] .tier .trial{color:#0b6f68}
+html[data-theme="light"] .tier li svg{color:#0b6f68}
+html[data-theme="light"] .legend .trial-note{color:#0b6f68}
 html[data-theme="light"] .club-glow{opacity:.4}
 
 /* ---- Practice Arcade / Archive top bar + tabs + upsell (token-driven, theme-safe) ---- */
@@ -120,10 +120,8 @@ html[data-theme="light"] #stagebg{opacity:.4}
 html[data-theme="light"] .card-glass{box-shadow:0 18px 46px -24px rgba(80,60,150,.5) !important}
 /* progress + accents that washed out on light */
 html[data-theme="light"] .dots i{background:rgba(60,50,110,.18); box-shadow:inset 0 0 0 1px rgba(60,50,110,.25)}
-html[data-theme="light"] .pill .ep{color:#0f9b90}
+html[data-theme="light"] .pill .ep{color:#0b6f68}
 html[data-theme="light"] .frac,
-html[data-theme="light"] .kick{color:#c98a12}
-html[data-theme="light"] .keeper{color:#b9791b}
 /* scrims become bright frosted glass, not dark veils */
 html[data-theme="light"] .modal{background:rgba(245,239,255,.55) !important}
 html[data-theme="light"] .intro{background:radial-gradient(120% 90% at 50% 0%,rgba(139,108,255,.18),rgba(245,239,255,.82)) !important}
@@ -131,7 +129,7 @@ html[data-theme="light"] .intro{background:radial-gradient(120% 90% at 50% 0%,rg
 html[data-theme="light"] .oriva{background:rgba(255,255,255,.62) !important; border:1px solid rgba(60,50,110,.14) !important}
 html[data-theme="light"] .actions a.btn[href="/practice-arcade.html"]{background:rgba(60,50,110,.08) !important; box-shadow:inset 0 0 0 1px rgba(60,50,110,.16)}
 /* night banner reads on a bright sky */
-html[data-theme="light"] .nightbanner .big{background:linear-gradient(100deg,#2a2150,#d98a14) !important; filter:drop-shadow(0 0 18px rgba(240,160,30,.4))}
+html[data-theme="light"] .nightbanner .big{background:linear-gradient(100deg,#2a2150,#9a5f06) !important; filter:drop-shadow(0 0 18px rgba(240,160,30,.4))}
 html[data-theme="light"] .nightbanner .small{color:#2a2150; text-shadow:none}
 
 /* ---- smooth, premium theme transition (surfaces without transform hovers) ---- */
@@ -142,8 +140,8 @@ html[data-theme="light"] .nightbanner .small{color:#2a2150; text-shadow:none}
 }
 
 /* solve-the-sentence feedback (outside the card) on light */
-html[data-theme="light"] .sb-msg.ok{color:#0f9b90}
-html[data-theme="light"] .sb-msg.nudge{color:#c98a12}
+html[data-theme="light"] .sb-msg.ok{color:#0b6f68}
+html[data-theme="light"] .sb-msg.nudge{color:#7a5100}
 
 /* solve card: keep every element defined on light theme */
 html[data-theme="light"] .reset{box-shadow:inset 0 0 0 1.8px rgba(60,50,110,.30)}
@@ -175,10 +173,10 @@ html[data-theme="light"] .focus .why .hlw{
 }
 html[data-theme="light"] .duenote .hlw,
 html[data-theme="light"] .chip.due{
-  color:#7e5405 !important; background:rgba(240,160,30,.14) !important;
+  color:#7a5100 !important; background:rgba(240,160,30,.14) !important;
   border-color:rgba(240,160,30,.55) !important;
 }
-html[data-theme="light"] .chip.due .tick{border-color:rgba(240,160,30,.6) !important; color:#7e5405 !important}
+html[data-theme="light"] .chip.due .tick{border-color:rgba(240,160,30,.6) !important; color:#7a5100 !important}
 html[data-theme="light"] .chip.due.on{color:#04201c !important}
 
 /* glass surfaces: violet depth instead of a black veil */
@@ -238,3 +236,36 @@ html[data-theme="light"] .btn:disabled{
    see repaintGlass() in theme.js. Without it a glass card can paint only half its
    content until the window is resized. */
 html.elc-repaint *{backdrop-filter:none !important; -webkit-backdrop-filter:none !important}
+
+/* ---- gold on light --------------------------------------------------------
+   --gold (#ffd27a) and --amber (#ffcd46) are made for a dark ground. As TEXT on
+   light they are invisible: measured 1.26:1, and the pale pill label #ffdd80 on
+   its own gold tint is 1.09:1. Fills stay gold; only the ink changes.
+   #7a5100 keeps the gold identity and measures 5.8-6.8:1 on every light surface. */
+html[data-theme="light"] .c-gold .lnk,
+html[data-theme="light"] .c-gold .eco-icon svg,
+html[data-theme="light"] .cta-band .gift,
+html[data-theme="light"] .tw-ep,
+html[data-theme="light"] .gpill .chk,
+html[data-theme="light"] .frac,
+html[data-theme="light"] .kick,
+html[data-theme="light"] .keeper,
+html[data-theme="light"] .chip.due,
+html[data-theme="light"] .chip.due .tick,
+html[data-theme="light"] .duenote .hlw{color:#7a5100 !important}
+
+/* pale label on a pale gold pill — the worst of them at 1.09:1 */
+html[data-theme="light"] .ribbon.fluency,
+html[data-theme="light"] .twg-tier.fluency{
+  background:rgba(255,205,70,.30) !important; color:#7a5100 !important;
+  border:1px solid rgba(154,95,6,.30);
+}
+/* story-unlock: white text on a 32% gold fill */
+html[data-theme="light"] .kw.on{
+  background:rgba(255,205,70,.34) !important; color:#7a5100 !important;
+  box-shadow:0 0 0 2px rgba(154,95,6,.25) !important;
+}
+/* gradient-clipped gold headings have no readable stop on a light ground */
+html[data-theme="light"] .grad-gold{
+  background:none !important; color:#7a5100 !important; -webkit-text-fill-color:#7a5100;
+}
