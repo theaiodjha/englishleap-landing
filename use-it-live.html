@@ -247,6 +247,7 @@ const RATES=[16000,12000,8000], MAX_RAW_BYTES=3000000;
 let mediaRec=null, chunks=[], startMs=0, autostop=null, remainingMin=0, words=[];
 let takes=[], recording=false, acx=null, playingIdx=-1, hitMax=false;
 let episodeId='';   // whichever episode the server served us — sent back on analyze
+let pendingWav=null, busyTries=0, retrying=false; // encoded once; a busy retry never re-encodes
 
 async function api(payload){
   const r=await fetch('/api/use-it-live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(PREVIEW?{...payload,preview:PREVIEW}:payload)});
@@ -382,7 +383,7 @@ function updateUI(){
   $('#totNow').textContent=fmt(t);
   $('#totFill').style.width=Math.min(100,Math.round(t/MIN_SEC*100))+'%';
   $('#totFill').classList.toggle('ok',t>=MIN_SEC);
-  $('#analyze').disabled = recording || t<MIN_SEC;
+  $('#analyze').disabled = recording || retrying || t<MIN_SEC;
   $('#mic').disabled = recording ? false : (noMin || full);
   if(!recording) $('#micLabel').textContent = takes.length ? '+ Add a take' : 'Record';
   $('#hint').textContent = noMin ? 'You have used all your minutes this month. They refresh on the 1st.'
@@ -398,7 +399,7 @@ $('#takes').addEventListener('click',e=>{
     if(playingIdx===i) stopPlayback();
     URL.revokeObjectURL(takes[i].url); takes.splice(i,1);
     if(playingIdx>i) playingIdx--;
-    hitMax=false; clearMsg(); renderTakes(); updateUI();
+    hitMax=false; pendingWav=null; busyTries=0; clearMsg(); renderTakes(); updateUI();
   } else playTake(i);
 });
 function stopPlayback(){ const p=$('#player'); p.pause(); playingIdx=-1; markPlaying(); }
@@ -443,6 +444,7 @@ $('#mic').onclick=async()=>{
     }catch(e){
       showMsg('That take could not be processed. Please record it again.','err');
     }
+    pendingWav=null; busyTries=0;
     renderTakes(); updateUI();
   };
   hitMax=false;
@@ -513,22 +515,45 @@ async function buildWav(){
 }
 
 // ---- submit: one request for the whole session ----
-$('#analyze').onclick=async()=>{
+// A burst can rate-limit Gemini. That is a wait, not a failure: we keep the encoded
+// WAV, count down, and retry — without ever telling the member they are out of minutes.
+function waitThenRetry(secs){
+  retrying=true;
+  let left=Math.max(3,Math.min(60,Math.round(secs)));
+  (function countdown(){
+    if(!retrying) return;                       // a take changed under us
+    if(left<=0){ submit(); return; }
+    showMsg(`The coach is helping a lot of learners right now — trying again in ${left}s. Your recording is safe.`,'warn');
+    left--; setTimeout(countdown,1000);
+  })();
+  updateUI();
+}
+
+async function submit(){
+  retrying=false;
   const t=total();
-  if(!takes.length || t<MIN_SEC) return;
+  if(!takes.length || t<MIN_SEC){ updateUI(); return; }
   $('#analyze').disabled=true;
   showMsg('Combining your takes and listening… this takes a few seconds.','warn');
   try{
-    const wav=await buildWav();
-    const b64=await blobToB64(new Blob([wav],{type:'audio/wav'}));
+    if(!pendingWav) pendingWav=await buildWav();   // encode once, reuse on retry
+    const b64=await blobToB64(new Blob([pendingWav],{type:'audio/wav'}));
     const d=await api({action:'analyze', audio:b64, mimeType:'audio/wav', durationSec:Math.round(t), episodeId});
     clearMsg(); setUsage(d); renderFeedback(d.feedback);
+    pendingWav=null; busyTries=0;
     takes.forEach(x=>URL.revokeObjectURL(x.url)); takes=[]; stopPlayback(); renderTakes();
   }catch(err){
-    if(err.status===429){ setUsage(err.data); showMsg(err.data.error||'You have used your minutes this month.','warn'); }
+    const d=err.data||{};
+    if(d.busy && busyTries<2){ busyTries++; return waitThenRetry(Number(d.retryAfter)||15); }
+    if(d.busy){
+      busyTries=0;
+      showMsg('The coach is still very busy. Your recording is safe — tap “Get my feedback” again in a minute.','warn');
+    }
+    else if(d.quota){ setUsage(d); showMsg(d.error||'You have used your minutes this month.','warn'); }
     else showMsg(err.message||'Something went wrong. Please try again.','err');
   }finally{ updateUI(); }
-};
+}
+$('#analyze').onclick=()=>submit();
 
 function renderFeedback(f){
   if(!f) return;

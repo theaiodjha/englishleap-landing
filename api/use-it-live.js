@@ -13,6 +13,10 @@ import { getUsage, addUsage, clampRecordingSec, LIMIT_MIN, MAX_REC_SEC } from '.
 import { getArcade } from '../lib/arcade-store.js';
 import { EPISODE_TITLES } from '../lib/episode-titles.js';
 
+// Audio analysis of a 3-minute clip can take well past the platform default, and a
+// killed function looks like a generic failure to the member. Give it real headroom.
+export const config = { maxDuration: 60 };
+
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash'; // 2.5-flash is retired for new API keys
 const FLUENCY_MIN_CENTS = 200; // Transcript = 100¢, Fluency Club = 299¢ (mirrors /api/games)
@@ -85,6 +89,17 @@ Return ONLY a JSON object with this exact shape:
 If the audio is empty, silent, or not speech, return the same shape with empty wins, a gentle tweak asking them to try recording again, and an empty transcript.`;
 }
 
+// Gemini's transient failures are worth waiting out: 429 RESOURCE_EXHAUSTED (rate
+// limit — TPM binds first for us at roughly 300 requests/min) and 503 UNAVAILABLE
+// (overloaded). Returns the seconds to wait, or 0 for a real error. Gemini often
+// names its own delay in a RetryInfo block; honour it when it does.
+function transientWait(status, text) {
+  if (status !== 429 && status !== 503) return 0;
+  const m = /"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"/.exec(text || '');
+  const named = m ? Math.ceil(Number(m[1])) : 0;
+  return Math.min(60, Math.max(5, named || (status === 429 ? 20 : 8)));
+}
+
 async function analyzeAudio(base64, mimeType, ep) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
   const body = {
@@ -101,13 +116,32 @@ async function analyzeAudio(base64, mimeType, ep) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  if (!r.ok) throw new Error(`gemini ${r.status}: ${(await r.text()).slice(0, 300)}`);
+  if (!r.ok) {
+    const text = await r.text();
+    const wait = transientWait(r.status, text);
+    const err = new Error(`gemini ${r.status}: ${text.slice(0, 300)}`);
+    if (wait) { err.transient = true; err.retryAfter = wait; }
+    throw err;
+  }
   const j = await r.json();
   const text = (j?.candidates?.[0]?.content?.parts || []).map(p => p.text || '').join('').trim();
   let out;
   try { out = JSON.parse(text.replace(/```json|```/g, '').trim()); }
   catch { out = { transcript: '', summary: '', wins: [], tweak: 'I could not hear that clearly — could you record again?', words_used: [], closing: '' }; }
   return out;
+}
+
+// A rate-limited call fails in well under a second, so one short wait still fits the
+// function budget — and retrying HERE means the member never re-uploads their audio.
+async function analyzeWithRetry(base64, mimeType, ep) {
+  try {
+    return await analyzeAudio(base64, mimeType, ep);
+  } catch (e) {
+    if (!e.transient) throw e;
+    const wait = Math.min(e.retryAfter, 6) * 1000 + Math.floor(Math.random() * 900); // jitter spreads a burst
+    await new Promise((r) => setTimeout(r, wait));
+    return analyzeAudio(base64, mimeType, ep);
+  }
 }
 
 export default async function handler(req, res) {
@@ -171,8 +205,19 @@ export default async function handler(req, res) {
     if (durationSec > MAX_REC_SEC) return res.status(413).json({ ok: false, error: `Please keep recordings under ${Math.round(MAX_REC_SEC/60)} minutes.` });
 
     let feedback;
-    try { feedback = await analyzeAudio(audio, mimeType, ep); }
-    catch (e) { return res.status(502).json({ ok: false, error: 'The coach could not analyse that just now. Please try again.', detail: String(e.message || e) }); }
+    try { feedback = await analyzeWithRetry(audio, mimeType, ep); }
+    catch (e) {
+      // Busy is a wait, not a failure, and emphatically not "you are out of minutes" —
+      // the client keys off `busy` so it never shows the quota message for a burst.
+      if (e.transient) {
+        res.setHeader('Retry-After', String(e.retryAfter));
+        return res.status(429).json({
+          ok: false, busy: true, retryAfter: e.retryAfter, ...publicUsage(before),
+          error: 'The coach is helping a lot of learners right now. Give it a moment.',
+        });
+      }
+      return res.status(502).json({ ok: false, error: 'The coach could not analyse that just now. Please try again.', detail: String(e.message || e) });
+    }
 
     // Meter only after a successful analysis, so failures never cost minutes.
     const after = await addUsage(s.uid, durationSec);

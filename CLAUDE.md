@@ -125,6 +125,15 @@ WAV, sent as **one** analyze request (`mimeType:'audio/wav'`). **60s minimum / 1
 total. Sample rate steps down (16k → 12k → 8k) so even a 3-min session stays under Vercel's
 ~4.5MB body limit — 16-bit mono at 16kHz is 32KB/s, so 180s would be ~7.7MB once base64'd.
 
+**Bursts degrade into a wait, not an error.** Gemini 429/503 is classified as transient
+(`transientWait()`), retried once server-side with jitter so the member never re-uploads,
+then surfaced as `429 {busy:true, retryAfter}` — deliberately distinct from the quota
+`429 {quota:true}`, so a rate limit never renders as "you've used your 100 minutes".
+The page counts down and retries twice, reusing the already-encoded WAV. Tier-1 limits are
+RPM 1000 / TPM 2M / RPD 10000, and **TPM binds first**: audio is 32 tokens/sec, so a 3-min
+clip is ~6.7k tokens → roughly 300 requests/min, not 1000. `maxDuration: 60` is set on the
+route because a long clip plus a retry easily outruns the platform default.
+
 **Intentionally OFF for the audience** until tested:
 - `api/use-it-live.js` returns a `coming_soon` 503 unless `UIL_ENABLED=true`.
 - `use-it-live.html` shows a clean "coming soon" card in that state.
