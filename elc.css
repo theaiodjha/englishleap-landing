@@ -49,6 +49,7 @@
   --fs-lg:17px;
   --fs-xl:20px;
   --fs-2xl:26px;
+  --fs-3xl:30px;   /* display only: the focal word in a game, not body copy */
 
   /* ---- spacing: 4pt grid, replacing ad-hoc 9/11/13/22px values ---- */
   --sp-1:4px;  --sp-2:8px;  --sp-3:12px; --sp-4:16px;
