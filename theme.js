@@ -19,11 +19,8 @@
   })();
 
   function setResolved(t) {
-    var d = document.documentElement;
-    var changed = d.dataset.theme !== t;
-    d.dataset.theme = t;
+    document.documentElement.dataset.theme = t;
     try { localStorage.setItem(RKEY, t); } catch (e) {}
-    if (changed && d.classList) repaintGlass();
   }
 
   // ---- sunrise/sunset (NOAA sunrise equation), returns absolute instants ----
@@ -97,31 +94,6 @@
       b.classList.toggle("active", b.dataset.mode === mode);
     });
   }
-  /* One fixed corner, shared by everything that wants to float there: the tour
-     launcher, the game "How to play" pill and this toggle. Each used to hardcode
-     right/bottom and they landed on top of each other. column-reverse puts the
-     CONTEXTUAL action lowest (easiest to reach) with the setting above it. */
-  window.ELCDock = function () {
-    var d = document.getElementById("elc-dock");
-    if (!d && document.body) {
-      d = document.createElement("div");
-      d.id = "elc-dock";
-      document.body.appendChild(d);
-    }
-    return d;
-  };
-
-  /* Chromium can leave a backdrop-filter layer un-repainted when the page behind it
-     changes, which shows as a half-blank glass card after a theme switch. Dropping
-     the filter for two frames forces those layers to be rebuilt. */
-  function repaintGlass() {
-    var d = document.documentElement;
-    d.classList.add("elc-repaint");
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () { d.classList.remove("elc-repaint"); });
-    });
-  }
-
   function build() {
     el = document.createElement("div");
     el.id = "elc-theme-toggle";
@@ -134,7 +106,7 @@
     el.addEventListener("click", function (e) {
       var b = e.target.closest("button"); if (b) start(b.dataset.mode);
     });
-    (window.ELCDock() || document.body).appendChild(el);
+    document.body.appendChild(el);
   }
 
   function init() { build(); start(getMode()); }

@@ -33,10 +33,6 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **Validate before packaging:** `node --check` every changed JS; extract and
   `node --check` inline `<script>` blocks in changed HTML; then run `python3 tools/audit.py`
   (wired into the pre-push hook). Fix HIGH/MED; LOW at discretion.
-- **Anything that floats bottom-right joins the dock.** `window.ELCDock()` (defined in
-  `theme.js`, on every page) returns the shared `#elc-dock` column — append to it instead
-  of `document.body` with your own `position:fixed`. The tour launcher, the game
-  "How to play" pill and the theme toggle all used to hardcode that corner and collided.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
   (celebrate, exercise, happy, point, read, think). If a PNG is absent, hide it gracefully.
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).

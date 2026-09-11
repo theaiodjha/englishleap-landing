@@ -136,7 +136,7 @@
         "color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:11px 17px;backdrop-filter:blur(10px);" +
         "background:linear-gradient(110deg,rgba(139,108,255,.92),rgba(77,139,255,.92));box-shadow:0 14px 30px -12px rgba(0,0,0,.8)";
       b.onclick = function () { ELC.playVideo(id, title, poster); };
-      ((window.ELCDock && window.ELCDock()) || document.body).appendChild(b);
+      document.body.appendChild(b);
     }
   };
   window.ELC = ELC;
