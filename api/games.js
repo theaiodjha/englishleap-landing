@@ -4,41 +4,14 @@ import "../lib/quiet-deprecations.js";
 //   GET /api/games?type=clue-room&ep=ep232 → the gated content for one game
 // Reuses the exact membership logic from lib/session.js (same live re-check as
 // /api/list), so access tracks paying status identically to the archive.
-import {
-  readSession, sessionCookie, clearCookie,
-  checkMembership, refreshToken, RECHECK_HOURS,
-} from "../lib/session.js";
+import { readSession, revalidateSession } from "../lib/session.js";
 import { getArcade } from "../lib/arcade-store.js";
 import { fullTitleFor } from "../lib/episode-titles.js";
-
-// Same 24h live re-check used by /api/list. Returns the (possibly updated)
-// session, or null if membership is now inactive (cookie cleared).
-async function revalidate(req, res, s) {
-  const needTier = s.cents === undefined && !!s.rt; // session issued before tiering existed
-  if (!(s.access && s.rt && (needTier || Date.now() > (s.recheck || 0)))) return s;
-  const doRefresh = async (rt) => {
-    const t = await refreshToken(rt);
-    return { at: t.access_token, rt: t.refresh_token || rt, atexp: Date.now() + (t.expires_in ? t.expires_in * 1000 : 30 * 864e5) };
-  };
-  try {
-    let { at, rt, atexp } = s;
-    if (!atexp || Date.now() > atexp - 60000) ({ at, rt, atexp } = await doRefresh(rt));
-    let mem;
-    try { mem = await checkMembership(at); }
-    catch { ({ at, rt, atexp } = await doRefresh(rt)); mem = await checkMembership(at); }
-    if (mem.status === "none") { res.setHeader("Set-Cookie", clearCookie); return null; }
-    const next = { ...s, at, rt, atexp, access: mem.status, cents: mem.cents, tier: mem.status === "paid" ? "fluency" : "trial", recheck: Date.now() + RECHECK_HOURS * 3600e3 };
-    res.setHeader("Set-Cookie", sessionCookie(next));
-    return next;
-  } catch {
-    return s; // Patreon unreachable → honour cached status (outage-safe)
-  }
-}
 
 export default async function handler(req, res) {
   // Logged-in members get a live re-check; anonymous visitors are still allowed a taster.
   let s = readSession(req);
-  if (s) s = await revalidate(req, res, s); // becomes null if membership went inactive
+  if (s) s = await revalidateSession(res, s); // becomes null if membership went inactive
 
   const ARCADE = await getArcade(); // server-side store (KV) with static fallback
 

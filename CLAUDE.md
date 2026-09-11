@@ -60,7 +60,8 @@ elc-tour.js                guided Oriva tour (home + arcade); auto-runs first vi
 api/auth/{login,callback,signout}.js   Patreon OAuth flow
 api/{games,list,download,unlock}.js    arcade data, archive list/download, code redemption
 api/use-it-live.js         Use It Live: usage + audio analysis (Gemini), flag-gated
-lib/session.js             session cookie (HMAC), readSession(), checkMembership() → tier/uid/email
+lib/session.js             session cookie (HMAC), readSession(), checkMembership() → tier/uid/email,
+                           revalidateSession() → shared 24h live Patreon re-check
 lib/quota.js               monthly 100-min audio quota (Upstash), keyed to session.uid
 lib/arcade-store.js        KV read/write for arcade data (static fallback)
 lib/arcade-data.js         static arcade catalogue (short cover titles)
@@ -87,6 +88,12 @@ games/*                    5 game types (clue-room, phrase-pairs, listening-gap,
 - **Fluency entitlement** = `cents >= 200` (Transcript = 100¢, Fluency = 299¢); a legacy
   session with `cents === undefined` counts as full. Mirror this anywhere you gate
   Fluency-only features (see `api/games.js` and `api/use-it-live.js`).
+- **Re-check membership on every gated route** with `revalidateSession(res, s)` — it
+  refreshes the token, re-confirms with Patreon at most every `RECHECK_HOURS`, backfills
+  `cents` on legacy sessions, and returns `null` (clearing the cookie) once a membership
+  goes inactive. Without it a cancelled member keeps their access for the cookie's 30 days.
+  `api/games.js` and `api/use-it-live.js` use it; **`api/list.js` still has its own inline
+  copy** — fold it in when you next touch that file.
 - **Wrong-account UX:** callback requests `identity[email]`, masks it (`ja***@gmail.com`),
   and passes `&who=` on `e=notmember`; the arcade names the account and offers a
   "log out of Patreon to switch account" link (Patreon has no account picker / `prompt`).
@@ -105,6 +112,12 @@ Record-and-review speaking practice: the learner records audio, **Gemini** analy
 (Claude can't take audio) and returns warm feedback (2 wins + 1 gentle tweak,
 confidence-focused, never grammar-policing). Metered at **100 audio-minutes/month** per
 member (`lib/quota.js`), Fluency-gated.
+
+**The task is derived from the Arcade**, not a second list: `episodeFor()` reads the
+clue-room block of the catalogue (`getArcade()`), takes the episode flagged `current`
+(or the requested `episodeId`) and uses its six clue words. Long titles come from
+`lib/episode-titles.js`. Per-episode hand-written prompts live in `PROMPTS` in
+`api/use-it-live.js`; anything absent gets a generic prompt built from the title.
 
 **Recorder is multi-take:** each take is decoded to an `AudioBuffer` and held client-side;
 on submit every take is concatenated, downmixed to mono and encoded as a single 16-bit PCM

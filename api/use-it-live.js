@@ -8,23 +8,56 @@ import "../lib/quiet-deprecations.js";
 // Fluency Club only (same cents>=200 rule as /api/games). Audio is analysed by
 // Gemini (Claude can't take audio); swap analyzeAudio() for any audio model.
 
-import { readSession } from '../lib/session.js';
+import { readSession, revalidateSession } from '../lib/session.js';
 import { getUsage, addUsage, clampRecordingSec, LIMIT_MIN, MAX_REC_SEC } from '../lib/quota.js';
+import { getArcade } from '../lib/arcade-store.js';
+import { EPISODE_TITLES } from '../lib/episode-titles.js';
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash'; // 2.5-flash is retired for new API keys
 const FLUENCY_MIN_CENTS = 200; // Transcript = 100¢, Fluency Club = 299¢ (mirrors /api/games)
 
-// Minimal episode context so feedback is anchored to the words being taught.
-const EPISODES = {
-  ep234: {
-    number: 234,
-    title: 'Morning Routine for Self-Discipline',
-    prompt: 'Talk for up to a minute about your morning routine. What is the first thing you do, and how does it make you feel?',
-    words: ['scattered', 'ritual', 'foundation', 'cultivate', 'anchor', 'rewire'],
-  },
+// The speaking task comes from the SAME six words the Arcade teaches for an episode.
+// clue-room is the free-tier game, so it carries every episode — reading it there keeps
+// Use It Live in step with the arcade automatically, with no second list to maintain.
+// Hand-written prompts win where they exist; everything else gets a warm generic one.
+const PROMPTS = {
+  ep234: 'Talk for up to a minute about your morning routine. What is the first thing you do, and how does it make you feel?',
 };
-const DEFAULT_EP = 'ep234';
+
+// Last resort only: used if the catalogue is unreachable AND the static seed is empty.
+const FALLBACK_EP = {
+  id: 'ep234', number: 234, title: 'Morning Routine for Self-Discipline',
+  prompt: PROMPTS.ep234,
+  words: ['scattered', 'ritual', 'foundation', 'cultivate', 'anchor', 'rewire'],
+};
+
+function promptFor(id, title) {
+  return PROMPTS[id]
+    || `Talk for a minute or two about this episode’s theme — “${title}”. What does it mean to you, and can you share a real example from your own life?`;
+}
+
+// Resolve a requested episode id, else the one flagged `current`, else the newest.
+async function episodeFor(wanted) {
+  try {
+    const arcade = await getArcade();
+    const eps = (arcade.find((g) => g.type === 'clue-room') || {}).episodes || [];
+    if (!eps.length) return FALLBACK_EP;
+    const e = (wanted && eps.find((x) => x.id === wanted)) || eps.find((x) => x.current) || eps[0];
+    const words = ((e.content && e.content.clues) || []).map((c) => c.word).filter(Boolean);
+    if (!words.length) return FALLBACK_EP;
+    const title = EPISODE_TITLES[e.id] || e.title;
+    return {
+      id: e.id,
+      number: Number(String(e.ep || e.id).replace(/\D/g, '')) || 0,
+      title,
+      prompt: promptFor(e.id, title),
+      words,
+    };
+  } catch {
+    return FALLBACK_EP;
+  }
+}
 
 function fluencyOK(s) {
   if (!s) return false;
@@ -83,7 +116,7 @@ export default async function handler(req, res) {
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
   body = body || {};
-  const s = readSession(req);
+  let s = readSession(req);
 
   // --- feature flag: hidden from the audience until tested & verified ---
   // Turn the feature on for everyone by setting env  UIL_ENABLED=true
@@ -99,6 +132,10 @@ export default async function handler(req, res) {
     return res.status(503).json({ ok: false, coming_soon: true, message: 'Use It Live is coming soon \u2014 we\u2019re testing it now.' });
   }
 
+  // Entitlement must track live Patreon status: without this a cancelled member keeps
+  // spending AI minutes for the 30-day life of their cookie (mirrors /api/games).
+  if (s) s = await revalidateSession(res, s); // null once the membership goes inactive
+
   if (!fluencyOK(s)) {
     return res.status(s ? 403 : 401).json({
       ok: false, login: !s, upgrade: !!s,
@@ -107,12 +144,12 @@ export default async function handler(req, res) {
   }
 
   const { action } = body;
-  const ep = EPISODES[body.episodeId] || EPISODES[DEFAULT_EP];
+  const ep = await episodeFor(body.episodeId);
 
   // --- usage: how many minutes are left this month ---
   if (action === 'usage') {
     const u = await getUsage(s.uid);
-    return res.json({ ok: true, name: s.name, ...publicUsage(u), prompt: ep.prompt, episode: ep.number, words: ep.words });
+    return res.json({ ok: true, name: s.name, ...publicUsage(u), prompt: ep.prompt, episode: ep.number, episodeId: ep.id, title: ep.title, words: ep.words });
   }
 
   // --- analyze: review a recording, then meter its length ---

@@ -60,6 +60,7 @@
     border-radius:24px;padding:22px;margin-top:16px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 20px 54px -26px rgba(0,0,0,.75)}
   .card h2{font-family:var(--display);font-weight:600;font-size:18px;margin:0 0 8px;display:flex;align-items:center;gap:9px}
   .task{color:var(--soft);font-size:15px;line-height:1.55;margin:.2rem 0 0}
+  .epline{font-family:var(--display);font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--soft2);margin:0 0 7px}
 
   /* minutes meter */
   .meter .row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px;color:var(--soft)}
@@ -184,6 +185,7 @@
 
     <div class="card">
       <h2>&#127919; Your task</h2>
+      <p class="epline" id="epline"></p>
       <p class="task" id="prompt">&mdash;</p>
       <div class="chips" id="words"></div>
     </div>
@@ -244,6 +246,7 @@ const MIN_SEC=60, MAX_SEC=180;
 const RATES=[16000,12000,8000], MAX_RAW_BYTES=3000000;
 let mediaRec=null, chunks=[], startMs=0, autostop=null, remainingMin=0, words=[];
 let takes=[], recording=false, acx=null, playingIdx=-1, hitMax=false;
+let episodeId='';   // whichever episode the server served us — sent back on analyze
 
 async function api(payload){
   const r=await fetch('/api/use-it-live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(PREVIEW?{...payload,preview:PREVIEW}:payload)});
@@ -270,6 +273,8 @@ function gate(html){ $('#app').classList.add('hidden'); $('#gate').innerHTML=htm
     const u=await api({action:'usage'});
     $('#app').classList.remove('hidden');
     $('#prompt').textContent=u.prompt;
+    episodeId=u.episodeId||'';
+    $('#epline').textContent=u.episode?`Episode ${u.episode}${u.title?' · '+u.title:''}`:'';
     words=u.words||[];
     $('#words').innerHTML=words.map(w=>`<span class="chip" data-w="${w}"><span class="tick">✓</span>${w}</span>`).join('');
     setUsage(u);
@@ -516,7 +521,7 @@ $('#analyze').onclick=async()=>{
   try{
     const wav=await buildWav();
     const b64=await blobToB64(new Blob([wav],{type:'audio/wav'}));
-    const d=await api({action:'analyze', audio:b64, mimeType:'audio/wav', durationSec:Math.round(t), episodeId:'ep234'});
+    const d=await api({action:'analyze', audio:b64, mimeType:'audio/wav', durationSec:Math.round(t), episodeId});
     clearMsg(); setUsage(d); renderFeedback(d.feedback);
     takes.forEach(x=>URL.revokeObjectURL(x.url)); takes=[]; stopPlayback(); renderTakes();
   }catch(err){
