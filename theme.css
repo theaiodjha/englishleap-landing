@@ -211,3 +211,26 @@ html[data-theme="light"] .blob{opacity:.34}
   .blob{animation:none !important}
   .mic.live::after{animation:none !important}
 }
+
+/* ---- figure/ground on light ----------------------------------------------
+   index.html and archive.html read correctly because their .card uses a TOKEN
+   (--panel / --glass) that flips to white above. use-it-live.html and the focus
+   card hardcode a violet gradient, so on a violet ground they dissolve into the
+   page — same hue, 1.14:1 apart. Make them paper, and let the border and shadow
+   do the separating, which is how light UI is supposed to work.            */
+html[data-theme="light"] .card,
+html[data-theme="light"] .gate,
+html[data-theme="light"] .focus{
+  background:linear-gradient(135deg,rgba(255,255,255,.80),rgba(255,255,255,.66)) !important;
+  border-color:rgba(60,50,110,.22) !important;
+}
+/* a quieter sky so the paper stands off it */
+html[data-theme="light"] .blob{opacity:.22}
+
+/* Disabled primary button: white-on-pale-gradient measured 1.96:1. Give it an
+   honest flat "not yet" surface with a readable dark label instead. */
+html[data-theme="light"] .btn.primary:disabled,
+html[data-theme="light"] .btn:disabled{
+  background:rgba(60,50,110,.11) !important; color:#413c66 !important;
+  box-shadow:none !important; opacity:1 !important;
+}
