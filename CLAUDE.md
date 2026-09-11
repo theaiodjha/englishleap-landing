@@ -49,8 +49,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   `<style>`, so a page can still override a token it genuinely needs. It also carries the
   **type scale** (`--fs-xs`…`--fs-2xl`, six steps replacing 22 ad-hoc px values) and the
   **4pt spacing scale** (`--sp-1`…`--sp-10`) — migrate rules onto them as you touch them.
+  **All 11 pages are migrated**: every text `font-size` is a `--fs-*` token (`clamp()` heroes
+  excepted). The off-grid spacings (7, 9, 10, 11, 13, 14, 15, 18, 22, 26, 28, 30, 34) are
+  still literals — rounding them to the 4pt grid changes layout, so it needs a design call.
   **The type scale governs text, not icons** — emoji/chevron glyphs sized by `font-size`
-  (`.scard .ico`, `.jdot`, `.shelf-arrow`) keep px literals on purpose.
+  keep px literals on purpose: `.scard .ico`, `.jdot`, `.shelf-arrow`, `.gi`, `.gicon`,
+  clue-room's `.emoji`/`.audio`/`.menubtn` + its 🎉 PNG fallback, phrase-pairs' `.face.back`.
   **Do not flatten the games' `:root` overrides:** listening-gap (warm), sentence-builder
   (teal) and story-unlock (violet) deliberately re-tint `--space`/`--ink`/`--soft`.
 - **Every page loads the theme** — `<script src="/theme.js">` + `<link href="/theme.css">`
