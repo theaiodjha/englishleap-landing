@@ -574,6 +574,8 @@ function hlWords(text, words){
     const d=await r.json();
     const n=d&&d.next; if(!n) return;
     const cur=d.current||{};
+    // no chips when the whole episode is new: nothing is singled out, so showing two
+    // would contradict the sentence above them
     const words=(n.words||[]).map(w=>`<span>&#9655; ${esc(w)}</span>`).join('');
     /* Oriva reacts to what is being recommended. Only the six real poses, and the
        <img> removes itself if the PNG is missing rather than leaving a broken box. */

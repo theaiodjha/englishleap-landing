@@ -12,7 +12,7 @@ import { readSession, revalidateSession } from '../lib/session.js';
 import { getUsage, addUsage, clampRecordingSec, limitFor, MAX_REC_SEC } from '../lib/quota.js';
 import { getEpisodes } from '../lib/arcade-store.js';
 import { logSession, getAggregates } from '../lib/history.js';
-import { focusFor, speechMetrics } from '../lib/coach.js';
+import { focusFor, allNew, speechMetrics } from '../lib/coach.js';
 
 // Audio analysis of a 3-minute clip can take well past the platform default, and a
 // killed function looks like a generic failure to the member. Give it real headroom.
@@ -178,11 +178,13 @@ async function analyzeWithRetry(base64, mimeType, ep, focus) {
 }
 
 // Which of this episode's words the member still owes, from their own usage counters.
+// `fresh` means they have used none of them yet — every word is new, so nothing is
+// singled out and the page says so instead of inventing a pair.
 async function focusWords(uid, words) {
   try {
     const agg = await getAggregates(uid);
-    return focusFor(words, agg.words);
-  } catch { return []; }
+    return { focus: focusFor(words, agg.words), fresh: allNew(words, agg.words) };
+  } catch { return { focus: [], fresh: false }; }
 }
 
 export default async function handler(req, res) {
@@ -228,7 +230,7 @@ export default async function handler(req, res) {
     return res.json({
       ok: true, name: s.name, ...publicUsage(u),
       prompt: ep.prompt, episode: ep.number, episodeId: ep.id, title: ep.title, words: ep.words,
-      focus: await focusWords(s.uid, ep.words),   // words they have not yet used naturally
+      ...(await focusWords(s.uid, ep.words)),     // { focus, fresh }
       episodes: await episodeChoices(),
     });
   }
@@ -251,7 +253,7 @@ export default async function handler(req, res) {
     if (!audio || durationSec < 1) return res.status(400).json({ ok: false, error: 'No audio received. Please record first.' });
     if (durationSec > MAX_REC_SEC) return res.status(413).json({ ok: false, error: `Please keep recordings under ${Math.round(MAX_REC_SEC/60)} minutes.` });
 
-    const focus = await focusWords(s.uid, ep.words);
+    const { focus } = await focusWords(s.uid, ep.words);
 
     let feedback;
     try { feedback = await analyzeWithRetry(audio, mimeType, ep, focus); }

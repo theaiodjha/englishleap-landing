@@ -269,7 +269,10 @@ community, not a scoreboard.
 
 ### Spaced repetition
 
-A word is **owned** after `OWNED_AT` (3) natural uses; below that it is *due*. `focusFor()`
+A word is **owned** after `OWNED_AT` (3) natural uses; below that it is *due*. **Nothing is
+singled out until there is a signal**: if a member has used none of an episode's words,
+`focusFor()` returns `[]` and `allNew()` is true — six identical zeroes make any pair
+arbitrary, so the page says "all N phrases are new" instead of inventing a recommendation. `focusFor()`
 ranks an episode's unowned words least-used-first, and the two due words are: injected into
 the Gemini prompt (so a natural use gets celebrated by name), marked as amber chips on the
 task card, and named in the "Today's focus" card. No schedule table needed — the `w:{word}`

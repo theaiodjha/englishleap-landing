@@ -321,9 +321,12 @@ function renderTask(u){
   $('#words').innerHTML=words.map(w=>
     `<span class="chip${due.has(w.toLowerCase())?' due':''}" data-w="${w}"><span class="tick">✓</span>${w}</span>`).join('');
   const list=(u.focus||[]);
+  // Nothing is singled out on a first visit: all six words are equally new, so saying
+  // "you have not used these two" would be arbitrary rather than personal.
   const note = list.length>1
     ? `✨ Reach for ${list[0]} and ${list[1]} today — you have not used them out loud yet.`
-    : list.length ? `✨ Reach for ${list[0]} today — you have not used it out loud yet.` : '';
+    : list.length ? `✨ Reach for ${list[0]} today — you have not used it out loud yet.`
+    : u.fresh ? `✨ All ${words.length} phrases are new to you — work in as many as feel natural.` : '';
   $('#duenote').innerHTML = note ? hlWords(note, list) : '';
 }
 function renderPicker(list){
