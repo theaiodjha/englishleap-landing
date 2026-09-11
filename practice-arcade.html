@@ -25,11 +25,14 @@
   .focus.show{display:block}
   .focus .eye{font-family:var(--display);font-weight:700;letter-spacing:.15em;font-size:11.5px;text-transform:uppercase;color:var(--teal)}
   .focus h2{font-family:var(--display);font-weight:700;font-size:clamp(19px,3.6vw,25px);line-height:1.2;margin:9px 0 0}
-  .focus .why{color:var(--soft);font-size:14.5px;line-height:1.55;margin:9px 0 0;max-width:46em}
+  .focus .why{color:var(--soft);font-size:14.5px;line-height:1.65;margin:9px 0 0;max-width:46em}
+  .focus .why .hlw{color:var(--mint);font-weight:700;background:rgba(87,230,196,.13);
+    border-bottom:1.5px solid rgba(87,230,196,.55);padding:1px 6px;border-radius:7px;white-space:nowrap}
   .focus .fw{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .focus .fw span{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
-    font-family:var(--display);font-weight:600;font-size:13.5px;color:#04201c;
-    background:linear-gradient(120deg,var(--mint),var(--teal));box-shadow:0 8px 24px -10px rgba(31,196,182,.7)}
+  .focus .fw span{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;
+    font-family:var(--display);font-weight:700;font-size:15px;color:#04201c;letter-spacing:.01em;
+    background:linear-gradient(120deg,var(--mint),var(--teal));
+    box-shadow:0 10px 28px -10px rgba(31,196,182,.85),0 0 0 4px rgba(31,196,182,.12)}
   .focus .row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:18px}
   .focus .go{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:12px 22px;border-radius:999px;
     font-family:var(--display);font-weight:700;font-size:15px;text-decoration:none;color:#fff;
@@ -479,6 +482,21 @@ tryLoad();
 
 /* Today's focus — one next-best-action, computed from what this member has actually
    practised. Silent for anonymous visitors (401) and whenever nothing is due. */
+/* Mark the focus words inside a sentence. Placeholders go in BEFORE escaping, and
+   longest words go first, so a phrase containing another can never be wrapped twice. */
+function hlWords(text, words){
+  let t=String(text||''); const marks=[];
+  (words||[]).slice().sort((a,b)=>String(b).length-String(a).length).forEach(w=>{
+    const needle=String(w||''); if(!needle) return;
+    const parts=t.split(needle); if(parts.length<2) return;
+    marks.push(needle);
+    t=parts.join('\u0000'+(marks.length-1)+'\u0001');
+  });
+  let out=esc(t);
+  marks.forEach((m,i)=>{ out=out.split('\u0000'+i+'\u0001').join('<b class="hlw">'+esc(m)+'</b>'); });
+  return out;
+}
+
 (async function focusCard(){
   try{
     const r=await fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -494,7 +512,7 @@ tryLoad();
     document.getElementById('focusCard').innerHTML=
       `<div class="eye">&#127919; Today&rsquo;s focus</div>
        <h2>${esc(n.title||'')}${n.episode?` <span style="color:#76729e">&middot; EP${n.episode}</span>`:''}</h2>
-       <p class="why">${esc(n.why||'')}</p>
+       <p class="why">${hlWords(n.why,n.words)}</p>
        ${words?`<div class="fw">${words}</div>`:''}
        <div class="row">
          <a class="go" href="${esc(n.href||'#')}">${esc(n.cta||'Start')}</a>

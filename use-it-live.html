@@ -84,10 +84,14 @@
     background:var(--glass2);color:var(--soft);font-family:var(--display);font-weight:600;font-size:13.5px;transition:.4s}
   .chip.on{color:#04201c;border-color:transparent;background:linear-gradient(120deg,var(--mint),var(--teal));box-shadow:0 8px 24px -8px rgba(31,196,182,.7);transform:translateY(-1px)}
   /* a word this member has never yet used out loud — the spaced-repetition nudge */
-  .chip.due{border-color:rgba(255,205,70,.45);color:var(--gold);background:rgba(255,205,70,.07)}
-  .chip.due .tick{border-color:rgba(255,205,70,.5)}
-  .chip.due.on{color:#04201c;border-color:transparent;background:linear-gradient(120deg,var(--mint),var(--teal))}
-  .duenote{margin:11px 0 0;font-size:13px;line-height:1.5;color:var(--gold)}
+  .chip.due{border-color:rgba(255,205,70,.6);color:var(--gold);font-weight:700;background:rgba(255,205,70,.12);
+    box-shadow:0 0 0 4px rgba(255,205,70,.10),0 8px 22px -12px rgba(255,205,70,.85);transform:translateY(-1px)}
+  .chip.due .tick{border-color:rgba(255,205,70,.65);color:var(--gold)}
+  .chip.due.on{color:#04201c;border-color:transparent;font-weight:600;transform:translateY(-1px);
+    background:linear-gradient(120deg,var(--mint),var(--teal));box-shadow:0 8px 24px -8px rgba(31,196,182,.7)}
+  .duenote{margin:12px 0 0;font-size:13.5px;line-height:1.6;color:var(--soft)}
+  .duenote .hlw{color:var(--gold);font-weight:700;background:rgba(255,205,70,.13);
+    border-bottom:1.5px solid rgba(255,205,70,.55);padding:1px 6px;border-radius:7px;white-space:nowrap}
   .chip .tick{width:16px;height:16px;display:grid;place-items:center;border-radius:50%;border:1.5px solid var(--soft2);font-size:10px}
   .chip.on .tick{border-color:#04201c;background:rgba(4,32,28,.25);color:#04201c}
 
@@ -290,6 +294,21 @@ function setUsage(u){
 
 function gate(html){ $('#app').classList.add('hidden'); $('#gate').innerHTML=html; }
 
+/* Mark the focus words inside a sentence. Placeholders go in BEFORE escaping, and
+   longest words go first, so a phrase containing another can never be wrapped twice. */
+function hlWords(text, words){
+  let t=String(text||''); const marks=[];
+  (words||[]).slice().sort((a,b)=>String(b).length-String(a).length).forEach(w=>{
+    const needle=String(w||''); if(!needle) return;
+    const parts=t.split(needle); if(parts.length<2) return;
+    marks.push(needle);
+    t=parts.join(' '+(marks.length-1)+'');
+  });
+  let out=esc(t);
+  marks.forEach((m,i)=>{ out=out.split(' '+i+'').join('<b class="hlw">'+esc(m)+'</b>'); });
+  return out;
+}
+
 function renderTask(u){
   $('#prompt').textContent=u.prompt;
   episodeId=u.episodeId||'';
@@ -301,11 +320,10 @@ function renderTask(u){
   $('#words').innerHTML=words.map(w=>
     `<span class="chip${due.has(w.toLowerCase())?' due':''}" data-w="${w}"><span class="tick">✓</span>${w}</span>`).join('');
   const list=(u.focus||[]);
-  $('#duenote').textContent = list.length
-    ? (list.length>1
-        ? `✨ Reach for “${list[0]}” and “${list[1]}” today — you have not used them out loud yet.`
-        : `✨ Reach for “${list[0]}” today — you have not used it out loud yet.`)
-    : '';
+  const note = list.length>1
+    ? `✨ Reach for ${list[0]} and ${list[1]} today — you have not used them out loud yet.`
+    : list.length ? `✨ Reach for ${list[0]} today — you have not used it out loud yet.` : '';
+  $('#duenote').innerHTML = note ? hlWords(note, list) : '';
 }
 function renderPicker(list){
   if(!Array.isArray(list)||list.length<2) return;            // nothing to switch between
