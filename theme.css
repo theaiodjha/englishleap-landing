@@ -254,6 +254,20 @@ html[data-theme="light"] .chip.due,
 html[data-theme="light"] .chip.due .tick,
 html[data-theme="light"] .duenote .hlw{color:#7a5100 !important}
 
+/* The other two tier pills have the same fault: a pale label on its own pale fill.
+   Free was 1.14:1 and Transcript 1.30:1. Inks are measured against the PILL, not the
+   page — #0b6f68 passes on the page but only reaches 4.4:1 on the teal fill. */
+html[data-theme="light"] .ribbon.free,
+html[data-theme="light"] .twg-tier.free{
+  background:rgba(31,196,182,.26) !important; color:#095f59 !important;
+  border:1px solid rgba(9,95,89,.28);
+}
+html[data-theme="light"] .ribbon.transcript,
+html[data-theme="light"] .twg-tier.transcript{
+  background:rgba(139,108,255,.28) !important; color:#4a2fb0 !important;
+  border:1px solid rgba(74,47,176,.28);
+}
+
 /* pale label on a pale gold pill — the worst of them at 1.09:1 */
 html[data-theme="light"] .ribbon.fluency,
 html[data-theme="light"] .twg-tier.fluency{
