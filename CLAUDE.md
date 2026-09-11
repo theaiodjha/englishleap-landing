@@ -93,7 +93,7 @@ api/progress.js            records game completions + returns a member's practic
 api/use-it-live.js         Use It Live: usage + audio analysis (Gemini), flag-gated
 lib/session.js             session cookie (HMAC), readSession(), checkMembership() → tier/uid/email,
                            revalidateSession() → shared 24h live Patreon re-check
-lib/quota.js               monthly 100-min audio quota (Upstash), keyed to session.uid
+lib/quota.js               monthly audio quota (Upstash), keyed to session.uid; tier-aware
 lib/history.js             practice history (sessions, aggregates, game completions)
 lib/coach.js               pure logic: due words, ownership, next-best-action, speech metrics
 elc.css                    design tokens: colour, type scale, spacing scale, radii
@@ -156,6 +156,14 @@ Members switch episodes with the picker in the task card (`episodeChoices()` shi
 list with the usage response); `?ep=ep277` deep-links straight to one, and the picker
 keeps the URL in step. Switching clears any recorded takes — they would otherwise be
 scored against the wrong six words.
+
+**The minute allowance is per tier** (`ALLOWANCE` / `limitFor(cents)` in `lib/quota.js`):
+Fluency (200c+) = 100 min, a 600c+ tier = 400 min. The 600c rung is **plumbing only —
+nothing sells it yet**. Thresholds sit BELOW the intended price so a $6.99 tier (699c)
+cannot miss by a cent, and a legacy session (`cents === undefined`) gets the BASE
+allowance, never the top one. Minutes cost ~$0.29 per 100, so be generous: the cap is a
+safety rail against runaway spend, not a paywall. The meter reads `limitMin` from the
+server, so the UI needs no change when a tier is added.
 
 **Recorder is multi-take:** each take is decoded to an `AudioBuffer` and held client-side;
 on submit every take is concatenated, downmixed to mono and encoded as a single 16-bit PCM

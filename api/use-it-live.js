@@ -9,7 +9,7 @@ import "../lib/quiet-deprecations.js";
 // Gemini (Claude can't take audio); swap analyzeAudio() for any audio model.
 
 import { readSession, revalidateSession } from '../lib/session.js';
-import { getUsage, addUsage, clampRecordingSec, LIMIT_MIN, MAX_REC_SEC } from '../lib/quota.js';
+import { getUsage, addUsage, clampRecordingSec, limitFor, MAX_REC_SEC } from '../lib/quota.js';
 import { getEpisodes } from '../lib/arcade-store.js';
 import { logSession, getAggregates } from '../lib/history.js';
 import { focusFor, speechMetrics } from '../lib/coach.js';
@@ -186,11 +186,12 @@ export default async function handler(req, res) {
   }
 
   const { action } = body;
+  const allowance = limitFor(s.cents);   // monthly minutes this member's tier is entitled to
   const ep = await episodeFor(body.episodeId);
 
   // --- usage: how many minutes are left this month ---
   if (action === 'usage') {
-    const u = await getUsage(s.uid);
+    const u = await getUsage(s.uid, allowance);
     return res.json({
       ok: true, name: s.name, ...publicUsage(u),
       prompt: ep.prompt, episode: ep.number, episodeId: ep.id, title: ep.title, words: ep.words,
@@ -203,11 +204,11 @@ export default async function handler(req, res) {
   if (action === 'analyze') {
     if (!GEMINI_KEY) return res.status(500).json({ ok: false, error: 'Audio analysis is not configured yet.' });
 
-    const before = await getUsage(s.uid);
+    const before = await getUsage(s.uid, allowance);
     if (before.over) {
       return res.status(429).json({
         ok: false, quota: true, ...publicUsage(before),
-        error: `You've used your ${LIMIT_MIN} practice minutes this month. They refresh on the 1st — see you then!`,
+        error: `You've used your ${allowance} practice minutes this month. They refresh on the 1st — see you then!`,
       });
     }
 
@@ -235,7 +236,7 @@ export default async function handler(req, res) {
     }
 
     // Meter only after a successful analysis, so failures never cost minutes.
-    const after = await addUsage(s.uid, durationSec);
+    const after = await addUsage(s.uid, durationSec, allowance);
 
     // Keep the session in the member's practice history (metadata only, no transcript).
     // logSession fails open and never throws, so history can't break a practice session.
