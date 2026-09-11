@@ -106,6 +106,12 @@ Record-and-review speaking practice: the learner records audio, **Gemini** analy
 confidence-focused, never grammar-policing). Metered at **100 audio-minutes/month** per
 member (`lib/quota.js`), Fluency-gated.
 
+**Recorder is multi-take:** each take is decoded to an `AudioBuffer` and held client-side;
+on submit every take is concatenated, downmixed to mono and encoded as a single 16-bit PCM
+WAV, sent as **one** analyze request (`mimeType:'audio/wav'`). **60s minimum / 180s maximum**
+total. Sample rate steps down (16k → 12k → 8k) so even a 3-min session stays under Vercel's
+~4.5MB body limit — 16-bit mono at 16kHz is 32KB/s, so 180s would be ~7.7MB once base64'd.
+
 **Intentionally OFF for the audience** until tested:
 - `api/use-it-live.js` returns a `coming_soon` 503 unless `UIL_ENABLED=true`.
 - `use-it-live.html` shows a clean "coming soon" card in that state.
@@ -134,7 +140,7 @@ PATREON_CAMPAIGN_ID      SET (live) — resolves membership to your campaign (fi
 KV_REST_API_URL, KV_REST_API_TOKEN     Upstash (arcade + quota)
 # Use It Live
 GEMINI_API_KEY           required for audio analysis (Google AI Studio key)
-GEMINI_MODEL             optional, default gemini-2.5-flash
+GEMINI_MODEL             optional, default gemini-3.6-flash (2.5-flash is retired for new keys)
 UIL_ENABLED              'true' to open the feature to everyone (default: off)
 UIL_PREVIEW_TOKEN        secret for owner ?preview= access while off
 UIL_PREVIEW_UIDS         comma-separated uids that bypass the flag
@@ -163,9 +169,11 @@ UIL_PREVIEW_UIDS         comma-separated uids that bypass the flag
 
 - Inlining a script that contains the literal `</script>` (e.g. in a comment) breaks
   the page — keep `elc-tour.js` external.
-- Gemini audio accepts ogg/mp3/aac/wav/flac; `MediaRecorder` emits WebM (Chrome) or
-  MP4 (Safari). `use-it-live.html` picks the best supported type and sends the real
-  mime; watch Safari/iOS specifically.
+- Gemini audio accepts ogg/mp3/aac/wav/flac (WebM worked in testing, but is undocumented).
+  `use-it-live.html` no longer relies on the `MediaRecorder` container at all — it decodes
+  each take and re-encodes one WAV, so Chrome/Safari differences stop at decode time.
+- Gemini model ids retire: `gemini-2.5-flash` is refused for new API keys with a **404**
+  naming its replacement. Default is `gemini-3.6-flash`; override with `GEMINI_MODEL`.
 - KV keys: no whitespace/slashes/quotes; `encodeURIComponent` them.
 - DEP0169 in logs is harmless (Vercel adapter) — already silenced via
   `lib/quiet-deprecations.js`; import it in any new api route if the warning reappears.

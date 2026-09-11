@@ -96,6 +96,25 @@
   .btn.ghost{color:var(--ink);background:var(--glass2);border:1px solid var(--line)}
   .btn:disabled{opacity:.5;cursor:not-allowed}
 
+  /* multi-take recorder */
+  .helper{font-size:13px;color:var(--soft2);text-align:center;max-width:34em;line-height:1.5;margin:0}
+  .totals{width:100%;margin-top:6px}
+  .totals .row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13px;color:var(--soft)}
+  .totals .row .tot{font-family:var(--display);font-weight:600}
+  .totals .row .tot b{font-size:19px;background:linear-gradient(100deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .bar>i.ok{background:linear-gradient(90deg,var(--mint),var(--teal))}
+  .takes{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:4px}
+  .take{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:14px;border:1px solid var(--line);
+    background:var(--glass2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .take .n{flex:0 0 20px;font-family:var(--display);font-weight:700;font-size:12px;color:var(--soft2)}
+  .wave{flex:1;display:flex;align-items:center;gap:2px;height:26px;min-width:0}
+  .wave i{flex:1;min-width:2px;border-radius:2px;background:linear-gradient(180deg,var(--teal),var(--purple));opacity:.72}
+  .take .dur{flex:0 0 auto;font-family:var(--display);font-size:12.5px;color:var(--soft);min-width:36px;text-align:right}
+  .tbtn{flex:0 0 30px;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;cursor:pointer;font-size:11px;
+    border:1px solid var(--line);background:var(--glass);color:var(--soft);transition:.2s;padding:0}
+  .tbtn:hover{color:var(--ink);border-color:rgba(255,255,255,.22)}
+  .tbtn.del:hover{color:#ffc2d6;border-color:rgba(246,71,154,.45)}
+
   /* feedback */
   .fb .summary{color:var(--soft);font-size:15px;line-height:1.55;font-style:italic;margin:2px 0 14px}
   .block{margin:14px 0}
@@ -175,13 +194,21 @@
         <button class="mic" id="mic" aria-label="Record">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
         </button>
-        <div class="timer" id="timer">Tap to record &middot; up to 3 min</div>
-        <div class="hint" id="hint"></div>
-        <audio id="player" controls class="hidden"></audio>
-        <div class="actions hidden" id="afterRec">
-          <button class="btn ghost" id="redo">&#8634; Record again</button>
-          <button class="btn primary" id="analyze">&#9889; Get my feedback</button>
+        <div class="timer" id="micLabel">Record</div>
+        <p class="helper">Record a few short takes &mdash; pause and think between them. We&rsquo;ll combine them into one and give you feedback.</p>
+        <div class="totals">
+          <div class="row">
+            <span>&#9201;&#65039; Total recorded</span>
+            <span class="tot"><b id="totNow">0:00</b> / 1:00 minimum</span>
+          </div>
+          <div class="bar"><i id="totFill" style="width:0%"></i></div>
         </div>
+        <div class="takes" id="takes"></div>
+        <div class="hint" id="hint"></div>
+        <div class="actions">
+          <button class="btn primary" id="analyze" disabled>&#9889; Get my feedback</button>
+        </div>
+        <audio id="player" class="hidden"></audio>
       </div>
       <div class="msg" id="msg"></div>
     </div>
@@ -211,8 +238,12 @@ const $=s=>document.querySelector(s);
 const PREVIEW=new URLSearchParams(location.search).get('preview')||'';
 const backEl=document.getElementById('back');
 if(backEl) backEl.addEventListener('click',e=>{ if(history.length>1){ e.preventDefault(); history.back(); } });
-const MAX_SEC=180;
-let mediaRec=null, chunks=[], startMs=0, durationSec=0, blob=null, mimeType='audio/webm', autostop=null, remainingMin=0, words=[];
+const MIN_SEC=60, MAX_SEC=180;
+// Highest sample rate whose 16-bit mono WAV still fits Vercel's ~4.5MB body limit
+// once base64 adds a third: 16k up to ~93s, 12k to ~125s, 8k covers the full 180s.
+const RATES=[16000,12000,8000], MAX_RAW_BYTES=3000000;
+let mediaRec=null, chunks=[], startMs=0, autostop=null, remainingMin=0, words=[];
+let takes=[], recording=false, acx=null, playingIdx=-1, hitMax=false;
 
 async function api(payload){
   const r=await fetch('/api/use-it-live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(PREVIEW?{...payload,preview:PREVIEW}:payload)});
@@ -228,9 +259,7 @@ function setUsage(u){
   $('#rem').textContent=u.remainingMin; $('#lim').textContent=u.limitMin;
   const pct=Math.min(100,Math.round((u.usedMin/u.limitMin)*100));
   $('#barfill').style.width=pct+'%';
-  const out = u.remainingMin<=0;
-  $('#mic').disabled=out;
-  $('#hint').textContent = out ? 'You have used all your minutes this month. They refresh on the 1st.' : '';
+  updateUI();
 }
 
 function gate(html){ $('#app').classList.add('hidden'); $('#gate').innerHTML=html; }
@@ -313,60 +342,187 @@ function showMicError(err){
   if(steps){ m.innerHTML='<b>'+esc(micErrorMessage(err))+'</b><ul style="margin:9px 0 0;padding-left:18px;line-height:1.65">'+steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ul>'; }
   else { m.textContent=micErrorMessage(err); }
 }
+// ---- takes: record, decode, keep. Nothing is sent until submit. ----
+function ac(){ const C=window.AudioContext||window.webkitAudioContext; if(!acx) acx=new C(); return acx; }
+function decodeAudio(arr){
+  const c=ac();
+  return new Promise((res,rej)=>{ let p; try{ p=c.decodeAudioData(arr,res,rej); }catch(e){ rej(e); return; } if(p&&p.then) p.then(res,rej); });
+}
+function total(){ return takes.reduce((a,t)=>a+t.dur,0); }
+function fmt(s){return Math.floor(s/60)+':'+String(Math.round(s)%60).padStart(2,'0');}
+
+// A tiny static waveform so each take is recognisable at a glance.
+function peaks(buf,n){
+  const d=buf.getChannelData(0), step=Math.max(1,Math.floor(d.length/n)), hop=Math.max(1,step>>6), out=[];
+  for(let i=0;i<n;i++){ let m=0; const s0=i*step;
+    for(let j=0;j<step;j+=hop){ const v=Math.abs(d[s0+j]||0); if(v>m) m=v; }
+    out.push(m); }
+  const mx=Math.max(0.01,...out);
+  return out.map(v=>Math.max(.12,v/mx));
+}
+
+function renderTakes(){
+  $('#takes').innerHTML=takes.map((t,i)=>`<div class="take">
+    <span class="n">${i+1}</span>
+    <span class="wave" aria-hidden="true">${t.peaks.map(p=>`<i style="height:${Math.round(p*100)}%"></i>`).join('')}</span>
+    <span class="dur">${fmt(t.dur)}</span>
+    <button class="tbtn play" data-act="play" data-i="${i}" aria-label="Play take ${i+1}">&#9654;</button>
+    <button class="tbtn del" data-act="del" data-i="${i}" aria-label="Delete take ${i+1}">&#10005;</button>
+  </div>`).join('');
+  markPlaying();
+}
+
+function updateUI(){
+  const t=total(), full=t>=MAX_SEC, noMin=remainingMin<=0;
+  $('#totNow').textContent=fmt(t);
+  $('#totFill').style.width=Math.min(100,Math.round(t/MIN_SEC*100))+'%';
+  $('#totFill').classList.toggle('ok',t>=MIN_SEC);
+  $('#analyze').disabled = recording || t<MIN_SEC;
+  $('#mic').disabled = recording ? false : (noMin || full);
+  if(!recording) $('#micLabel').textContent = takes.length ? '+ Add a take' : 'Record';
+  $('#hint').textContent = noMin ? 'You have used all your minutes this month. They refresh on the 1st.'
+    : full ? 'That’s the 3-minute maximum — delete a take if you want to re-record.'
+    : t<MIN_SEC ? `Add ${fmt(MIN_SEC-t)} more to reach the one-minute minimum.`
+    : 'Ready when you are.';
+}
+
+$('#takes').addEventListener('click',e=>{
+  const btn=e.target.closest('.tbtn'); if(!btn) return;
+  const i=Number(btn.dataset.i);
+  if(btn.dataset.act==='del'){
+    if(playingIdx===i) stopPlayback();
+    URL.revokeObjectURL(takes[i].url); takes.splice(i,1);
+    if(playingIdx>i) playingIdx--;
+    hitMax=false; clearMsg(); renderTakes(); updateUI();
+  } else playTake(i);
+});
+function stopPlayback(){ const p=$('#player'); p.pause(); playingIdx=-1; markPlaying(); }
+function playTake(i){
+  const p=$('#player');
+  if(playingIdx===i && !p.paused){ stopPlayback(); return; }
+  p.src=takes[i].url; playingIdx=i; markPlaying();
+  p.play().catch(()=>{ playingIdx=-1; markPlaying(); });
+  p.onended=()=>{ playingIdx=-1; markPlaying(); };
+}
+function markPlaying(){
+  document.querySelectorAll('#takes .tbtn.play').forEach(b=>{
+    b.innerHTML = Number(b.dataset.i)===playingIdx ? '&#10074;&#10074;' : '&#9654;';
+  });
+}
+
 $('#mic').onclick=async()=>{
+  if(recording){ stopRec(); return; }
   if($('#mic').disabled || remainingMin<=0) return;
-  if(mediaRec && mediaRec.state==='recording'){ stopRec(); return; }
-  clearMsg(); $('#fb').classList.add('hidden');
+  const left=MAX_SEC-total();
+  if(left<=0){ showMsg('You have reached the 3-minute maximum. Delete a take to record more.','warn'); return; }
+  clearMsg(); $('#fb').classList.add('hidden'); stopPlayback();
   let stream;
   try{ stream=await getMicStream(); }
   catch(err){ showMicError(err); return; }
   const type=pickMime();
   try{ mediaRec=type?new MediaRecorder(stream,{mimeType:type}):new MediaRecorder(stream); }
   catch{ mediaRec=new MediaRecorder(stream); }
-  mimeType=(mediaRec.mimeType||type||'audio/webm').split(';')[0];
   chunks=[];
   mediaRec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
-  mediaRec.onstop=()=>{
+  mediaRec.onstop=async()=>{
     stream.getTracks().forEach(t=>t.stop());
-    blob=new Blob(chunks,{type:mediaRec.mimeType||mimeType});
-    durationSec=Math.max(1,Math.round((performance.now()-startMs)/1000));
-    const url=URL.createObjectURL(blob);
-    const p=$('#player'); p.src=url; p.classList.remove('hidden');
-    $('#afterRec').classList.remove('hidden');
-    $('#mic').classList.remove('live');
-    $('#timer').textContent=`Recorded ${fmt(durationSec)} · listen back, then get feedback`;
+    recording=false; $('#mic').classList.remove('live');
+    const b=new Blob(chunks,{type:mediaRec.mimeType||'audio/webm'});
+    $('#micLabel').textContent='Processing that take…';
+    try{
+      const buf=await decodeAudio(await b.arrayBuffer());
+      // Trim the take if it would push the session past the maximum.
+      const room=MAX_SEC-total();
+      takes.push({buffer:buf,dur:Math.min(buf.duration,room),url:URL.createObjectURL(b),peaks:peaks(buf,28)});
+      if(hitMax) showMsg('We stopped at the 3-minute maximum. Tap “Get my feedback” when you are ready.','warn');
+    }catch(e){
+      showMsg('That take could not be processed. Please record it again.','err');
+    }
+    renderTakes(); updateUI();
   };
-  startMs=performance.now();
+  hitMax=false;
+  startMs=performance.now(); recording=true;
   mediaRec.start();
   $('#mic').classList.add('live');
-  $('#player').classList.add('hidden'); $('#afterRec').classList.add('hidden');
   tick();
-  autostop=setTimeout(stopRec, MAX_SEC*1000);
+  autostop=setTimeout(()=>{ hitMax=true; stopRec(); }, Math.min(left,MAX_SEC)*1000);
 };
 function stopRec(){ if(autostop){clearTimeout(autostop);autostop=null;} if(mediaRec&&mediaRec.state==='recording') mediaRec.stop(); }
 function tick(){
-  if(!mediaRec||mediaRec.state!=='recording') return;
+  if(!recording) return;
   const s=Math.round((performance.now()-startMs)/1000);
-  $('#timer').textContent=`Recording… ${fmt(s)} / ${fmt(MAX_SEC)} · tap to stop`;
+  $('#micLabel').textContent=`Recording… ${fmt(s)} · tap to stop`;
   requestAnimationFrame(()=>setTimeout(tick,250));
 }
-function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 
-$('#redo').onclick=()=>{ $('#player').classList.add('hidden'); $('#afterRec').classList.add('hidden'); $('#fb').classList.add('hidden'); clearMsg(); $('#timer').textContent='Tap to record · up to 3 min'; blob=null; };
+// ---- combine every take into ONE 16-bit mono WAV ----
+function mixManually(rate,frames){
+  const out=new Float32Array(frames); let off=0;
+  for(const t of takes){
+    const b=t.buffer, ch=b.numberOfChannels, n=Math.floor(t.dur*rate), chans=[];
+    for(let c=0;c<ch;c++) chans.push(b.getChannelData(c));
+    for(let i=0;i<n && off+i<frames;i++){
+      const src=i*b.sampleRate/rate, i0=Math.floor(src), i1=Math.min(i0+1,b.length-1), f=src-i0;
+      let v=0; for(let c=0;c<ch;c++) v+=chans[c][i0]*(1-f)+chans[c][i1]*f;
+      out[off+i]=v/ch;
+    }
+    off+=n;
+  }
+  return out;
+}
+async function mixRendered(rate,frames){
+  const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+  if(!OAC) throw new Error('no OfflineAudioContext');
+  const oc=new OAC(1,frames,rate); let at=0;
+  for(const t of takes){
+    const src=oc.createBufferSource(); src.buffer=t.buffer; src.connect(oc.destination);
+    src.start(at,0,t.dur); at+=t.dur;
+  }
+  const rendered=await oc.startRendering();
+  return rendered.getChannelData(0);
+}
+function encodeWAV(samples,rate){
+  const bytes=samples.length*2, buf=new ArrayBuffer(44+bytes), v=new DataView(buf);
+  const tag=(o,t)=>{ for(let i=0;i<t.length;i++) v.setUint8(o+i,t.charCodeAt(i)); };
+  tag(0,'RIFF');  v.setUint32(4,36+bytes,true);  tag(8,'WAVE');
+  tag(12,'fmt '); v.setUint32(16,16,true);       v.setUint16(20,1,true);    // PCM
+  v.setUint16(22,1,true);                        v.setUint32(24,rate,true); // mono
+  v.setUint32(28,rate*2,true);                   v.setUint16(32,2,true);
+  v.setUint16(34,16,true);                       tag(36,'data');
+  v.setUint32(40,bytes,true);
+  let o=44;
+  for(let i=0;i<samples.length;i++,o+=2){
+    const x=Math.max(-1,Math.min(1,samples[i]));
+    v.setInt16(o, x<0 ? x*0x8000 : x*0x7fff, true);
+  }
+  return buf;
+}
+async function buildWav(){
+  const t=total();
+  const rate=RATES.find(r=>t*r*2<=MAX_RAW_BYTES)||RATES[RATES.length-1];
+  const frames=Math.max(1,Math.ceil(t*rate));
+  let data;
+  try{ data=await mixRendered(rate,frames); }
+  catch(e){ data=mixManually(rate,frames); }
+  return encodeWAV(data,rate);
+}
 
-// ---- analyze ----
+// ---- submit: one request for the whole session ----
 $('#analyze').onclick=async()=>{
-  if(!blob) return;
-  $('#analyze').disabled=true; showMsg('Listening to your recording… this takes a few seconds.','warn');
+  const t=total();
+  if(!takes.length || t<MIN_SEC) return;
+  $('#analyze').disabled=true;
+  showMsg('Combining your takes and listening… this takes a few seconds.','warn');
   try{
-    const b64=await blobToB64(blob);
-    const d=await api({action:'analyze', audio:b64, mimeType, durationSec, episodeId:'ep234'});
-    clearMsg(); setUsage(d);
-    renderFeedback(d.feedback);
+    const wav=await buildWav();
+    const b64=await blobToB64(new Blob([wav],{type:'audio/wav'}));
+    const d=await api({action:'analyze', audio:b64, mimeType:'audio/wav', durationSec:Math.round(t), episodeId:'ep234'});
+    clearMsg(); setUsage(d); renderFeedback(d.feedback);
+    takes.forEach(x=>URL.revokeObjectURL(x.url)); takes=[]; stopPlayback(); renderTakes();
   }catch(err){
     if(err.status===429){ setUsage(err.data); showMsg(err.data.error||'You have used your minutes this month.','warn'); }
     else showMsg(err.message||'Something went wrong. Please try again.','err');
-  }finally{ $('#analyze').disabled=false; }
+  }finally{ updateUI(); }
 };
 
 function renderFeedback(f){
