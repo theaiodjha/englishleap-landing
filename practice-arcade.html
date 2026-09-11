@@ -40,8 +40,11 @@
   .focus .own .bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--teal),var(--purple))}
   .focus .own .lbl{font-size:var(--fs-xs);color:var(--soft2);margin-bottom:6px;font-family:var(--display);
     font-weight:700;letter-spacing:.11em;text-transform:uppercase}
-  .focus .oriva{position:absolute;right:var(--sp-5);bottom:0;width:108px;height:auto;pointer-events:none;
-    filter:drop-shadow(0 12px 26px rgba(0,0,0,.45))}
+  /* no drop-shadow: the PNG is a transparent cut-out, so a shadow traces her
+     silhouette and reads as a dark background behind her. Matches how elc-tour.js
+     and progress.js present her — object-fit only. */
+  .focus .oriva{position:absolute;right:var(--sp-5);bottom:0;width:108px;height:auto;
+    object-fit:contain;pointer-events:none}
   .focus.has-oriva{padding-right:150px}
   @media(max-width:760px){ .focus.has-oriva{padding-right:var(--sp-6)} .focus .oriva{display:none} }
   @media(max-width:520px){ .focus{padding:18px} .focus .go{width:100%;justify-content:center} }
