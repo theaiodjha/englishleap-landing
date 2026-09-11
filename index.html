@@ -774,6 +774,7 @@ menuBtn.addEventListener('click',()=>setMenu(!mobileMenu.classList.contains('ope
     else { if(t.parentNode!==document.body) document.body.appendChild(t); t.classList.remove('in-menu'); }
     return true;
   }
+  document.documentElement.classList.add('has-menu');   // scopes the mobile hide rule
   if(!place()){                                   // toggle injected later by theme.js
     var obs=new MutationObserver(function(){ if(place()) obs.disconnect(); });
     obs.observe(document.documentElement,{childList:true,subtree:true});

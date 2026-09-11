@@ -6,10 +6,12 @@
 <meta name="theme-color" content="#06060f" />
 <meta name="description" content="Use It Live — record yourself speaking English and get warm, gentle AI feedback on your confidence and fluency. Part of the English Leap Club Fluency tier." />
 <title>English Leap Club · Use It Live</title>
+<script src="/theme.js"></script>
+<link rel="stylesheet" href="/theme.css" />
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --space:#06060f;--bg2:#0a0918;--ink:#f5f3ff;--soft:#a39fce;--soft2:#76729e;
+    --space:#06060f;--bg2:#0a0918;--ink:#f5f3ff;--soft:#a39fce;--soft2:#8b86b4;
     --pink:#f6479a;--coral:#ff8a63;--purple:#8b6cff;--electric:#ff7848;--cyan:#1fc4b6;--magenta:#ff5ca8;--gold:#ffd27a;
     --teal:#1fc4b6;--mint:#57e6c4;--amber:#ffcd46;
     --glass:rgba(255,255,255,.04);--glass2:rgba(255,255,255,.06);--line:rgba(255,255,255,.10);
@@ -294,19 +296,23 @@ function setUsage(u){
 
 function gate(html){ $('#app').classList.add('hidden'); $('#gate').innerHTML=html; }
 
-/* Mark the focus words inside a sentence. Placeholders go in BEFORE escaping, and
-   longest words go first, so a phrase containing another can never be wrapped twice. */
+/* Mark the focus words inside a sentence. Text is split into segments — plain strings
+   are still matchable, marked ones are objects — so a phrase can never be wrapped twice
+   (longest first means "put off" is consumed before "off" is looked for). Escaping
+   happens last, on each segment, so no placeholder characters are ever needed. */
 function hlWords(text, words){
-  let t=String(text||''); const marks=[];
-  (words||[]).slice().sort((a,b)=>String(b).length-String(a).length).forEach(w=>{
-    const needle=String(w||''); if(!needle) return;
-    const parts=t.split(needle); if(parts.length<2) return;
-    marks.push(needle);
-    t=parts.join(' '+(marks.length-1)+'');
+  const list=(words||[]).slice().filter(Boolean).sort((a,b)=>String(b).length-String(a).length);
+  let parts=[String(text||'')];
+  list.forEach(w=>{
+    const needle=String(w), next=[];
+    parts.forEach(seg=>{
+      if(typeof seg!=='string'){ next.push(seg); return; }
+      const bits=seg.split(needle);
+      bits.forEach((b,i)=>{ if(i) next.push({w:needle}); if(b) next.push(b); });
+    });
+    parts=next;
   });
-  let out=esc(t);
-  marks.forEach((m,i)=>{ out=out.split(' '+i+'').join('<b class="hlw">'+esc(m)+'</b>'); });
-  return out;
+  return parts.map(p=>typeof p==='string'?esc(p):'<b class="hlw">'+esc(p.w)+'</b>').join('');
 }
 
 function renderTask(u){

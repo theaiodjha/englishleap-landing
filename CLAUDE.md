@@ -39,6 +39,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **Two design systems, never mixed:** the marketing/member site uses **Clash Display +
   General Sans** (Fontshare) with the dark "aurora" aesthetic (see `practice-arcade.html`
   / `use-it-live.html`); the premium PDF/print pipeline uses **Poppins**.
+- **Every page loads the theme** — `<script src="/theme.js">` + `<link href="/theme.css">`
+  in the head, before the webfont link (copy `index.html`). `theme.js` resolves Auto from
+  the visitor's local sunrise/sunset and stamps `html[data-theme]`; `theme.css` carries the
+  light overrides at specificity `0,1,1` so it outranks each page's `:root`. **Any new
+  component with a hardcoded dark fill, a black shadow or a neon text colour needs a light
+  rule in `theme.css`** — check contrast against the composited tint, not the page ground.
 - **Render-review is mandatory** for any generated visual/asset — check overflow and
   layout before shipping.
 - **Zip from inside the project dir** (`cd <root> && zip -rq ../out.zip .`).
