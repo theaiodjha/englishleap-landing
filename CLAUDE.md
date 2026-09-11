@@ -39,6 +39,8 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   `offsetParent` to decide whether the toggle is floating — CSSOM returns null for every
   `position:fixed` element, so the check silently always fails. A shared dock that re-parented
   these was tried and reverted: it broke clicks site-wide.
+- **Light theme is daylight, not an inverted night.** The aurora is `display:none` on
+  `html[data-theme="light"]` — by day the page is paper. Do not reintroduce blobs there.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
   (celebrate, exercise, happy, point, read, think). If a PNG is absent, hide it gracefully.
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).

@@ -40,6 +40,10 @@
   .focus .own .bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--teal),var(--purple))}
   .focus .own .lbl{font-size:var(--fs-xs);color:var(--soft2);margin-bottom:6px;font-family:var(--display);
     font-weight:700;letter-spacing:.11em;text-transform:uppercase}
+  .focus .oriva{position:absolute;right:var(--sp-5);bottom:0;width:108px;height:auto;pointer-events:none;
+    filter:drop-shadow(0 12px 26px rgba(0,0,0,.45))}
+  .focus.has-oriva{padding-right:150px}
+  @media(max-width:760px){ .focus.has-oriva{padding-right:var(--sp-6)} .focus .oriva{display:none} }
   @media(max-width:520px){ .focus{padding:18px} .focus .go{width:100%;justify-content:center} }
 
   .aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
@@ -507,6 +511,11 @@ function hlWords(text, words){
     const n=d&&d.next; if(!n) return;
     const cur=d.current||{};
     const words=(n.words||[]).map(w=>`<span>&#9655; ${esc(w)}</span>`).join('');
+    /* Oriva reacts to what is being recommended. Only the six real poses, and the
+       <img> removes itself if the PNG is missing rather than leaving a broken box. */
+    const POSE={speak:'point', play:'exercise', revise:'think', free:'celebrate'};
+    const pose=POSE[n.kind]||'happy';
+    const oriva=`<img class="oriva" src="/assets/oriva/${pose}.png" alt="" aria-hidden="true" onerror="this.remove()">`;
     const own=(typeof cur.owned==='number' && cur.owned>0)
       ? `<div class="own"><div class="lbl">EP${cur.n} words owned &middot; ${cur.owned}%</div>
            <div class="bar"><i style="width:${Math.max(0,Math.min(100,cur.owned))}%"></i></div></div>` : '';
@@ -519,8 +528,9 @@ function hlWords(text, words){
          <a class="go" href="${esc(n.href||'#')}">${esc(n.cta||'Start')}</a>
          <span class="mins">About ${Number(n.minutes)||6} minutes</span>
          ${own}
-       </div>`;
-    document.getElementById('focusCard').classList.add('show');
+       </div>
+       ${oriva}`;
+    document.getElementById('focusCard').classList.add('show','has-oriva');
   }catch(e){ /* never let the coach break the arcade */ }
 })();
 </script>

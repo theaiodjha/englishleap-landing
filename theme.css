@@ -21,9 +21,9 @@ html[data-theme="light"] body{
 }
 
 /* keep the aurora colourful but gentle, so the glass reads as frosted */
-html[data-theme="light"] .aurora{opacity:.5}
+html[data-theme="light"] .aurora{display:none}   /* the aurora is for night only */
 html[data-theme="light"] .vignette{
-  background:radial-gradient(120% 80% at 50% -10%,transparent 48%,rgba(150,130,205,.14) 100%) !important;
+  background:radial-gradient(120% 80% at 50% -10%,transparent 62%,rgba(150,130,205,.07) 100%) !important;
 }
 
 /* frosted glass + soft depth — preserve the glassy, 3D feel on light */
@@ -206,8 +206,6 @@ html[data-theme="light"] .msg.warn{
 html[data-theme="light"] .hd-tabs,
 html[data-theme="light"] .iback{background:rgba(255,255,255,.62) !important}
 
-/* the aurora is a night sky — by day it is a whisper */
-html[data-theme="light"] .blob{opacity:.34}
 
 /* ---- motion safety, every page (was only honoured on two) ---- */
 @media (prefers-reduced-motion:reduce){
@@ -227,8 +225,6 @@ html[data-theme="light"] .focus{
   background:linear-gradient(135deg,rgba(255,255,255,.80),rgba(255,255,255,.66)) !important;
   border-color:rgba(60,50,110,.22) !important;
 }
-/* a quieter sky so the paper stands off it */
-html[data-theme="light"] .blob{opacity:.22}
 
 /* Disabled primary button: white-on-pale-gradient measured 1.96:1. Give it an
    honest flat "not yet" surface with a readable dark label instead. */
