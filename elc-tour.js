@@ -31,7 +31,7 @@
   '.elct-spot.none{box-shadow:0 0 0 9999px rgba(7,13,18,.86);width:0;height:0;top:50%;left:50%}' +
   '.elct-card{position:fixed;z-index:99999;max-width:340px;width:calc(100% - 32px);' +
     'background:#0e1a20;border:1px solid #1d3138;border-radius:18px;color:#eaf3f1;' +
-    'font-family:"Poppins",system-ui,sans-serif;box-shadow:0 24px 70px -20px rgba(0,0,0,.8);' +
+    'font-family:"General Sans",system-ui,sans-serif;box-shadow:0 24px 70px -20px rgba(0,0,0,.8);' +
     'padding:18px 18px 16px;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s}' +
   '.elct-card.show{opacity:1;transform:none}' +
   '.elct-top{display:flex;align-items:flex-start;gap:12px}' +
@@ -56,7 +56,7 @@
   '.elct-launch{position:fixed;right:14px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:99990;' +
     'display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:11px 18px;' +
     'background:linear-gradient(110deg,#8b6cff 0%,#e834a0 55%,#ff7848 100%);border:1.5px solid rgba(255,255,255,.55);' +
-    'color:#fff;font:700 13px/1 "Poppins",system-ui,sans-serif;letter-spacing:.01em;cursor:pointer;' +
+    'color:#fff;font:700 13px/1 "General Sans",system-ui,sans-serif;letter-spacing:.01em;cursor:pointer;' +
     'box-shadow:0 8px 22px -6px rgba(232,52,160,.55),0 0 26px -4px rgba(139,108,255,.6)}' +
   '.elct-launch:hover{filter:brightness(1.05);transform:translateY(-1px);' +
     'box-shadow:0 10px 28px -6px rgba(232,52,160,.65),0 0 36px 0 rgba(139,108,255,.72)}' +
@@ -207,7 +207,7 @@
     var b = document.createElement('button'); b.className = 'elct-launch';
     b.innerHTML = '<span class="d"></span><span class="elct-lbl">' + CFG.launcherLabel + '</span>';
     b.onclick = function () { start(tour); };
-    document.body.appendChild(b);
+    ((window.ELCDock && window.ELCDock()) || document.body).appendChild(b);
     // Stack above the theme toggle only when it's actually floating (desktop);
     // on mobile the toggle lives in the menu, so the launcher uses its base spot.
     function positionLauncher() {
