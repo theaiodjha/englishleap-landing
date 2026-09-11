@@ -15,6 +15,29 @@
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
 <style>
   
+  /* Monthly recap — a look back, shown once. Stat tiles, not a chart: the numbers
+     wear ink tokens (never brand colour), so nothing reads as a score. */
+  .recap{display:none;position:relative;margin:var(--sp-4) 0 0;padding:var(--sp-5) var(--sp-6);border-radius:var(--r-lg);
+    border:1px solid var(--line);background:var(--glass2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .recap.show{display:block}
+  .recap .eye{font-family:var(--display);font-weight:700;letter-spacing:.15em;font-size:var(--fs-xs);
+    text-transform:uppercase;color:var(--soft2)}
+  .recap .hero{font-family:var(--display);font-weight:700;font-size:52px;line-height:1;color:var(--ink);margin-top:10px}
+  .recap .hero small{font-family:var(--body);font-weight:500;font-size:var(--fs-md);color:var(--soft);margin-left:9px}
+  .recap .say{color:var(--soft);font-size:var(--fs-md);line-height:1.55;margin:10px 0 0;max-width:46em}
+  .recap .kpi{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-8);margin-top:var(--sp-5)}
+  .recap .kpi b{display:block;font-family:var(--display);font-weight:700;font-size:var(--fs-xl);color:var(--ink)}
+  .recap .kpi span{font-size:var(--fs-xs);letter-spacing:.1em;text-transform:uppercase;color:var(--soft2);
+    font-family:var(--display);font-weight:700}
+  .recap .eps{display:flex;flex-wrap:wrap;gap:7px;margin-top:var(--sp-4)}
+  .recap .eps i{font-style:normal;font-size:var(--fs-sm);color:var(--soft);padding:6px var(--sp-3);
+    border-radius:var(--r-full);border:1px solid var(--line);background:var(--glass)}
+  .recap .done{margin-top:var(--sp-5);min-height:44px;padding:0 var(--sp-5);border-radius:var(--r-full);cursor:pointer;
+    font-family:var(--display);font-weight:700;font-size:var(--fs-sm);color:var(--ink);
+    border:1px solid var(--line);background:var(--glass2)}
+  .recap .done:hover{border-color:rgba(255,255,255,.22)}
+  @media(max-width:520px){ .recap{padding:var(--sp-4)} .recap .hero{font-size:44px} }
+
   /* Today's focus — the next-best-action card, shown only to signed-in members */
   .focus{display:none;position:relative;margin:18px 0 6px;padding:22px;border-radius:24px;overflow:hidden;
     border:1px solid var(--line);background:linear-gradient(135deg,rgba(139,108,255,.16),rgba(31,196,182,.08));
@@ -246,6 +269,7 @@
     </div>
   </div>
 
+  <section class="recap" id="recapCard" aria-live="polite"></section>
   <section class="focus" id="focusCard" aria-live="polite"></section>
 
   <!-- HERO -->
@@ -485,6 +509,41 @@ async function unlock(){
 $('#go').addEventListener('click',unlock);
 $('#code').addEventListener('keydown',ev=>{if(ev.key==='Enter')unlock();});
 tryLoad();
+
+/* A look back at last month, shown once. Facts only, assembled from the member's own
+   history — no model call, and nothing that reads as a grade. */
+(async function recapCard(){
+  try{
+    const r=await fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'recap'})});
+    if(!r.ok) return;
+    const d=await r.json();
+    if(!d||!d.has||d.seen) return;
+    const when=new Date(d.month+'-02T00:00:00Z').toLocaleString('en-GB',{month:'long',timeZone:'UTC'});
+    const kpi=[[d.sessions,d.sessions===1?'session':'sessions'],
+               [d.episodes.length,d.episodes.length===1?'episode':'episodes'],
+               [d.wordsUsed.length,'phrases used'],
+               [d.wordsOwned,'phrases owned']]
+      .filter(k=>k[0])
+      .map(k=>`<div><b>${k[0]}</b><span>${esc(k[1])}</span></div>`).join('');
+    const delta = (typeof d.minutesDelta==='number' && d.minutesDelta>0)
+      ? `<span style="color:var(--soft2)"> &middot; ${d.minutesDelta} more than the month before</span>` : '';
+    const eps=(d.episodes||[]).map(e=>`<i>EP${e.n} &middot; ${esc(e.title)}</i>`).join('');
+    const el=document.getElementById('recapCard');
+    el.innerHTML=`<div class="eye">&#128198; Your ${esc(when)} &middot; a look back</div>
+      <div class="hero">${d.minutes}<small>minutes practised out loud${delta}</small></div>
+      <p class="say">${esc(d.headline||'')}</p>
+      <div class="kpi">${kpi}</div>
+      ${eps?`<div class="eps">${eps}</div>`:''}
+      <button class="done" id="recapDone">Got it</button>`;
+    el.classList.add('show');
+    document.getElementById('recapDone').onclick=()=>{
+      el.classList.remove('show');
+      fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'recap-seen'})}).catch(()=>{});
+    };
+  }catch(e){ /* a look back must never break the arcade */ }
+})();
 
 /* Today's focus — one next-best-action, computed from what this member has actually
    practised. Silent for anonymous visitors (401) and whenever nothing is due. */

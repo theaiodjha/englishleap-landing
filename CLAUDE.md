@@ -96,6 +96,7 @@ lib/session.js             session cookie (HMAC), readSession(), checkMembership
 lib/quota.js               monthly audio quota (Upstash), keyed to session.uid; tier-aware
 lib/history.js             practice history (sessions, aggregates, game completions)
 lib/coach.js               pure logic: due words, ownership, next-best-action, speech metrics
+lib/recap.js               monthly "how your month went" facts (no model call)
 elc.css                    design tokens: colour, type scale, spacing scale, radii
 lib/arcade-store.js        KV read/write for arcade data (static fallback)
 lib/arcade-data.js         static arcade catalogue (short cover titles)
@@ -279,6 +280,23 @@ free-choice nudge. Surfaced as the "Today's focus" card at the top of `practice-
 — it is **added above** the menu, not a replacement, and is invisible to logged-out visitors.
 
 Cost of all this: a practice session is now ~12 KV commands (was 9); `usage` gained one read.
+
+### Monthly recap
+
+`/api/progress` `action:'recap'` returns last month assembled from the member's own
+aggregates — minutes, sessions, episodes, phrases used/owned, pace. **Pure arithmetic,
+no model call**, so it costs nothing and cannot fail. Shown once on `practice-arcade.html`;
+`action:'recap-seen'` stores `uil:recapseen:{uid}` so it does not reappear on another device.
+
+**Generated on view, never on a schedule.** That is deliberate: a cron job would need a
+member registry, stored Patreon tokens and an email provider, and would have to work out
+who is still active. On view, the session gate and `revalidateSession()` have already
+answered that — and nothing is generated for someone who never comes back.
+
+Facts go to every Fluency member; **interpretation is the upgrade** (`canDeep`, true at
+the 600c+ allowance). The rubric never surfaces as a number — the higher tier reads it
+back as a sentence. That is also where the cost boundary falls: facts are free, the
+coaching layer is the model call.
 
 ## Open decisions
 

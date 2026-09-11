@@ -11,8 +11,10 @@ import "../lib/quiet-deprecations.js";
 // Anything gated stays gated elsewhere — this route only ever records or returns a
 // member's OWN progress, keyed to the verified session cookie.
 import { readSession } from '../lib/session.js';
-import { logGame, logGamesBulk, getGames, getSessions, getAggregates } from '../lib/history.js';
-import { getUsage } from '../lib/quota.js';
+import { logGame, logGamesBulk, getGames, getSessions, getAggregates,
+         getRecapSeen, setRecapSeen } from '../lib/history.js';
+import { buildRecap, prevMonth, thisMonth, needsDeep, headline } from '../lib/recap.js';
+import { getUsage, limitFor } from '../lib/quota.js';
 import { getEpisodes, getGameTypes } from '../lib/arcade-store.js';
 import { nextAction, focusFor, ownership } from '../lib/coach.js';
 
@@ -73,6 +75,31 @@ export default async function handler(req, res) {
       } : null,
       sessions: sessions.length,
     });
+  }
+
+  // Last month, read back. Assembled from the member's own aggregates — no model call,
+  // so it costs nothing. Only ever computed when they actually come back and look.
+  if (action === 'recap') {
+    const ym = prevMonth(thisMonth());
+    const [agg, sessions, episodes, seen] = await Promise.all([
+      getAggregates(s.uid), getSessions(s.uid), getEpisodes(), getRecapSeen(s.uid),
+    ]);
+    const r = buildRecap(ym, { months: agg.months, words: agg.words, sessions, episodes });
+    return res.json({
+      ok: true, name: s.name, ...r,
+      headline: headline(r),
+      seen: seen === ym,
+      // Interpretation — the rubric read back as a sentence, and a goal for next month —
+      // is the upgrade. The facts above are every Fluency member's own data.
+      canDeep: needsDeep(limitFor(s.cents)),   // entitled to the coaching layer
+      deep: null,                              // not built yet; lights up for canDeep members
+    });
+  }
+
+  // Dismiss this month's card. Stored per member so it does not reappear on another device.
+  if (action === 'recap-seen') {
+    await setRecapSeen(s.uid, prevMonth(thisMonth()));
+    return res.json({ ok: true });
   }
 
   return res.status(400).json({ ok: false, error: 'Unknown action.' });
