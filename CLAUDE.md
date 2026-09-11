@@ -116,6 +116,11 @@ member (`lib/quota.js`), Fluency-gated.
 - open `/use-it-live.html?preview=TOKEN` where `TOKEN === UIL_PREVIEW_TOKEN`, or
 - add your uid (e.g. `p:12345`) to `UIL_PREVIEW_UIDS` (comma-separated).
 
+Preview bypasses the flag only — the Fluency gate still applies, and the creator account
+is usually not a patron of its own campaign. Easiest owner login: mint a member code
+(`node tools/issue-code.js new fluency "preview"`, which prints the `c:<CODE>` uid to
+paste into `UIL_PREVIEW_UIDS`), redeem it on the arcade, then `revoke` it after testing.
+
 **To launch:** set `UIL_ENABLED=true` and uncomment the nav links + tour step.
 
 ## Environment variables (Vercel)
