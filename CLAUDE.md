@@ -45,6 +45,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **Two design systems, never mixed:** the marketing/member site uses **Clash Display +
   General Sans** (Fontshare) with the dark "aurora" aesthetic (see `practice-arcade.html`
   / `use-it-live.html`); the premium PDF/print pipeline uses **Poppins**.
+- **Tokens live in `elc.css`, not in the page.** Every page links it before its own
+  `<style>`, so a page can still override a token it genuinely needs. It also carries the
+  **type scale** (`--fs-xs`…`--fs-2xl`, six steps replacing 22 ad-hoc px values) and the
+  **4pt spacing scale** (`--sp-1`…`--sp-10`) — migrate rules onto them as you touch them.
+  **Do not flatten the games' `:root` overrides:** listening-gap (warm), sentence-builder
+  (teal) and story-unlock (violet) deliberately re-tint `--space`/`--ink`/`--soft`.
 - **Every page loads the theme** — `<script src="/theme.js">` + `<link href="/theme.css">`
   in the head, before the webfont link (copy `index.html`). `theme.js` resolves Auto from
   the visitor's local sunrise/sunset and stamps `html[data-theme]`; `theme.css` carries the
@@ -78,6 +84,7 @@ lib/session.js             session cookie (HMAC), readSession(), checkMembership
 lib/quota.js               monthly 100-min audio quota (Upstash), keyed to session.uid
 lib/history.js             practice history (sessions, aggregates, game completions)
 lib/coach.js               pure logic: due words, ownership, next-best-action, speech metrics
+elc.css                    design tokens: colour, type scale, spacing scale, radii
 lib/arcade-store.js        KV read/write for arcade data (static fallback)
 lib/arcade-data.js         static arcade catalogue (short cover titles)
 lib/episode-titles.js      long/searchable episode titles for the arcade browser

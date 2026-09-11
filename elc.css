@@ -1,0 +1,59 @@
+/* elc.css — the one place tokens live.
+   Loaded by every page BEFORE its own <style>, so a page can still override any
+   token it genuinely needs to. theme.css loads after and wins on light theme via
+   html[data-theme="light"] (specificity 0,1,1).
+
+   IMPORTANT: the five games deliberately re-tint --space / --ink / --soft to give
+   each its own identity (listening-gap is warm, sentence-builder teal, story-unlock
+   violet). Those overrides stay in the page. Only genuine duplicates were removed. */
+
+:root{
+  /* ---- ground + text ---- */
+  --space:#06060f;                    /* page ground */
+  --bg2:#0a0918;                      /* raised ground */
+  --ink:#f5f3ff;                      /* primary text            18.4:1 on --space */
+  --soft:#a39fce;                     /* secondary text           8.1:1 */
+  --soft2:#8b86b4;                    /* labels, hints            5.9:1 (was #76729e, 4.49:1 = AA fail) */
+
+  /* ---- the four pillars: Read it · Hear it · Practise it · Use it ---- */
+  --pink:#f6479a;   --read:#f6479a;
+  --coral:#ff8a63;  --hear:#ff8a63;
+  --purple:#8b6cff; --practise:#8b6cff;
+  --teal:#1fc4b6;   --use:#1fc4b6;
+
+  /* ---- supporting accents ---- */
+  --electric:#ff7848; --cyan:#1fc4b6; --magenta:#ff5ca8;
+  --gold:#ffd27a; --mint:#57e6c4; --amber:#ffcd46;
+
+  /* ---- surfaces ---- */
+  --glass:rgba(255,255,255,.04);
+  --glass2:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.10);
+
+  /* ---- type ---- */
+  --display:'Clash Display',system-ui,sans-serif;
+  --body:'General Sans',system-ui,sans-serif;
+
+  /* Six steps, replacing 22 ad-hoc sizes between 9.5px and 30px. Migrate a rule at a
+     time; the old literal it replaces is listed so the swap is mechanical.
+       --fs-xs   9.5 10 10.5 11 11.5 12      eyebrows, uppercase labels, footnotes
+       --fs-sm   12.5 13 13.5                meta, chips, secondary buttons
+       --fs-md   14 14.5 15 15.5             body copy
+       --fs-lg   16 17 18                    card headings
+       --fs-xl   19 20 22                    section headings
+       --fs-2xl  24 26                       page headings
+     Hero type stays a clamp() — it is fluid by design, not a scale step. */
+  --fs-xs:11.5px;
+  --fs-sm:13px;
+  --fs-md:15px;
+  --fs-lg:17px;
+  --fs-xl:20px;
+  --fs-2xl:26px;
+
+  /* ---- spacing: 4pt grid, replacing ad-hoc 9/11/13/22px values ---- */
+  --sp-1:4px;  --sp-2:8px;  --sp-3:12px; --sp-4:16px;
+  --sp-5:20px; --sp-6:24px; --sp-8:32px; --sp-10:40px;
+
+  /* ---- radii ---- */
+  --r-sm:13px; --r-md:18px; --r-lg:24px; --r-full:999px;
+}
