@@ -43,10 +43,12 @@
   /* no drop-shadow: the PNG is a transparent cut-out, so a shadow traces her
      silhouette and reads as a dark background behind her. Matches how elc-tour.js
      and progress.js present her — object-fit only. */
-  .focus .oriva{position:absolute;right:var(--sp-5);bottom:0;width:108px;height:auto;
-    object-fit:contain;pointer-events:none}
+  /* NB: not .oriva — that class is clue-room's cheer CARD, which theme.css paints
+     as a white panel on light. Reusing it here gave the mascot a box. */
+  .focus .focus-oriva{position:absolute;right:var(--sp-5);bottom:0;width:108px;height:auto;
+    object-fit:contain;pointer-events:none;background:none;border:0}
   .focus.has-oriva{padding-right:150px}
-  @media(max-width:760px){ .focus.has-oriva{padding-right:var(--sp-6)} .focus .oriva{display:none} }
+  @media(max-width:760px){ .focus.has-oriva{padding-right:var(--sp-6)} .focus .focus-oriva{display:none} }
   @media(max-width:520px){ .focus{padding:18px} .focus .go{width:100%;justify-content:center} }
 
   .aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
@@ -518,7 +520,7 @@ function hlWords(text, words){
        <img> removes itself if the PNG is missing rather than leaving a broken box. */
     const POSE={speak:'point', play:'exercise', revise:'think', free:'celebrate'};
     const pose=POSE[n.kind]||'happy';
-    const oriva=`<img class="oriva" src="/assets/oriva/${pose}.png" alt="" aria-hidden="true" onerror="this.remove()">`;
+    const oriva=`<img class="focus-oriva" src="/assets/oriva/${pose}.png" alt="" aria-hidden="true" onerror="this.remove()">`;
     const own=(typeof cur.owned==='number' && cur.owned>0)
       ? `<div class="own"><div class="lbl">EP${cur.n} words owned &middot; ${cur.owned}%</div>
            <div class="bar"><i style="width:${Math.max(0,Math.min(100,cur.owned))}%"></i></div></div>` : '';
