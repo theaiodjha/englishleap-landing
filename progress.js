@@ -133,7 +133,8 @@
       var b = document.createElement("button"); b.id = "elcHowBtn";
       b.innerHTML = "&#9654;&nbsp; How to play";
       b.style.cssText = "position:fixed;right:16px;bottom:16px;z-index:80;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;" +
-        "color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:11px 17px;backdrop-filter:blur(10px);" +
+        "height:42px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;" +
+        "color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:0 17px;backdrop-filter:blur(10px);" +
         "background:linear-gradient(110deg,rgba(139,108,255,.92),rgba(77,139,255,.92));box-shadow:0 14px 30px -12px rgba(0,0,0,.8)";
       b.onclick = function () { ELC.playVideo(id, title, poster); };
       document.body.appendChild(b);

@@ -53,8 +53,8 @@
   '.elct-back:hover{border-color:#1fc4b633}' +
   '.elct-next{background:linear-gradient(135deg,#8b6cff,#1fc4b6);border:none;color:#06201c;' +
     'border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit}' +
-  '.elct-launch{position:fixed;right:14px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:99990;' +
-    'display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:11px 18px;' +
+  '.elct-launch{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:99990;' +
+    'display:inline-flex;align-items:center;gap:9px;border-radius:999px;height:42px;padding:0 18px;box-sizing:border-box;' +
     'background:linear-gradient(110deg,#8b6cff 0%,#e834a0 55%,#ff7848 100%);border:1.5px solid rgba(255,255,255,.55);' +
     'color:#fff;font:700 13px/1 "General Sans",system-ui,sans-serif;letter-spacing:.01em;cursor:pointer;' +
     'box-shadow:0 8px 22px -6px rgba(232,52,160,.55),0 0 26px -4px rgba(139,108,255,.6)}' +
@@ -212,7 +212,7 @@
     // on mobile the toggle lives in the menu, so the launcher uses its base spot.
     function positionLauncher() {
       var clear = (window.ELCToggleClearance && window.ELCToggleClearance()) || 0;
-      b.style.bottom = 'calc(' + (clear ? clear + 14 : 22) + 'px + env(safe-area-inset-bottom))';
+      b.style.bottom = 'calc(' + (clear + 16) + 'px + env(safe-area-inset-bottom))';
     }
     [80, 400, 900, 1600].forEach(function (t) { setTimeout(positionLauncher, t); });
     window.addEventListener('resize', positionLauncher);

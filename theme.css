@@ -59,15 +59,18 @@ html[data-theme="light"] .audio{background:rgba(60,50,110,.10) !important}
 
 /* ---- Auto / Light / Dark toggle ---- */
 #elc-theme-toggle{
-  position:fixed; z-index:9999; right:14px; bottom:14px;
-  display:flex; gap:2px; padding:4px; border-radius:999px;
+  /* one shared corner metric: 42px tall, 16px from the right/bottom edges, matched
+     by .elct-launch (elc-tour.js) and #elcHowBtn (progress.js) */
+  position:fixed; z-index:9999; right:16px; bottom:16px;
+  height:42px; box-sizing:border-box;
+  display:flex; align-items:stretch; gap:2px; padding:4px; border-radius:999px;
   background:var(--panel-2,rgba(255,255,255,.1)); border:1px solid var(--line,rgba(255,255,255,.14));
   backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%);
   box-shadow:0 10px 28px rgba(40,30,80,.22);
   font-family:var(--body,system-ui,sans-serif);
 }
 #elc-theme-toggle button{
-  all:unset; cursor:pointer; width:36px; height:32px; display:grid; place-items:center;
+  all:unset; cursor:pointer; width:36px; height:100%; display:grid; place-items:center;
   border-radius:999px; font-size:13px; font-weight:700; color:var(--muted,#9a96c4); transition:.2s;
 }
 #elc-theme-toggle button:hover{color:var(--ink,#fff)}
@@ -154,7 +157,7 @@ html[data-theme="light"] .sentence{color:#241f3a}
    one IS the control, so it must stay reachable on a phone. */
 @media (max-width:1080px){html.has-menu #elc-theme-toggle:not(.in-menu){opacity:0;pointer-events:none}}
 /* comfortable touch targets for the floating toggle */
-@media (pointer:coarse){#elc-theme-toggle button{height:40px;min-width:44px}}
+@media (pointer:coarse){#elc-theme-toggle{height:46px}#elc-theme-toggle button{min-width:44px}}
 
 /* ================================================================
    Practice Arcade + Use It Live components (added with the rollout)
