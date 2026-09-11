@@ -18,9 +18,27 @@
     document.documentElement.dataset.theme = init;
   })();
 
+  /* Chromium can leave a backdrop-filter layer un-repainted when the page behind it
+     changes wholesale — which is exactly what a theme switch does. It shows as a glass
+     card rendering only part of its content until something forces a repaint (resizing
+     the window brings it back). Dropping the filter across the theme transition makes
+     those layers rebuild. Held for the length of the .4s transition, not two frames,
+     because the backdrop keeps changing for its whole duration. */
+  var repaintT = null;
+  function repaintGlass() {
+    var d = document.documentElement;
+    if (!d.classList) return;
+    d.classList.add("elc-repaint");
+    if (repaintT) clearTimeout(repaintT);
+    repaintT = setTimeout(function () { d.classList.remove("elc-repaint"); repaintT = null; }, 520);
+  }
+
   function setResolved(t) {
-    document.documentElement.dataset.theme = t;
+    var d = document.documentElement;
+    var changed = d.dataset.theme !== t;
+    d.dataset.theme = t;
     try { localStorage.setItem(RKEY, t); } catch (e) {}
+    if (changed) repaintGlass();
   }
 
   // ---- sunrise/sunset (NOAA sunrise equation), returns absolute instants ----

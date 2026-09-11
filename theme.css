@@ -234,3 +234,8 @@ html[data-theme="light"] .btn:disabled{
   background:rgba(60,50,110,.11) !important; color:#413c66 !important;
   box-shadow:none !important; opacity:1 !important;
 }
+
+/* Held across a theme change so blurred layers rebuild instead of staying stale —
+   see repaintGlass() in theme.js. Without it a glass card can paint only half its
+   content until the window is resized. */
+html.elc-repaint *{backdrop-filter:none !important; -webkit-backdrop-filter:none !important}
