@@ -83,6 +83,11 @@
   .chip{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);
     background:var(--glass2);color:var(--soft);font-family:var(--display);font-weight:600;font-size:13.5px;transition:.4s}
   .chip.on{color:#04201c;border-color:transparent;background:linear-gradient(120deg,var(--mint),var(--teal));box-shadow:0 8px 24px -8px rgba(31,196,182,.7);transform:translateY(-1px)}
+  /* a word this member has never yet used out loud — the spaced-repetition nudge */
+  .chip.due{border-color:rgba(255,205,70,.45);color:var(--gold);background:rgba(255,205,70,.07)}
+  .chip.due .tick{border-color:rgba(255,205,70,.5)}
+  .chip.due.on{color:#04201c;border-color:transparent;background:linear-gradient(120deg,var(--mint),var(--teal))}
+  .duenote{margin:11px 0 0;font-size:13px;line-height:1.5;color:var(--gold)}
   .chip .tick{width:16px;height:16px;display:grid;place-items:center;border-radius:50%;border:1.5px solid var(--soft2);font-size:10px}
   .chip.on .tick{border-color:#04201c;background:rgba(4,32,28,.25);color:#04201c}
 
@@ -199,6 +204,7 @@
       <p class="epline" id="epline"></p>
       <p class="task" id="prompt">&mdash;</p>
       <div class="chips" id="words"></div>
+      <p class="duenote" id="duenote"></p>
       <div class="picker hidden" id="picker">
         <label class="picklbl" for="epPick">&#127911; Practise a different episode</label>
         <select class="eppick" id="epPick"></select>
@@ -289,7 +295,17 @@ function renderTask(u){
   episodeId=u.episodeId||'';
   $('#epline').textContent=u.episode?`Episode ${u.episode}${u.title?' · '+u.title:''}`:'';
   words=u.words||[];
-  $('#words').innerHTML=words.map(w=>`<span class="chip" data-w="${w}"><span class="tick">✓</span>${w}</span>`).join('');
+  // Words this member has never used naturally are marked, so practice compounds
+  // instead of circling the same easy three.
+  const due=new Set((u.focus||[]).map(w=>String(w).toLowerCase()));
+  $('#words').innerHTML=words.map(w=>
+    `<span class="chip${due.has(w.toLowerCase())?' due':''}" data-w="${w}"><span class="tick">✓</span>${w}</span>`).join('');
+  const list=(u.focus||[]);
+  $('#duenote').textContent = list.length
+    ? (list.length>1
+        ? `✨ Reach for “${list[0]}” and “${list[1]}” today — you have not used them out loud yet.`
+        : `✨ Reach for “${list[0]}” today — you have not used it out loud yet.`)
+    : '';
 }
 function renderPicker(list){
   if(!Array.isArray(list)||list.length<2) return;            // nothing to switch between

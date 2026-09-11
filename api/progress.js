@@ -13,6 +13,8 @@ import "../lib/quiet-deprecations.js";
 import { readSession } from '../lib/session.js';
 import { logGame, logGamesBulk, getGames, getSessions, getAggregates } from '../lib/history.js';
 import { getUsage } from '../lib/quota.js';
+import { getEpisodes, getGameTypes } from '../lib/arcade-store.js';
+import { nextAction, focusFor, ownership } from '../lib/coach.js';
 
 const ID = /^[a-z0-9-]{1,40}$/i; // game types and episode ids are simple slugs
 
@@ -52,6 +54,24 @@ export default async function handler(req, res) {
       ok: true, name: s.name, games, sessions,
       months: agg.months, words: agg.words,
       usedMin: usage.usedMin, limitMin: usage.limitMin, remainingMin: usage.remainingMin,
+    });
+  }
+
+  // The single next best thing to do, with the reason in one sentence.
+  if (action === 'next') {
+    const [episodes, types, agg, games, sessions] = await Promise.all([
+      getEpisodes(), getGameTypes(), getAggregates(s.uid), getGames(s.uid), getSessions(s.uid, 40),
+    ]);
+    const next = nextAction({ episodes, counts: agg.words, games, sessions, types });
+    return res.json({
+      ok: true, name: s.name, next,
+      // enough context for the card to show progress without a second round trip
+      current: episodes[0] ? {
+        id: episodes[0].id, n: episodes[0].n, title: episodes[0].title,
+        focus: focusFor(episodes[0].words, agg.words),
+        owned: Math.round(ownership(episodes[0].words, agg.words) * 100),
+      } : null,
+      sessions: sessions.length,
     });
   }
 

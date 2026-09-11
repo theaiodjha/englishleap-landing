@@ -18,6 +18,30 @@
     --glass:rgba(255,255,255,.04); --glass2:rgba(255,255,255,.06); --line:rgba(255,255,255,.10);
     --display:'Clash Display',system-ui,sans-serif; --body:'General Sans',system-ui,sans-serif;
   }
+  /* Today's focus — the next-best-action card, shown only to signed-in members */
+  .focus{display:none;position:relative;margin:18px 0 6px;padding:22px;border-radius:24px;overflow:hidden;
+    border:1px solid var(--line);background:linear-gradient(135deg,rgba(139,108,255,.16),rgba(31,196,182,.08));
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 20px 54px -26px rgba(0,0,0,.75)}
+  .focus.show{display:block}
+  .focus .eye{font-family:var(--display);font-weight:700;letter-spacing:.15em;font-size:11.5px;text-transform:uppercase;color:var(--teal)}
+  .focus h2{font-family:var(--display);font-weight:700;font-size:clamp(19px,3.6vw,25px);line-height:1.2;margin:9px 0 0}
+  .focus .why{color:var(--soft);font-size:14.5px;line-height:1.55;margin:9px 0 0;max-width:46em}
+  .focus .fw{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .focus .fw span{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;
+    font-family:var(--display);font-weight:600;font-size:13.5px;color:#04201c;
+    background:linear-gradient(120deg,var(--mint),var(--teal));box-shadow:0 8px 24px -10px rgba(31,196,182,.7)}
+  .focus .row{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:18px}
+  .focus .go{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:12px 22px;border-radius:999px;
+    font-family:var(--display);font-weight:700;font-size:15px;text-decoration:none;color:#fff;
+    background:linear-gradient(110deg,var(--purple),var(--electric));box-shadow:0 14px 36px -14px rgba(139,108,255,.7)}
+  .focus .mins{font-size:13px;color:var(--soft2)}
+  .focus .own{flex:1 1 160px;min-width:140px}
+  .focus .own .bar{height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+  .focus .own .bar>i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--teal),var(--purple))}
+  .focus .own .lbl{font-size:11.5px;color:var(--soft2);margin-bottom:6px;font-family:var(--display);
+    font-weight:700;letter-spacing:.11em;text-transform:uppercase}
+  @media(max-width:520px){ .focus{padding:18px} .focus .go{width:100%;justify-content:center} }
+
   .aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
   .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;mix-blend-mode:screen;will-change:transform}
   .b1{width:60vw;height:60vw;left:-15vw;top:-20vh;background:radial-gradient(circle at 30% 30%,var(--purple),transparent 70%);animation:drift1 26s ease-in-out infinite}
@@ -212,6 +236,8 @@
       <div class="acct" id="acct"><a class="signlink" href="/api/auth/login?next=/practice-arcade.html"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6Z"/></svg>Member Login</a></div>
     </div>
   </div>
+
+  <section class="focus" id="focusCard" aria-live="polite"></section>
 
   <!-- HERO -->
   <div class="hero">
@@ -450,6 +476,34 @@ async function unlock(){
 $('#go').addEventListener('click',unlock);
 $('#code').addEventListener('keydown',ev=>{if(ev.key==='Enter')unlock();});
 tryLoad();
+
+/* Today's focus — one next-best-action, computed from what this member has actually
+   practised. Silent for anonymous visitors (401) and whenever nothing is due. */
+(async function focusCard(){
+  try{
+    const r=await fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'next'})});
+    if(!r.ok) return;                                   // logged out → card never appears
+    const d=await r.json();
+    const n=d&&d.next; if(!n) return;
+    const cur=d.current||{};
+    const words=(n.words||[]).map(w=>`<span>&#9655; ${esc(w)}</span>`).join('');
+    const own=(typeof cur.owned==='number' && cur.owned>0)
+      ? `<div class="own"><div class="lbl">EP${cur.n} words owned &middot; ${cur.owned}%</div>
+           <div class="bar"><i style="width:${Math.max(0,Math.min(100,cur.owned))}%"></i></div></div>` : '';
+    document.getElementById('focusCard').innerHTML=
+      `<div class="eye">&#127919; Today&rsquo;s focus</div>
+       <h2>${esc(n.title||'')}${n.episode?` <span style="color:#76729e">&middot; EP${n.episode}</span>`:''}</h2>
+       <p class="why">${esc(n.why||'')}</p>
+       ${words?`<div class="fw">${words}</div>`:''}
+       <div class="row">
+         <a class="go" href="${esc(n.href||'#')}">${esc(n.cta||'Start')}</a>
+         <span class="mins">About ${Number(n.minutes)||6} minutes</span>
+         ${own}
+       </div>`;
+    document.getElementById('focusCard').classList.add('show');
+  }catch(e){ /* never let the coach break the arcade */ }
+})();
 </script>
 <script defer src="/elc-tour.js"></script>
 </body>

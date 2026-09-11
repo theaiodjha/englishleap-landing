@@ -10,9 +10,9 @@ import "../lib/quiet-deprecations.js";
 
 import { readSession, revalidateSession } from '../lib/session.js';
 import { getUsage, addUsage, clampRecordingSec, LIMIT_MIN, MAX_REC_SEC } from '../lib/quota.js';
-import { getArcade } from '../lib/arcade-store.js';
-import { logSession } from '../lib/history.js';
-import { EPISODE_TITLES } from '../lib/episode-titles.js';
+import { getEpisodes } from '../lib/arcade-store.js';
+import { logSession, getAggregates } from '../lib/history.js';
+import { focusFor, speechMetrics } from '../lib/coach.js';
 
 // Audio analysis of a 3-minute clip can take well past the platform default, and a
 // killed function looks like a generic failure to the member. Give it real headroom.
@@ -42,35 +42,20 @@ function promptFor(id, title) {
     || `Talk for a minute or two about this episode’s theme — “${title}”. What does it mean to you, and can you share a real example from your own life?`;
 }
 
-const epNum = (e) => Number(String(e.ep || e.id).replace(/\D/g, '')) || 0;
-const epWords = (e) => ((e.content && e.content.clues) || []).map((c) => c.word).filter(Boolean);
-
-async function clueRoomEpisodes() {
-  try {
-    const arcade = await getArcade();
-    return (arcade.find((g) => g.type === 'clue-room') || {}).episodes || [];
-  } catch {
-    return [];
-  }
-}
-
 // Resolve a requested episode id, else the one flagged `current`, else the newest.
 async function episodeFor(wanted) {
-  const eps = await clueRoomEpisodes();
+  let eps = [];
+  try { eps = await getEpisodes(); } catch { /* fall through to the static fallback */ }
   if (!eps.length) return FALLBACK_EP;
   const e = (wanted && eps.find((x) => x.id === wanted)) || eps.find((x) => x.current) || eps[0];
-  const words = epWords(e);
-  if (!words.length) return FALLBACK_EP;
-  const title = EPISODE_TITLES[e.id] || e.title;
-  return { id: e.id, number: epNum(e), title, prompt: promptFor(e.id, title), words };
+  return { id: e.id, number: e.n, title: e.title, prompt: promptFor(e.id, e.title), words: e.words };
 }
 
 // Everything the member can practise, newest first — feeds the episode picker.
 async function episodeChoices() {
-  const eps = await clueRoomEpisodes();
-  return eps
-    .filter((e) => epWords(e).length)
-    .map((e) => ({ id: e.id, n: epNum(e), title: EPISODE_TITLES[e.id] || e.title }));
+  try {
+    return (await getEpisodes()).map((e) => ({ id: e.id, n: e.n, title: e.title }));
+  } catch { return []; }
 }
 
 function fluencyOK(s) {
@@ -79,11 +64,12 @@ function fluencyOK(s) {
   return (Number(s.cents) || 0) >= FLUENCY_MIN_CENTS;
 }
 
-function analysisPrompt(ep) {
+function analysisPrompt(ep, focus) {
   return `You are Anna and Jake, the warm hosts of the "Speak English With Class" podcast, giving friendly feedback to a B1–B2 English learner. They recorded themselves speaking for this task from Episode ${ep.number} ("${ep.title}"):
 
 TASK THEY WERE GIVEN: "${ep.prompt}"
-TARGET WORDS from the episode: ${ep.words.join(', ')}
+TARGET WORDS from the episode: ${ep.words.join(', ')}${(focus && focus.length) ? `
+STILL WORKING ON: ${focus.join(', ')} — if they use one of these naturally, say so specifically in a win.` : ''}
 
 Listen to the audio and reflect it back kindly. This is NOT a grammar test and NOT a score sheet. Focus on confidence, flow, and the words they used well. Be specific and point to real moments. Use plain, warm B1–B2 English.
 
@@ -94,8 +80,12 @@ Return ONLY a JSON object with this exact shape:
   "wins": ["<specific thing they did well>", "<a second specific win>"],
   "tweak": "<ONE small, gentle, doable suggestion for next time — about confidence or flow, not a grammar nitpick>",
   "words_used": ["<any TARGET words they actually used naturally, base form>"],
-  "closing": "<one short encouraging line>"
+  "closing": "<one short encouraging line>",
+  "rubric": { "fluency": <1-5>, "clarity": <1-5>, "vocabulary": <1-5>, "task": <1-5> }
 }
+The rubric is INTERNAL — it is never shown to the learner and must never change the warmth
+of the text above. Score honestly and consistently so the same performance always scores the
+same: 3 is a solid B1-B2 answer, 5 is confident and natural, 1 is barely attempted.
 If the audio is empty, silent, or not speech, return the same shape with empty wins, a gentle tweak asking them to try recording again, and an empty transcript.`;
 }
 
@@ -110,12 +100,12 @@ function transientWait(status, text) {
   return Math.min(60, Math.max(5, named || (status === 429 ? 20 : 8)));
 }
 
-async function analyzeAudio(base64, mimeType, ep) {
+async function analyzeAudio(base64, mimeType, ep, focus) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
   const body = {
     contents: [{
       parts: [
-        { text: analysisPrompt(ep) },
+        { text: analysisPrompt(ep, focus) },
         { inline_data: { mime_type: mimeType, data: base64 } },
       ],
     }],
@@ -143,15 +133,23 @@ async function analyzeAudio(base64, mimeType, ep) {
 
 // A rate-limited call fails in well under a second, so one short wait still fits the
 // function budget — and retrying HERE means the member never re-uploads their audio.
-async function analyzeWithRetry(base64, mimeType, ep) {
+async function analyzeWithRetry(base64, mimeType, ep, focus) {
   try {
-    return await analyzeAudio(base64, mimeType, ep);
+    return await analyzeAudio(base64, mimeType, ep, focus);
   } catch (e) {
     if (!e.transient) throw e;
     const wait = Math.min(e.retryAfter, 6) * 1000 + Math.floor(Math.random() * 900); // jitter spreads a burst
     await new Promise((r) => setTimeout(r, wait));
-    return analyzeAudio(base64, mimeType, ep);
+    return analyzeAudio(base64, mimeType, ep, focus);
   }
+}
+
+// Which of this episode's words the member still owes, from their own usage counters.
+async function focusWords(uid, words) {
+  try {
+    const agg = await getAggregates(uid);
+    return focusFor(words, agg.words);
+  } catch { return []; }
 }
 
 export default async function handler(req, res) {
@@ -196,6 +194,7 @@ export default async function handler(req, res) {
     return res.json({
       ok: true, name: s.name, ...publicUsage(u),
       prompt: ep.prompt, episode: ep.number, episodeId: ep.id, title: ep.title, words: ep.words,
+      focus: await focusWords(s.uid, ep.words),   // words they have not yet used naturally
       episodes: await episodeChoices(),
     });
   }
@@ -218,8 +217,10 @@ export default async function handler(req, res) {
     if (!audio || durationSec < 1) return res.status(400).json({ ok: false, error: 'No audio received. Please record first.' });
     if (durationSec > MAX_REC_SEC) return res.status(413).json({ ok: false, error: `Please keep recordings under ${Math.round(MAX_REC_SEC/60)} minutes.` });
 
+    const focus = await focusWords(s.uid, ep.words);
+
     let feedback;
-    try { feedback = await analyzeWithRetry(audio, mimeType, ep); }
+    try { feedback = await analyzeWithRetry(audio, mimeType, ep, focus); }
     catch (e) {
       // Busy is a wait, not a failure, and emphatically not "you are out of minutes" —
       // the client keys off `busy` so it never shows the quota message for a burst.
@@ -238,6 +239,7 @@ export default async function handler(req, res) {
 
     // Keep the session in the member's practice history (metadata only, no transcript).
     // logSession fails open and never throws, so history can't break a practice session.
+    const rb = (feedback && feedback.rubric) || {};
     await logSession(s.uid, {
       episodeId: ep.id,
       episode: ep.number,
@@ -245,7 +247,12 @@ export default async function handler(req, res) {
       wordsUsed: feedback && feedback.words_used,
       wins: feedback && Array.isArray(feedback.wins) ? feedback.wins.length : 0,
       tweak: feedback && feedback.tweak,
+      rubric: [rb.fluency, rb.clarity, rb.vocabulary, rb.task],
+      metrics: speechMetrics(feedback && feedback.transcript, durationSec),
     });
+
+    // The rubric is for the chart, not the member — never send a score to the page.
+    if (feedback) delete feedback.rubric;
 
     return res.json({ ok: true, feedback, ...publicUsage(after) });
   }

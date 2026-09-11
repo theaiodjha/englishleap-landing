@@ -65,6 +65,7 @@ lib/session.js             session cookie (HMAC), readSession(), checkMembership
                            revalidateSession() → shared 24h live Patreon re-check
 lib/quota.js               monthly 100-min audio quota (Upstash), keyed to session.uid
 lib/history.js             practice history (sessions, aggregates, game completions)
+lib/coach.js               pure logic: due words, ownership, next-best-action, speech metrics
 lib/arcade-store.js        KV read/write for arcade data (static fallback)
 lib/arcade-data.js         static arcade catalogue (short cover titles)
 lib/episode-titles.js      long/searchable episode titles for the arcade browser
@@ -209,6 +210,36 @@ account copy is hooked there; `localStorage` stays the device source of truth (a
 players need no account) and a one-time `backfill` migrates it on first signed-in visit.
 
 **The dashboard itself is NOT built** — this is capture only, so history accrues from now.
+
+### The rubric (what makes growth chartable)
+
+Every analysis returns TWO things: the warm prose the member reads, and a **fixed rubric**
+scored the same way every time — `[fluency, clarity, vocabulary, task]`, each 1-5. Prose
+can't be trended; the rubric can. Plus two deterministic measures computed from the
+transcript server-side (`speechMetrics`), not asked of the model, so the same input always
+gives the same number: **wpm** and **ttr** (type-token ratio, vocabulary spread).
+
+**The rubric is never shown to the member** — `delete feedback.rubric` before responding.
+It lives in the data, not on screen. That is deliberate: the brand promise is a practice
+community, not a scoreboard.
+
+### Spaced repetition
+
+A word is **owned** after `OWNED_AT` (3) natural uses; below that it is *due*. `focusFor()`
+ranks an episode's unowned words least-used-first, and the two due words are: injected into
+the Gemini prompt (so a natural use gets celebrated by name), marked as amber chips on the
+task card, and named in the "Today's focus" card. No schedule table needed — the `w:{word}`
+counters already carry the signal.
+
+### Next-best-action
+
+`nextAction()` returns ONE recommendation in a fixed priority order, so the reason is always
+one sentence: unused words in the current episode → **speak**; else an unplayed game for it
+→ **play**; else the oldest practised episode still holding due words → **revise**; else a
+free-choice nudge. Surfaced as the "Today's focus" card at the top of `practice-arcade.html`
+— it is **added above** the menu, not a replacement, and is invisible to logged-out visitors.
+
+Cost of all this: a practice session is now ~12 KV commands (was 9); `usage` gained one read.
 
 ## Open decisions
 
