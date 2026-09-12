@@ -111,8 +111,12 @@ html[data-theme="light"] .legend .trial-note{color:#0b6f68}
 html[data-theme="light"] .club-glow{opacity:.4}
 
 /* ---- Practice Arcade / Archive top bar + tabs + upsell (token-driven, theme-safe) ---- */
-html[data-theme="light"] .tabs a.active,
-html[data-theme="light"] .acct .out:hover{color:#06121f}
+html[data-theme="light"] .tabs a.active{color:#06121f}
+/* the games' own sign-out button: #acct holds a <button class="out"> there, and the
+   `.acct .out` this used to be written as matched nothing once that class was dropped */
+html[data-theme="light"] #acct > .out:hover{color:#06121f}   /* direct child: the games' own
+   button. The account card's Sign out row is also .out but nested, and an id selector
+   would out-rank its --rc red. */
 html[data-theme="light"] .upsell{background:linear-gradient(120deg,rgba(139,108,255,.14),rgba(31,196,182,.12)) !important}
 
 /* clue-room: calm the background glow on light so relics read crisply */
@@ -359,17 +363,16 @@ html[data-theme="light"] .gap.filled{
 
 /* Game header controls were var(--glass) + var(--soft): almost colourless on a bright
    ground. Ink text and a defined edge so they read as controls, not decoration. */
+/* .back and .pill only. NOT `#acct a` / `.acct a`: the account card renders inside
+   #acct, so those forms paint this pill around every <a> row in the menu. They were also
+   already dead — the games put a <button class="out"> in #acct, never a link. */
 html[data-theme="light"] .back,
-html[data-theme="light"] .pill,
-html[data-theme="light"] #acct a,
-html[data-theme="light"] .acct a{
+html[data-theme="light"] .pill{
   background:rgba(255,255,255,.72) !important;
   border:1px solid rgba(60,50,110,.20) !important;
   color:#3a3560 !important;
 }
-html[data-theme="light"] .back:hover,
-html[data-theme="light"] #acct a:hover,
-html[data-theme="light"] .acct a:hover{border-color:rgba(60,50,110,.38) !important}
+html[data-theme="light"] .back:hover{border-color:rgba(60,50,110,.38) !important}
 html[data-theme="light"] .pill b{color:#241f3a !important}
 
 /* ---- story-unlock on light --------------------------------------------------
