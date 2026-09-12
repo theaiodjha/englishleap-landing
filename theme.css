@@ -17,13 +17,14 @@ html[data-theme="light"]{
 
 /* vibrant cream → lilac shell (applies to every page's body) */
 html[data-theme="light"] body{
-  /* attachment:fixed sizes the gradient to the VIEWPORT, and the default repeat then
-     tiles it down the canvas — every tile edge is a hard line where the lilac end jumps
-     back to cream. no-repeat plus a matching colour behind it keeps one clean wash. */
+  /* attachment:fixed sizes the gradient to the VIEWPORT — beyond that it either tiles
+     (a hard seam at every tile edge) or falls back to the flat colour. Size it to the
+     DOCUMENT instead: one wash from top to bottom, no boundary at any scroll position. */
   background:linear-gradient(160deg,#fff4ec 0%,#f6efff 46%,#ece0ff 100%) !important;
-  background-attachment:fixed;
+  background-attachment:scroll;
   background-repeat:no-repeat;
-  background-color:#ece0ff;
+  background-size:100% 100%;
+  background-color:#f6efff;
 }
 
 /* keep the aurora colourful but gentle, so the glass reads as frosted */
@@ -119,6 +120,12 @@ html[data-theme="light"] .acct .out:hover{color:#06121f}
 html[data-theme="light"] .upsell{background:linear-gradient(120deg,rgba(139,108,255,.14),rgba(31,196,182,.12)) !important}
 
 /* clue-room: calm the background glow on light so relics read crisply */
+/* the backdrop must span the document and never clip: overflow:hidden on a
+   viewport-height box is what drew the original seam. */
+#stagebg{position:absolute !important;inset:0 !important;height:auto !important;
+  min-height:100% !important;overflow:visible !important}
+#stagebg::before{inset:0 !important;filter:blur(60px)}
+
 html[data-theme="light"] #stagebg{
   background:
     radial-gradient(80% 60% at 10% -6%, rgba(139,108,255,.16), transparent 62%),
