@@ -21,16 +21,16 @@
   html,body{margin:0;height:100%}
   body{font-family:var(--body);color:var(--ink);background:var(--space);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
   #stagebg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:
-    radial-gradient(80% 60% at 10% -6%, rgba(31,196,182,.40), transparent 60%),
-    radial-gradient(70% 56% at 96% 4%, rgba(87,230,196,.28), transparent 60%),
-    radial-gradient(92% 70% at 52% 114%, rgba(139,108,255,.26), transparent 66%),
-    radial-gradient(58% 50% at 82% 94%, rgba(77,139,255,.22), transparent 60%),
+    radial-gradient(80% 60% at 10% -6%, rgba(31,196,182,.20), transparent 60%),
+    radial-gradient(70% 56% at 96% 4%, rgba(87,230,196,.15), transparent 60%),
+    radial-gradient(92% 70% at 52% 114%, rgba(139,108,255,.15), transparent 66%),
+    radial-gradient(58% 50% at 82% 94%, rgba(77,139,255,.13), transparent 60%),
     linear-gradient(180deg,#08152c 0%,#0a1f30 50%,#08152a 100%)}
   #stagebg::before{content:"";position:absolute;inset:-25%;pointer-events:none;
     background:
-      radial-gradient(38% 38% at 30% 32%, rgba(31,196,182,.32), transparent 62%),
-      radial-gradient(34% 34% at 72% 58%, rgba(87,230,196,.22), transparent 62%),
-      radial-gradient(34% 34% at 54% 82%, rgba(139,108,255,.22), transparent 62%);
+      radial-gradient(38% 38% at 30% 32%, rgba(31,196,182,.13), transparent 62%),
+      radial-gradient(34% 34% at 72% 58%, rgba(87,230,196,.10), transparent 62%),
+      radial-gradient(34% 34% at 54% 82%, rgba(139,108,255,.10), transparent 62%);
     filter:blur(44px);animation:aurora 30s ease-in-out infinite alternate}
   @keyframes aurora{from{transform:translate3d(-3%,-2%,0) rotate(0deg) scale(1.06)}to{transform:translate3d(3%,2%,0) rotate(7deg) scale(1.14)}}
   .wrap{max-width:860px;margin:0 auto;padding:14px 18px 60px;min-height:100%}

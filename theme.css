@@ -369,10 +369,6 @@ html[data-theme="light"] .gap{
   border-bottom:2px solid rgba(60,50,110,.35) !important;
 }
 
-/* the sticky word bank fades into the page rather than ending in a hard edge */
-html[data-theme="light"] .bank{
-  background:linear-gradient(180deg,transparent,rgba(246,239,255,.90) 58%,rgba(246,239,255,.97)) !important;
-}
 
 /* the bonus ending body is the same hardcoded #efeaff as .story */
 html[data-theme="light"] .bonus p{color:#2b2545 !important}
