@@ -195,6 +195,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **The Member Archive is hidden from the whole site** until it actually works: no nav
   tab, and every link commented with "Member Archive hidden until it is a working
   feature" (`index.html` x2, `games/clue-room`). `archive.html` still exists at its URL.
+- **A game type has ONE icon and accent, in `lib/arcade-data.js`.** `api/games` returns them
+  with a game's content, and every surface reads from there: the Arcade shelf, the browse
+  tiles, `arcade-type.html`, the progress "Games finished" rows, and the game's own page
+  (`#gameIcon` beside its h1). Do not hardcode a glyph on a page — Sentence Builder ended up
+  with two identities that way, one of them on a "COMING SOON" card for a game that had
+  already shipped. **When a game ships, remove its card from "More on the way".**
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
   (celebrate, exercise, happy, point, read, think). If a PNG is absent, hide it gracefully.
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).

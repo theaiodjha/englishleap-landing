@@ -64,5 +64,7 @@ export default async function handler(req, res) {
     if (!s) return res.status(401).json({ ok: false, login: true, access: gt.access, walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "", error: "Sign in with Patreon to play this game." });
     return res.status(403).json({ ok: false, upgrade: true, access: gt.access, walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "", error: "This game is part of " + tierName + "." });
   }
-  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "", user: s ? s.name : null, content: e.content });
+  // icon + accent so a game page can wear the same identity as its tile in the Arcade,
+  // rather than each page hardcoding its own
+  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, icon: gt.icon || "", accent: gt.accent || "", walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "", user: s ? s.name : null, content: e.content });
 }
