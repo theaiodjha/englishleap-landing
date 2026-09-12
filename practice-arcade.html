@@ -39,10 +39,14 @@
   @media(max-width:520px){ .recap{padding:var(--sp-4)} .recap .hero{font-size:44px} }
 
   /* Today's focus — the next-best-action card, shown only to signed-in members */
+  /* a warm golden wash so the one thing to do today is the first thing you see */
   .focus{display:none;position:relative;margin:18px 0 6px;padding:22px;border-radius:24px;overflow:hidden;
-    border:1px solid var(--line);background:linear-gradient(135deg,rgba(139,108,255,.16),rgba(31,196,182,.08));
+    border:1px solid rgba(255,205,70,.26);background:linear-gradient(135deg,rgba(255,205,70,.16),rgba(255,138,99,.07) 62%,rgba(139,108,255,.05));
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 20px 54px -26px rgba(0,0,0,.75)}
   .focus.show{display:block}
+  /* The warm wash lifts the card's ground, which drops --soft2 to 4.38:1 on it.
+     Small print inside .focus uses a slightly stronger muted ink so it still passes. */
+  .focus{--soft2:#9691bd}
   .focus .eye{font-family:var(--display);font-weight:700;letter-spacing:.15em;font-size:var(--fs-xs);text-transform:uppercase;color:var(--teal)}
   .focus h2{font-family:var(--display);font-weight:700;font-size:clamp(19px,3.6vw,25px);line-height:1.2;margin:9px 0 0}
   .focus .why{color:var(--soft);font-size:var(--fs-md);line-height:1.65;margin:9px 0 0;max-width:46em}

@@ -218,8 +218,7 @@ html[data-theme="light"] .iback{background:rgba(255,255,255,.62) !important}
    page — same hue, 1.14:1 apart. Make them paper, and let the border and shadow
    do the separating, which is how light UI is supposed to work.            */
 html[data-theme="light"] .card,
-html[data-theme="light"] .gate,
-html[data-theme="light"] .focus{
+html[data-theme="light"] .gate{
   background:linear-gradient(135deg,rgba(255,255,255,.80),rgba(255,255,255,.66)) !important;
   border-color:rgba(60,50,110,.22) !important;
 }
@@ -283,3 +282,12 @@ html[data-theme="light"] .kw.on{
 html[data-theme="light"] .grad-gold{
   background:none !important; color:#7a5100 !important; -webkit-text-fill-color:#7a5100;
 }
+
+/* Today's focus keeps its golden wash on light: cream paper, not plain white, so it
+   still leads the page. Warm enough to notice, pale enough for dark ink to sit on. */
+html[data-theme="light"] .focus{
+  background:linear-gradient(135deg,rgba(255,205,70,.22),rgba(255,255,255,.86) 70%) !important;
+  border-color:rgba(154,95,6,.26) !important;
+  --soft2:#615c85;                 /* the wash lifts the ground; keep small print at AA */
+}
+
