@@ -58,6 +58,10 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   clue-room is the exception: it is a non-scrolling 3D scene with `overflow:hidden`.
 - **Light theme is daylight, not an inverted night.** The aurora is `display:none` on
   `html[data-theme="light"]` — by day the page is paper. Do not reintroduce blobs there.
+- **The five games share a layout.** One 1100px column; "How to play" is a `.howbtn`
+  styled exactly like the counter `.pill` and sits on the tracker row (never its own row);
+  the phrase bank spans the full column so six long phrases stay on one line; primary
+  buttons are 44px tall at `--fs-md`.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
   (celebrate, exercise, happy, point, read, think). If a PNG is absent, hide it gracefully.
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).
