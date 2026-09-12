@@ -757,7 +757,7 @@ onScroll();window.addEventListener('scroll',onScroll,{passive:true});
    if the call fails) the visitor gets Member Login, pointed at the Arcade rather than
    back here: a member signing in wants to land somewhere they can practise. */
 ELCAccount(null,{next:'/practice-arcade.html'});   // paint the signed-out state first, so the slot is never empty
-fetch('/api/me',{credentials:'same-origin'})
+ELCFetch('/api/me',{credentials:'same-origin'},6000)
   .then(r=>r.json())
   .then(d=>ELCAccount(d&&d.name?{name:d.name,plan:d.plan}:null,{next:'/practice-arcade.html'}))
   .catch(()=>ELCAccount(null,{next:'/practice-arcade.html'}));
@@ -765,7 +765,7 @@ fetch('/api/me',{credentials:'same-origin'})
 /* Club numbers. One cached edge response serves every visitor (see api/stats.js), so
    this costs nothing per view. Any failure, or `show:false`, leaves the strip hidden —
    the section is written to read perfectly well without it. */
-fetch('/api/stats').then(r=>r.json()).then(d=>{
+ELCFetch('/api/stats', {}, 6000).then(r=>r.json()).then(d=>{
   if(!d||!d.show) return;
   const fmt=n=>n.toLocaleString('en-GB');
   const bits=[['members practising',d.members]];

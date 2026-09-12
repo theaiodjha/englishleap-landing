@@ -82,6 +82,61 @@
     if (label) label.textContent = name;
   }
 
+  /* ---- slow and dead responses ---------------------------------------------
+     fetch() has no timeout of its own: a hung connection hangs until the browser gives
+     up, which can be minutes, with the page showing nothing and saying nothing. */
+  window.ELCFetch = function (url, opts, ms) {
+    var ctl = ('AbortController' in window) ? new AbortController() : null;
+    var t = setTimeout(function () { if (ctl) ctl.abort(); }, ms || 12000);
+    var o = {};
+    for (var k in (opts || {})) o[k] = opts[k];
+    if (ctl) o.signal = ctl.signal;
+    return fetch(url, o).then(
+      function (r) { clearTimeout(t); return r; },
+      function (e) { clearTimeout(t); throw e; }
+    );
+  };
+
+  /* A placeholder that only appears if the wait is long enough to notice. Under ~450ms a
+     spinner reads as a flash of clutter and makes a quick page feel slower than it was.
+     Returns a function to call when the real content is ready. */
+  window.ELCBusy = function (el, html, ms) {
+    if (!el) return function () {};
+    var shown = false;
+    var t = setTimeout(function () { shown = true; el.innerHTML = html; }, ms || 450);
+    return function () { clearTimeout(t); if (shown) el.innerHTML = ''; };
+  };
+
+  /* ---- the first-frame hint ------------------------------------------------
+     Being signed in is an HttpOnly cookie, so a page cannot know it without asking the
+     server. Remembering the last answer lets the header and the floating controls settle
+     on the FIRST frame instead of after a round trip — which is what was causing the
+     theme toggle and tour pill to appear and then vanish on every navigation. */
+  var HINT_KEY = 'elc-acct';
+
+  function readHint() {
+    try {
+      var h = JSON.parse(localStorage.getItem(HINT_KEY) || 'null');
+      return (h && h.name) ? h : null;
+    } catch (e) { return null; }
+  }
+  function writeHint(user) {
+    try {
+      if (user && user.name) localStorage.setItem(HINT_KEY, JSON.stringify({ name: user.name, plan: user.plan }));
+      else localStorage.removeItem(HINT_KEY);
+    } catch (e) {}
+  }
+
+  /* Whether the floating theme toggle and tour pill should exist on this page. Expressed
+     as classes on <html> so it holds for elements that have not been created yet — script
+     order stops mattering. */
+  function setFloating(signedIn) {
+    var d = document.documentElement;
+    if (!d || !d.classList) return;
+    d.classList.toggle('elc-nofloat-theme', !!signedIn);
+    d.classList.toggle('elc-nolaunch', !!signedIn);
+  }
+
   // ---- the account control -------------------------------------------------
   // An avatar with the member's initials; clicking it opens a card with their name,
   // plan and sign-out. Six pages previously printed "Signed in as Fahad" plus a bare
@@ -124,6 +179,7 @@
     var next = (opts && opts.next) || location.pathname;
 
     if (!user || !user.name) {
+      if (!opts || opts.hint !== true) { writeHint(null); setFloating(false); }
       slot.innerHTML = '<a class="elcnav-login" href="/api/auth/login?next=' + encodeURIComponent(next) + '">' +
         '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
         '<path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6Z"/></svg>' +
@@ -175,8 +231,15 @@
       '</div>';
 
     // The card now owns both: take the floating controls off this page. Neither element
-    // is moved — the theme toggle is hidden by a class and the tour pill is removed —
-    // because re-parenting them broke clicks site-wide when it was tried.
+    // is moved — they are hidden by a class on <html> and, where the tour script is already
+    // loaded, the pill is removed outright — because re-parenting them broke clicks
+    // site-wide when it was tried.
+    setFloating(true);
+    if (opts && opts.hint === true) {
+      // drawn from cache; the caller will follow up with the truth
+    } else {
+      writeHint(user);
+    }
     if (window.ELCTheme) window.ELCTheme.hide();
     if (tour && window.ELCTour && window.ELCTour.hideLauncher) window.ELCTour.hideLauncher();
 
@@ -212,6 +275,8 @@
     });
 
     document.getElementById('acctOut').addEventListener('click', function () {
+      writeHint(null);          // so the next page does not paint a stale avatar
+      setFloating(false);
       fetch('/api/auth/signout', { method: 'POST' })
         .catch(function () {})
         .then(function () { location.href = '/'; });
@@ -245,17 +310,32 @@
       onScroll();
     }
 
-    // Pages call ELCAccount() once they know who is signed in. If a page never does,
-    // fall back to the signed-out control so the slot is never just empty.
-    document.addEventListener('DOMContentLoaded', function () {
-      setTimeout(function () {
-        var a = document.getElementById('acct');
-        if (a && !a.innerHTML.trim()) window.ELCAccount(null);
-      }, 600);
-    });
+  }
+
+  /* Draw the last known account straight away, so the header does not pop in and the
+     floating controls are never created visible. The page's own fetch calls ELCAccount()
+     again with the truth a moment later.
+
+     Deliberately OUTSIDE render(): index.html carries #acct but no #elcnav (it keeps its
+     own marketing nav), and render() returns early without that slot — so putting this
+     there silently skipped the busiest page on the site. */
+  function bootAccount() {
+    var hint = readHint();
+    if (hint) window.ELCAccount(hint, { hint: true });
+
+    /* Safety net only. It used to fire at 600ms, which is INSIDE a normal round trip — so
+       a signed-in member on a slow connection was shown "Member Login" and then had it
+       swapped for their avatar. Now it waits longer, and never overrides a hint: an empty
+       slot for a moment beats the wrong answer twice. */
+    setTimeout(function () {
+      var a = document.getElementById('acct');
+      if (a && !a.innerHTML.trim() && !readHint()) window.ELCAccount(null);
+    }, 2500);
   }
 
   render();
+  bootAccount();
+
   /* The back link sits BELOW this script in the document, so it does not exist yet when
      this file runs (the header is rendered synchronously on purpose, so page scripts can
      find #acct). Wait for the parse to finish before looking for it. */

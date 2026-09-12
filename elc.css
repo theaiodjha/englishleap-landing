@@ -108,6 +108,11 @@
 
 /* the account control: an initials avatar that opens a card (see ELCAccount in elc-nav.js) */
 .elcnav-acct{position:relative}
+/* Born hidden. The account card owns the theme choice and the tour for a signed-in member,
+   and these two elements are created by other scripts at unpredictable times — so the
+   decision lives on <html> where it applies whenever they appear, rather than depending on
+   script order. See the hint in elc-nav.js. */
+html.elc-nolaunch .elct-launch{display:none !important}
 .elcnav-av{width:38px;height:38px;flex:0 0 38px;border-radius:var(--r-full);cursor:pointer;
   display:grid;place-items:center;padding:0;
   font-family:var(--display);font-weight:600;font-size:var(--fs-sm);letter-spacing:.02em;color:#fff;

@@ -108,7 +108,7 @@ function tile(type,ep,locked,access){
 }
 async function load(){
   let data;
-  try{ const r=await fetch('/api/games'); data=await r.json(); }catch(e){ $('#deck').innerHTML='<div class="note">Couldn\u2019t load the arcade. Please try again.</div>'; return; }
+  try{ const r=await ELCFetch('/api/games'); data=await r.json(); }catch(e){ $('#deck').innerHTML='<div class="note">Couldn\u2019t load the arcade. Please try again.</div>'; return; }
   ELCAccount(data&&data.name?{name:data.name, plan:data.level}:null);
   const gt=(data.arcade||[]).find(g=>g.type===TYPE);
   if(!gt){ $('#head').innerHTML='<h1>Game not found</h1>'; return; }

@@ -91,6 +91,23 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   and nothing else — the script renders synchronously so page scripts still find `#acct`.
   Six pages previously had five different headers with drifting labels, and Progress and
   Use It Live did not link to each other.
+- **Nothing waits on a round trip to decide what to paint.** Being signed in is an
+  HttpOnly cookie, so a page cannot know it without asking — which is why the theme toggle
+  and tour pill used to appear on every navigation and then vanish, and why the header
+  flashed "Member Login" before the avatar. `elc-nav.js` caches the last answer in
+  **`elc-acct`** (localStorage) and applies it on the FIRST frame; the page's fetch then
+  confirms or corrects it. Suppression is **classes on `<html>`**
+  (`elc-nofloat-theme`, `elc-nolaunch`), never touching the elements, so an element created
+  later by another script is simply born hidden and script order stops mattering. The
+  safety-net fallback fires at **2500ms and never overrides a hint** — at 600ms it was
+  inside a normal round trip. `bootAccount()` runs OUTSIDE `render()`: `index.html` has
+  `#acct` but no `#elcnav`, and `render()` returns early without that slot.
+- **Every fetch has a deadline.** `window.ELCFetch(url, opts, ms)` (elc-nav.js) aborts at
+  12s by default; `window.ELCBusy(el, html, ms)` shows a placeholder only if the wait passes
+  ~450ms, because below that a spinner just flashes and makes a fast page feel slower.
+  `progress.html` shows card-shaped skeletons and tells an AbortError apart from a real
+  failure — "try again" is good advice for a timeout and poor advice for an outage.
+  These live in `elc-nav.js`, so it is a hard dependency of every member page.
 - **The account control is `window.ELCAccount(user, {next})`**, also in `elc-nav.js`: an
   initials avatar that opens a card with the member's name, plan and sign-out, replacing
   six copies of "Signed in as … [Sign out]" (which ate the header on phones). Pass
@@ -199,6 +216,7 @@ tools/{seed-arcade,issue-code}.js      seed arcade to KV; issue member codes
 tools/test-popular.mjs     node tools/test-popular.mjs — asserts the popularity ranking rules
 tools/test-stats.mjs       node tools/test-stats.mjs — asserts the public stats floor + rounding
 tools/test-progress-kpi.js node tools/test-progress-kpi.js — asserts where each KPI tile leads
+tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
 games/*                    5 game types (clue-room, phrase-pairs, listening-gap,

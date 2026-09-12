@@ -508,7 +508,7 @@ function render(data){
   }
 }
 async function tryLoad(){
-  try{ const r=await fetch('/api/games'); if(!r.ok) return; const data=await r.json(); if(data.ok) render(data); }catch(e){}
+  try{ const r=await ELCFetch('/api/games'); if(!r.ok) return; const data=await r.json(); if(data.ok) render(data); }catch(e){}
 }
 async function unlock(){
   const code=$('#code').value.trim(); if(!code){showMsg('Please enter your code.','err');return;}
@@ -617,7 +617,7 @@ function hlWords(text, words){
 /* What members are practising this week. One edge-cached response (see api/stats.js), so
    this costs nothing per visit. Absent or below the floor -> the section never appears;
    a "most played" list built on four plays is noise, and members can tell. */
-fetch('/api/stats').then(r=>r.json()).then(d=>{
+ELCFetch('/api/stats', {}, 6000).then(r=>r.json()).then(d=>{
   const p = d && d.popular;
   if(!p || !p.episodes || !p.episodes.length) return;
   const el = document.getElementById('popWeek');
