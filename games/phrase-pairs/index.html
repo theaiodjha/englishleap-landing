@@ -20,8 +20,8 @@
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{font-family:var(--body);color:var(--ink);background:var(--space);overflow-x:hidden;
-    -webkit-tap-highlight-color:transparent}
-  #stagebg{position:fixed;inset:0;z-index:-1;background:
+    -webkit-tap-highlight-color:transparent;position:relative}
+  #stagebg{position:absolute;inset:0;height:100%;z-index:-1;background:
     radial-gradient(110% 70% at 18% 6%, rgba(31,196,182,.20), transparent 56%),
     radial-gradient(90% 70% at 92% 4%, rgba(139,108,255,.20), transparent 58%),
     radial-gradient(90% 60% at 50% 108%, rgba(20,60,80,.5), transparent 70%),

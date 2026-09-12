@@ -19,8 +19,8 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
-  body{font-family:var(--body);color:var(--ink);background:var(--space);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
-  #stagebg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:
+  body{font-family:var(--body);color:var(--ink);background:var(--space);overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative}
+  #stagebg{position:absolute;inset:0;height:100%;z-index:-1;overflow:hidden;background:
     radial-gradient(78% 60% at 10% -6%, rgba(139,108,255,.20), transparent 60%),
     radial-gradient(70% 56% at 96% 4%, rgba(246,71,154,.16), transparent 60%),
     radial-gradient(95% 72% at 50% 114%, rgba(31,196,182,.14), transparent 66%),
@@ -33,7 +33,7 @@
       radial-gradient(34% 34% at 54% 82%, rgba(31,196,182,.10), transparent 62%);
     filter:blur(44px);animation:aurora 30s ease-in-out infinite alternate}
   @keyframes aurora{from{transform:translate3d(-3%,-2%,0) rotate(0deg) scale(1.06)}to{transform:translate3d(3%,2%,0) rotate(7deg) scale(1.14)}}
-  .wrap{max-width:820px;margin:0 auto;padding:14px 18px 60px;min-height:100%}
+  .wrap{max-width:1100px;margin:0 auto;padding:14px 18px 60px;min-height:100%}
   .bar{display:flex;align-items:center;gap:var(--sp-3);justify-content:space-between;padding:6px 2px 14px}
   .bar .left{display:flex;align-items:center;gap:var(--sp-3);min-width:0}
   .back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--soft);font-weight:600;font-size:var(--fs-md);
@@ -68,8 +68,9 @@
   .hintline{margin:var(--sp-4) auto 0;max-width:680px;text-align:center;color:var(--soft);font-size:var(--fs-sm)}
   /* wider than the story card so six long phrases stay on one line on a desktop;
      it still wraps naturally once the viewport is narrow */
+  /* the column is wide enough for six long phrases on one line; it wraps on a phone */
   .bank{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);justify-content:center;align-items:center;
-    margin:var(--sp-4) calc(50% - 47vw) 0;width:94vw;max-width:1180px;padding:0 var(--sp-4)}
+    margin:var(--sp-4) auto 0;max-width:100%}
   .chip{appearance:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:clamp(15px,3.6vw,18px);
     padding:13px 20px;border-radius:16px;color:#fff;background:rgba(139,108,255,.28);border:1px solid rgba(255,255,255,.3);border:1px solid color-mix(in srgb,var(--c,#8b6cff) 62%, transparent);
     background:linear-gradient(160deg,color-mix(in srgb,var(--c,#8b6cff) 46%, transparent),color-mix(in srgb,var(--c,#8b6cff) 16%, transparent));
