@@ -113,7 +113,7 @@ html[data-theme="light"] .acct .out:hover{color:#06121f}
 html[data-theme="light"] .upsell{background:linear-gradient(120deg,rgba(139,108,255,.14),rgba(31,196,182,.12)) !important}
 
 /* clue-room: calm the background glow on light so relics read crisply */
-html[data-theme="light"] #stagebg{opacity:.4}
+html[data-theme="light"] #stagebg{display:none}   /* night backdrop; by day the page is paper */
 
 /* ---- Clue Room game: full light-theme parity (premium, contrasting) ---- */
 /* soft violet depth instead of heavy black shadow on glass surfaces */
@@ -291,3 +291,39 @@ html[data-theme="light"] .focus{
   --soft2:#615c85;                 /* the wash lifts the ground; keep small print at AA */
 }
 
+/* ---- game surfaces that were built dark-only -------------------------------
+   .chip is shared by clue-room, listening-gap, sentence-builder and story-unlock.
+   Its fill is a tint of the word's own --accent, which lands pale on light — white
+   label text measured 1.1-1.3:1 against every accent. Dark ink reads 11.8-14.2:1
+   on all six, so the accent can keep doing the identifying.                    */
+html[data-theme="light"] .chip{
+  color:#241f3a !important;
+  border-color:rgba(60,50,110,.28) !important;
+  text-shadow:none !important;
+}
+html[data-theme="light"] .chip.right{color:#06201b !important}
+
+/* the word tray was a 28%-black slab: a grey box on a cream page */
+html[data-theme="light"] .tray{
+  background:rgba(255,255,255,.58) !important;
+  border-color:rgba(60,50,110,.30) !important;
+}
+
+/* progress dots at 18% white are invisible on light */
+html[data-theme="light"] .dot{background:rgba(60,50,110,.20)}
+
+/* "Check" before any word is placed — a washed gradient with pale text */
+html[data-theme="light"] .check:disabled,
+html[data-theme="light"] .clear:disabled{
+  background:rgba(60,50,110,.11) !important; color:#413c66 !important;
+  box-shadow:none !important; opacity:1 !important;
+}
+
+/* Same accent-tint problem as .chip, in four more places: the prompt pill, a filled
+   clue slot, and a filled gap. All are white-on-pale once the page ground is light. */
+html[data-theme="light"] .hint b,
+html[data-theme="light"] .slot.filled,
+html[data-theme="light"] .gap.filled{
+  color:#241f3a !important;
+  border-color:rgba(60,50,110,.30) !important;
+}

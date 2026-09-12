@@ -43,6 +43,11 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   (a pale label on a gold pill was 1.09:1). Fills may stay gold; the ink must become
   **`#7a5100`** — `theme.css` carries the light overrides. Same for teal text: `#0f9b90`
   is 3.0:1, use **`#0b6f68`**. Check any new accent against the composited background.
+- **Game surfaces were built dark-only.** Anything filled with a tint of the word's
+  `--accent` (`.chip`, `.hint b`, `.slot.filled`, `.gap.filled`) carries `color:#fff`,
+  which measures ~1.2:1 once the page ground is light — `theme.css` swaps the ink to
+  `#241f3a` and leaves the accent to do the identifying. `#stagebg` is hidden on light
+  for the same reason as the aurora.
 - **Light theme is daylight, not an inverted night.** The aurora is `display:none` on
   `html[data-theme="light"]` — by day the page is paper. Do not reintroduce blobs there.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
