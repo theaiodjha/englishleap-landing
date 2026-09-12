@@ -17,8 +17,13 @@ html[data-theme="light"]{
 
 /* vibrant cream → lilac shell (applies to every page's body) */
 html[data-theme="light"] body{
+  /* attachment:fixed sizes the gradient to the VIEWPORT, and the default repeat then
+     tiles it down the canvas — every tile edge is a hard line where the lilac end jumps
+     back to cream. no-repeat plus a matching colour behind it keeps one clean wash. */
   background:linear-gradient(160deg,#fff4ec 0%,#f6efff 46%,#ece0ff 100%) !important;
   background-attachment:fixed;
+  background-repeat:no-repeat;
+  background-color:#ece0ff;
 }
 
 /* keep the aurora colourful but gentle, so the glass reads as frosted */
