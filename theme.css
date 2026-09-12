@@ -471,7 +471,15 @@ html[data-theme="light"] .elcnav-card{
   box-shadow:0 24px 50px -24px rgba(80,60,150,.55) !important;
 }
 html[data-theme="light"] .elcnav-card-id{border-bottom-color:rgba(60,50,110,.14) !important}
-html[data-theme="light"] .elcnav-card-plan{color:#0b6f68 !important}
+/* The badge carries its own ink on its own fill, so it needs no recolouring by theme —
+   only a softer, lilac-tinted drop shadow, because a black shadow on paper reads as dirt. */
+html[data-theme="light"] .elcnav-card-plan{
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.62),
+    inset 0 -1px 0 rgba(0,0,0,.12),
+    0 2px 6px -2px rgba(80,60,150,.45) !important;
+  border-color:rgba(60,50,110,.14) !important;
+}
 /* The row hues again, re-pointed for a white card: --teal and --purple are dark-ground
    steps (#1fc4b6 on white measures 2.0:1, under the 3:1 an icon needs to read as a shape).
    Only --rc changes here; the rules in elc.css stay exactly as written. */

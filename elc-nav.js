@@ -145,7 +145,8 @@
         '<div class="elcnav-card-id">' +
           '<span class="elcnav-av lg" aria-hidden="true"><span>' + esc(ini) + '</span></span>' +
           '<span class="elcnav-card-who"><b>' + esc(user.name) + '</b>' +
-            (plan ? '<span class="elcnav-card-plan">' + esc(plan) + '</span>' : '') + '</span>' +
+            (plan ? '<span class="elcnav-card-plan plan-' + esc(user.plan) + '">' +
+              esc(plan) + '</span>' : '') + '</span>' +
         '</div>' +
         '<a class="elcnav-card-row r-progress" role="menuitem" href="/progress.html">' +
           svg('progress') + '<span>Your progress</span></a>' +

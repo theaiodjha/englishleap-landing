@@ -127,7 +127,29 @@
 .elcnav-card-who{display:flex;flex-direction:column;gap:2px;min-width:0}
 .elcnav-card-who b{font-family:var(--display);font-weight:600;font-size:var(--fs-md);color:var(--ink);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.elcnav-card-plan{font-size:var(--fs-xs);color:var(--teal);font-weight:600}
+/* The tier badge. Three shadows imply one light source above — a highlight on the top
+   edge, a shade on the bottom, and a drop shadow lifting the whole thing off the card —
+   with a gradient running light-to-dark downward to match. Uppercase with tracking so it
+   reads as a badge rather than a sentence.
+   Each tier's ink is chosen against the DARK end of its gradient (the worst case): at
+   12px bold this is normal-sized text and needs 4.5:1 there, not just at the top. */
+.elcnav-card-plan{
+  align-self:flex-start; margin-top:3px;
+  display:inline-flex; align-items:center;
+  padding:3px 9px; border-radius:var(--r-full);
+  font-family:var(--display); font-weight:700;
+  font-size:10.5px/* badge, not body type */; letter-spacing:.07em; text-transform:uppercase;
+  background:linear-gradient(180deg,var(--t1),var(--t2));
+  color:var(--ti);
+  border:1px solid rgba(0,0,0,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.58),
+    inset 0 -1px 0 rgba(0,0,0,.16),
+    0 2px 5px -1px rgba(0,0,0,.34);
+  --t1:#5fd9cd; --t2:#14a89c; --ti:#06302d;          /* default / free trial */
+}
+.elcnav-card-plan.plan-fluency{--t1:#ffd98a; --t2:#e3a02f; --ti:#4a2f00}
+.elcnav-card-plan.plan-transcript{--t1:#b9a6ff; --t2:#9a7ff5; --ti:#2a1170}
 .elcnav-card-row{display:flex;align-items:center;gap:10px;width:100%;min-height:40px;
   padding:0 var(--sp-3);border:0;border-radius:var(--r-md);background:transparent;cursor:pointer;
   font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--soft);

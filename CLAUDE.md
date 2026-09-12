@@ -102,7 +102,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   changes shape from page to page and pages need not carry the tour script. Each row sets its own `--rc`
   (violet for progress, teal for the tour, red for sign out): the icon wears it and the
   hover is a 16% wash of it, never grey. `theme.css` re-points `--rc` to a darker step for
-  light and changes nothing else. **Never write `.elcnav-acct a`** — the card lives inside
+  light and changes nothing else. The plan under the name is a raised **tier badge**
+  (`.elcnav-card-plan.plan-{fluency|transcript|trial}`): a downward gradient plus three
+  shadows implying one light source — inset top highlight, inset bottom shade, outer drop.
+  It carries its own ink on its own fill, so only the shadow changes by theme (black reads
+  as dirt on paper). Each tier ink is checked against the **dark end** of its gradient, the
+  worst case — that is why the violet is `#9a7ff5` and not `--purple`, which failed 4.5:1. **Never write `.elcnav-acct a`** — the card lives inside
   that element, so a descendant selector boxes every row in the old header pill. **`index.html` uses it too** —
   it loads `elc-nav.js` for the control alone (no `#elcnav` slot, so no header is rendered)
   and asks **`/api/me`**, which reads the cookie and nothing else; /api/games would ship the
