@@ -124,12 +124,11 @@
   @media(max-width:380px){.wrap{padding:var(--sp-3) 12px 52px}.card{padding:var(--sp-5) 14px}.prog{gap:7px}}
   .card.result{position:relative;z-index:60;text-align:center}
   .card .rk{font-family:var(--display);font-weight:700;font-size:clamp(22px,5vw,30px);color:var(--ink);line-height:1.08}
-  /* the game's own icon, same glyph and accent as its tile in the Arcade */
+  /* the game's own glyph, inline before its name — exactly as the Arcade shelf prints it
+     (`${gt.icon} ${gt.name}`). em-sized so it tracks the heading's clamp. */
   .gameicon:empty{display:none}
-  .gameicon{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:14px;
-    margin:0 auto 10px;font-size:22px/* emoji glyph, not type */;line-height:1;
-    background:color-mix(in srgb,var(--gaccent,var(--teal)) 18%,transparent);
-    border:1px solid color-mix(in srgb,var(--gaccent,var(--teal)) 34%,transparent)}
+  .gameicon{font-size:.86em/* emoji glyph, not type */;margin-right:.3em;
+    line-height:1;vertical-align:baseline}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -147,7 +146,7 @@
 
   <div class="head">
     <div class="ep" id="epLabel">EP</div>
-    <span class="gameicon" id="gameIcon" aria-hidden="true"></span><h1>Sentence Builder</h1>
+    <h1><span class="gameicon" id="gameIcon" aria-hidden="true"></span>Sentence Builder</h1>
     <p class="sub" id="sub">Tap the words into the right order to build each sentence.</p>
   </div>
 
@@ -346,8 +345,7 @@ async function load(){
   sentences=d.content.sentences||[]; keeper=d.content.keeper||'';
   $('#epLabel').textContent=d.ep||EP.toUpperCase();
   /* the catalogue's glyph and accent, so the page wears the same identity as its tile */
-  if(d.icon){ const gi=$('#gameIcon'); gi.textContent=d.icon;
-    if(d.accent) gi.style.setProperty('--gaccent',d.accent); }
+  if(d.icon) $('#gameIcon').textContent=d.icon;
   if(d.content.intro) $('#sub').textContent=d.content.intro;
   $('#pRound').textContent='1/'+(sentences.length||1);
   acctBar(d.user);

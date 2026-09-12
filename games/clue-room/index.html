@@ -157,12 +157,11 @@
   .nightbanner .small{color:#fff;font-size:var(--fs-md);margin-top:7px;opacity:.94;text-shadow:0 2px 18px rgba(0,0,0,.5)}
   .howbtn{align-items:center;justify-content:center;gap:var(--sp-2);margin:14px auto 0;cursor:pointer;border:0;font:inherit;font-weight:700;font-size:var(--fs-md);padding:10px 18px;border-radius:999px;color:#10121c;background:#fff;box-shadow:0 10px 26px -10px rgba(0,0,0,.55)}
   .howbtn:hover{transform:translateY(-1px)}
-  /* the game's own icon, same glyph and accent as its tile in the Arcade */
+  /* the game's own glyph, inline before its name — exactly as the Arcade shelf prints it
+     (`${gt.icon} ${gt.name}`). em-sized so it tracks the heading's clamp. */
   .gameicon:empty{display:none}
-  .gameicon{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:14px;
-    margin:0 auto 10px;font-size:22px/* emoji glyph, not type */;line-height:1;
-    background:color-mix(in srgb,var(--gaccent,var(--teal)) 18%,transparent);
-    border:1px solid color-mix(in srgb,var(--gaccent,var(--teal)) 34%,transparent)}
+  .gameicon{font-size:.86em/* emoji glyph, not type */;margin-right:.3em;
+    line-height:1;vertical-align:baseline}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0a0a14">
@@ -241,7 +240,7 @@
 <div class="nightbanner" id="nightbanner"></div>
 <div class="intro" id="intro"><div class="panel card-glass">
   <div class="eyebrow" id="introEyebrow">Practice Arcade</div>
-  <span class="gameicon" id="gameIcon" aria-hidden="true"></span><h1>The Clue Room</h1>
+  <h1><span class="gameicon" id="gameIcon" aria-hidden="true"></span>The Clue Room</h1>
   <button id="howBtn" class="howbtn" style="display:none">&#9654; How to play</button>
   <p class="lede">Six phrases from this episode are hidden in the light. Step in, uncover each one, then put them together &mdash; this is where the words become <i>yours</i>.</p>
   <div class="steps">
@@ -276,8 +275,7 @@ const TYPE='clue-room';
   $('#loading').classList.add('hide');
   $('#epLabel').textContent=data.ep||EP.toUpperCase();
   /* the catalogue's glyph and accent, so the page wears the same identity as its tile */
-  if(data.icon){ const gi=$('#gameIcon'); gi.textContent=data.icon;
-    if(data.accent) gi.style.setProperty('--gaccent',data.accent); }
+  if(data.icon) $('#gameIcon').textContent=data.icon;
   $('#introEyebrow').textContent=(data.ep||EP.toUpperCase())+' \u00b7 '+(data.title||'Clue Room');
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}
   try{ window.ELC&&data.walkthrough&&ELC.howToPlay(data.walkthrough,(data.name||"")+" \u2014 how to play",(data.walkthroughPoster||("/covers/"+TYPE+".png"))); }catch(e){}

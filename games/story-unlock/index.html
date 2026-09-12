@@ -172,12 +172,11 @@
   .kw{scroll-margin-bottom:130px}
   html.reading,body.reading{scroll-padding-bottom:calc(130px + env(safe-area-inset-bottom))}
   body.reading .wrap{padding-bottom:calc(140px + env(safe-area-inset-bottom))}
-  /* the game's own icon, same glyph and accent as its tile in the Arcade */
+  /* the game's own glyph, inline before its name — exactly as the Arcade shelf prints it
+     (`${gt.icon} ${gt.name}`). em-sized so it tracks the heading's clamp. */
   .gameicon:empty{display:none}
-  .gameicon{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:14px;
-    margin:0 auto 10px;font-size:22px/* emoji glyph, not type */;line-height:1;
-    background:color-mix(in srgb,var(--gaccent,var(--teal)) 18%,transparent);
-    border:1px solid color-mix(in srgb,var(--gaccent,var(--teal)) 34%,transparent)}
+  .gameicon{font-size:.86em/* emoji glyph, not type */;margin-right:.3em;
+    line-height:1;vertical-align:baseline}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -195,7 +194,7 @@
 
   <div class="head">
     <div class="ep" id="epLabel">EP232</div>
-    <span class="gameicon" id="gameIcon" aria-hidden="true"></span><h1>Story Unlock</h1>
+    <h1><span class="gameicon" id="gameIcon" aria-hidden="true"></span>Story Unlock</h1>
   
     <p class="sub" id="sub">Fill each gap with the right phrase to unlock the story.</p>
   </div>
@@ -434,8 +433,7 @@ async function load(){
   byWord={}; (d.content.phrases||[]).forEach(p=>byWord[p.word]=p.color);
   $('#epLabel').textContent=d.ep||EP.toUpperCase();
   /* the catalogue's glyph and accent, so the page wears the same identity as its tile */
-  if(d.icon){ const gi=$('#gameIcon'); gi.textContent=d.icon;
-    if(d.accent) gi.style.setProperty('--gaccent',d.accent); }
+  if(d.icon) $('#gameIcon').textContent=d.icon;
   if(d.content.intro) $('#sub').textContent=d.content.intro;
   acctBar(d.user);
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}

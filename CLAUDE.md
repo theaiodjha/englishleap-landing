@@ -198,7 +198,7 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **A game type has ONE icon and accent, in `lib/arcade-data.js`.** `api/games` returns them
   with a game's content, and every surface reads from there: the Arcade shelf, the browse
   tiles, `arcade-type.html`, the progress "Games finished" rows, and the game's own page
-  (`#gameIcon` beside its h1). Do not hardcode a glyph on a page — Sentence Builder ended up
+  (`#gameIcon`, inline at the START of its h1 — the same `icon + space + name` the Arcade shelf prints). Do not hardcode a glyph on a page — Sentence Builder ended up
   with two identities that way, one of them on a "COMING SOON" card for a game that had
   already shipped. **When a game ships, remove its card from "More on the way".**
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit

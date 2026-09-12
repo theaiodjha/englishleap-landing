@@ -151,12 +151,11 @@
   .result-card .again a,.result-card .again button{font:inherit;font-weight:700;font-size:var(--fs-md);border-radius:999px;padding:11px 20px;cursor:pointer;text-decoration:none}
   .result-card .again .pri{background:linear-gradient(135deg,#1fc4b6,#57e6c4);color:#06201b;border:0}
   .result-card .again .sec{background:var(--glass);border:1px solid var(--line);color:var(--ink)}
-  /* the game's own icon, same glyph and accent as its tile in the Arcade */
+  /* the game's own glyph, inline before its name — exactly as the Arcade shelf prints it
+     (`${gt.icon} ${gt.name}`). em-sized so it tracks the heading's clamp. */
   .gameicon:empty{display:none}
-  .gameicon{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:14px;
-    margin:0 auto 10px;font-size:22px/* emoji glyph, not type */;line-height:1;
-    background:color-mix(in srgb,var(--gaccent,var(--teal)) 18%,transparent);
-    border:1px solid color-mix(in srgb,var(--gaccent,var(--teal)) 34%,transparent)}
+  .gameicon{font-size:.86em/* emoji glyph, not type */;margin-right:.3em;
+    line-height:1;vertical-align:baseline}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -174,7 +173,7 @@
 
   <div class="head">
     <div class="ep" id="epLabel">EP232</div>
-    <span class="gameicon" id="gameIcon" aria-hidden="true"></span><h1>Phrase Pairs</h1>
+    <h1><span class="gameicon" id="gameIcon" aria-hidden="true"></span>Phrase Pairs</h1>
     <p class="sub" id="sub">Match each phrase to its meaning. Every match speaks the phrase aloud.</p>
   </div>
 
@@ -366,8 +365,7 @@ async function load(){
   DATA=Object.assign({user:d.user}, d.content);
   $('#epLabel').textContent=d.ep||EP.toUpperCase();
   /* the catalogue's glyph and accent, so the page wears the same identity as its tile */
-  if(d.icon){ const gi=$('#gameIcon'); gi.textContent=d.icon;
-    if(d.accent) gi.style.setProperty('--gaccent',d.accent); }
+  if(d.icon) $('#gameIcon').textContent=d.icon;
   acctBar(d.user);
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}
   try{ window.ELC&&d.walkthrough&&ELC.howToPlay(d.walkthrough,(d.name||"")+" \u2014 how to play",(d.walkthroughPoster||("/covers/"+TYPE+".png"))); }catch(e){}
