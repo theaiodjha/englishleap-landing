@@ -173,7 +173,9 @@ html[data-theme="light"] .sentence{color:#241f3a}
 /* The member pages put the theme choice inside the account card (elc-nav.js), so the
    floating control is hidden there rather than moved — see ELCTheme.hide(). It stays
    for signed-out visitors, who have no card. */
-html.elc-nofloat-theme #elc-theme-toggle{display:none}
+/* :not(.in-menu) matters on index.html, which moves the toggle INTO its mobile menu.
+   Without it, a signed-in member on a phone would lose the Appearance row there too. */
+html.elc-nofloat-theme #elc-theme-toggle:not(.in-menu){display:none}
 #elc-theme-toggle.in-menu{position:static;right:auto;bottom:auto;z-index:auto;box-shadow:none}
 /* Only the home page has a menu to host the toggle; everywhere else the floating
    one IS the control, so it must stay reachable on a phone. */

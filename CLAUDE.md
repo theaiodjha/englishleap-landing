@@ -90,7 +90,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   six copies of "Signed in as … [Sign out]" (which ate the header on phones). Pass
   `{name, plan}` where plan is `fluency|transcript|trial|none`; pass `null` for the
   signed-out Member Login link. The card also carries the theme choice and, where the page
-  has a tour (`ELCTour.pageTour()`), a "Take the tour" row. The plan comes from **`planOf(s)` in `lib/session.js`** —
+  has a tour (`ELCTour.pageTour()`), a "Take the tour" row. **`index.html` uses it too** —
+  it loads `elc-nav.js` for the control alone (no `#elcnav` slot, so no header is rendered)
+  and asks **`/api/me`**, which reads the cookie and nothing else; /api/games would ship the
+  whole catalogue to answer a question about one cookie. It is a label, never a gate: every
+  gated route still calls `revalidateSession()`. Signed out there, Member Login points at the
+  Arcade, not back at the home page. The plan comes from **`planOf(s)` in `lib/session.js`** —
   derived from `cents`, not `s.tier`, which is `'fluency'` for ANY paid pledge and so
   labels a $1 Transcript backer a Fluency member. `api/games.js` ships it as `level`;
   `api/list.js`, `api/progress.js` and `api/use-it-live.js` ship it as `plan`.
@@ -153,6 +158,7 @@ use-it-live.html           Use It Live — record & get AI feedback (FLAGGED OFF
 elc-tour.js                guided Oriva tour (home + arcade); auto-runs first visit
 api/auth/{login,callback,signout}.js   Patreon OAuth flow
 api/{games,list,download,unlock}.js    arcade data, archive list/download, code redemption
+api/me.js                  who is signed in + their plan, from the cookie alone (header labels)
 api/progress.js            records game completions + returns practice history / recap / dashboard
 progress.html              the member progress page (KPI row, monthly chart, phrase mastery)
 api/use-it-live.js         Use It Live: usage + audio analysis (Gemini), flag-gated

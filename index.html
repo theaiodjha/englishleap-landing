@@ -154,6 +154,7 @@ body.menu-open{overflow:hidden}
   .nav-cta .btn-ghost{display:none}
   .menu-btn{display:grid}
 }
+@media(max-width:560px){.nav-cta .btn-primary{display:none}}
 @media(min-width:1081px){.mobile-menu{display:none}}
 .m-theme{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
 .m-theme-lbl{font-family:var(--display);font-size:1.2rem;font-weight:500;color:var(--ink)}
@@ -378,10 +379,15 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
     <div class="nav-cta">
       <a href="#watch" class="btn btn-ghost">Watch free</a>
       <a href="#club" class="btn btn-primary">Join the Club</a>
+      <!-- Signed in: the initials avatar + account card. Signed out: Member Login.
+           Rendered by ELCAccount() in elc-nav.js, the same control the member pages use. -->
+      <div class="elcnav-acct" id="acct"></div>
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span></button>
     </div>
   </div>
 </header>
+
+<script src="/elc-nav.js"></script>
 
 <!-- MOBILE MENU -->
 <nav class="mobile-menu" id="mobileMenu">
@@ -732,6 +738,16 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
 const nav=document.getElementById('nav');
 const onScroll=()=>nav.classList.toggle('scrolled',window.scrollY>20);
 onScroll();window.addEventListener('scroll',onScroll,{passive:true});
+
+/* Who is signed in? /api/me reads the cookie only — no catalogue, no Patreon call —
+   because this decides what the header says, not what anyone may open. Signed out (or
+   if the call fails) the visitor gets Member Login, pointed at the Arcade rather than
+   back here: a member signing in wants to land somewhere they can practise. */
+ELCAccount(null,{next:'/practice-arcade.html'});   // paint the signed-out state first, so the slot is never empty
+fetch('/api/me',{credentials:'same-origin'})
+  .then(r=>r.json())
+  .then(d=>ELCAccount(d&&d.name?{name:d.name,plan:d.plan}:null,{next:'/practice-arcade.html'}))
+  .catch(()=>ELCAccount(null,{next:'/practice-arcade.html'}));
 
 // mobile menu toggle
 const menuBtn=document.getElementById('menuBtn');
