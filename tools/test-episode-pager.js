@@ -110,11 +110,15 @@ for (const g of ['phrase-pairs', 'listening-gap', 'sentence-builder', 'story-unl
   const m = src.match(/const BOARD_SEL='([^']+)'/);
   ok(`${g}: names a board`, !!m, m ? m[1] : '');
   if (!m) continue;
-  const id = m[1].replace(/^#/, '');
-  ok(`${g}: ${m[1]} is actually in the page`, new RegExp(`id="${id}"`).test(src));
+  // may be a descendant selector now (#game .card), so check the anchor element exists
+  const id = m[1].replace(/^#/, '').split(/[\s.>]/)[0];
+  ok(`${g}: ${m[1]} resolves to something in the page`, new RegExp(`id="${id}"`).test(src));
   ok(`${g}: re-measures on resize and scroll`,
     /addEventListener\('resize',placeArrows/.test(src)
     && /addEventListener\('scroll',placeArrows/.test(src));
+  // the board is rebuilt each round; without this the arrows sit against a stale box
+  ok(`${g}: re-measures when the layout changes`,
+    /ResizeObserver\(placeArrows\)/.test(src));
 }
 
 console.log(bad ? `\n${bad} FAILED` : '\nall assertions passed');

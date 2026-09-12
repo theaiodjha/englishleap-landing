@@ -344,7 +344,7 @@ function gate(title,msg,cta,how){
 }
 /* The episode arrows. Neighbours WRAP (see api/games.js), so there is no end state to
    render — either both arrows exist or, for a one-episode game, neither does. */
-const BOARD_SEL='#game';   // what the arrows flank
+const BOARD_SEL='#game .card';   // what the arrows flank
 
 function epPager(d){
   const el=$('#epPager'); if(!el) return;
@@ -377,6 +377,9 @@ function placeArrows(){
          n.style.right=narrow?'10px':Math.max(10,Math.round(innerWidth-r.right)-gap-n.offsetWidth)+'px'; }
 }
 addEventListener('resize',placeArrows,{passive:true});
+/* The board is re-rendered each round and changes size, so resize/scroll alone would
+   leave the arrows measured against a box that no longer exists. */
+try{ new ResizeObserver(placeArrows).observe(document.body); }catch(e){}
 addEventListener('scroll',placeArrows,{passive:true});
 
 

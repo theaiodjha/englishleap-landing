@@ -392,6 +392,9 @@ function placeArrows(){
          n.style.right=narrow?'10px':Math.max(10,Math.round(innerWidth-r.right)-gap-n.offsetWidth)+'px'; }
 }
 addEventListener('resize',placeArrows,{passive:true});
+/* The board is re-rendered each round and changes size, so resize/scroll alone would
+   leave the arrows measured against a box that no longer exists. */
+try{ new ResizeObserver(placeArrows).observe(document.body); }catch(e){}
 addEventListener('scroll',placeArrows,{passive:true});
 
 
