@@ -104,21 +104,21 @@
   .gameicon:empty{display:none}
   .gameicon{font-size:.86em/* emoji glyph, not type */;margin-right:.3em;
     line-height:1;vertical-align:baseline}
-  /* Episode arrows, carousel style: fixed beside the content column, wrapping, so there
-     is never a disabled end. Vertically centred, clear of the bottom-right controls. */
-  .eppager a{position:fixed;top:50%;transform:translateY(-50%);z-index:30;
+  /* Episode arrows, carousel style: measured against the BOARD (see placeArrows), so they
+     sit level with its middle and just outside its edge rather than floating at the centre
+     of the window. Fixed, because the board scrolls and they should not drift with it. */
+  .eppager a{position:fixed;z-index:30;
     display:inline-flex;align-items:center;gap:5px;
     font-family:var(--display);font-weight:700;font-size:var(--fs-sm);letter-spacing:.02em;
     text-decoration:none;color:var(--soft);padding:10px 13px;border-radius:var(--r-full);
     background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);
-    transition:color .15s,border-color .15s,transform .15s}
+    transition:color .15s,border-color .15s,transform .15s;
+    transform:translateY(-50%)}
   .eppager a:hover{color:var(--ink);border-color:color-mix(in srgb,var(--teal) 50%,transparent)}
-  .eppager .p{left:max(10px,calc(50vw - 570px))}
-  .eppager .n{right:max(10px,calc(50vw - 570px))}
   .eppager .p:hover{transform:translateY(-50%) translateX(-2px)}
   .eppager .n:hover{transform:translateY(-50%) translateX(2px)}
   .eppager svg{width:14px;height:14px;flex:0 0 14px}
-  /* on a phone they sit on the very edge and shed the label, as carousel arrows do */
+  /* on a phone they go back to the viewport edge and shed the label */
   @media(max-width:720px){
     .eppager a{padding:9px;gap:0}
     .eppager b{display:none}
@@ -273,6 +273,8 @@ function gate(title,msg,cta,how){
 }
 /* The episode arrows. Neighbours WRAP (see api/games.js), so there is no end state to
    render — either both arrows exist or, for a one-episode game, neither does. */
+const BOARD_SEL='#game';   // what the arrows flank
+
 function epPager(d){
   const el=$('#epPager'); if(!el) return;
   if(!d.prev && !d.next) return;
@@ -283,7 +285,29 @@ function epPager(d){
     (dir<0?L:'')+`<b>${esc(epi.ep)}</b>`+(dir>0?R:'')+`</a>`:'';
   el.innerHTML=arrow(d.prev,-1)+arrow(d.next,1);
   el.hidden=false;
+  requestAnimationFrame(placeArrows);   // after layout, so the board has a box
 }
+/* Put each arrow beside the board and level with its middle. Re-run on resize and scroll:
+   two of the games render their board after the fetch, and its height changes as a round
+   is played. Below 720px the board is as wide as the screen, so they return to the edges. */
+function placeArrows(){
+  const el=$('#epPager'); if(!el||el.hidden) return;
+  const board=document.querySelector(BOARD_SEL);
+  const p=el.querySelector('.p'), n=el.querySelector('.n');
+  if(!board||!p&&!n) return;
+  const r=board.getBoundingClientRect();
+  if(!r.height) return;                         // not rendered yet
+  const mid=Math.round(r.top+r.height/2);
+  const top=Math.min(Math.max(mid,70),innerHeight-70)+'px';   // never off the top or bottom
+  const narrow=innerWidth<=720;
+  const gap=12;
+  if(p){ p.style.top=top; p.style.left=narrow?'10px':Math.max(10,Math.round(r.left)-gap-p.offsetWidth)+'px'; }
+  if(n){ n.style.top=top; n.style.left=narrow?'':'';
+         n.style.right=narrow?'10px':Math.max(10,Math.round(innerWidth-r.right)-gap-n.offsetWidth)+'px'; }
+}
+addEventListener('resize',placeArrows,{passive:true});
+addEventListener('scroll',placeArrows,{passive:true});
+
 
 function acctBar(name, plan){
   /* the same avatar + card as every other page, not a bare Sign out button */

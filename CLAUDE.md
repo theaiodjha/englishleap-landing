@@ -190,10 +190,15 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   no extra request. The catalogue is newest-first, so `prev` is the NEWER episode, and the
   neighbours **WRAP** — past the oldest is the newest — so no episode is a dead end and
   nothing is ever rendered disabled. A game with a single episode gets `null` both ways
-  rather than a link back to itself, and shows no arrows at all. They are carousel arrows,
-  `position:fixed` beside the content column at `calc(50vw - 570px)`, falling to the
-  viewport edge on a phone where they also shed their label: anchoring to a board instead
-  would need five different hooks, one per game. Clue Room puts its neighbours in the HUD
+  rather than a link back to itself, and shows no arrows at all. They are carousel arrows measured
+  against the **board**, not the window: each game names its play area in `BOARD_SEL`
+  (`#grid`, `#game`, `#storyCard` — the five differ and there is no honest way to guess),
+  and `placeArrows()` puts each arrow level with that box's middle and just outside its
+  edge. It re-runs on resize AND scroll, because two of the boards are rendered after the
+  fetch and change height as a round is played. Below 720px they return to the viewport
+  edges and shed their label. `tools/test-episode-pager.js` asserts each `BOARD_SEL`
+  actually matches an id in its page — rename one and the arrows silently stop positioning
+  without erroring. Clue Room puts its neighbours in the HUD
   menu, having no room for arrows. **Clue Room is the
   exception**: a 3D scene with a kebab HUD rather than a page with a header, and its menu
   reaches the Arcade, sign-out and — since it has no account card to hold it — **the

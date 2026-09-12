@@ -50,8 +50,12 @@ const page = fs.readFileSync(path.join(ROOT, 'games', 'phrase-pairs', 'index.htm
 const block = [...page.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)]
   .map((x) => x[1]).find((x) => /function epPager/.test(x));
 if (!block) throw new Error('epPager() not found');
-const fn = block.slice(block.indexOf('function epPager'));
-const body = fn.slice(0, fn.indexOf('\n}') + 2);
+// Take BOARD_SEL, epPager() and placeArrows() together: epPager calls placeArrows, so
+// slicing out one of them would leave a function that cannot run.
+const from = block.indexOf('const BOARD_SEL');
+const to = block.indexOf('\n}', block.indexOf('function placeArrows', from)) + 2;
+if (from < 0 || to < 2) throw new Error('pager block not found in the page');
+const body = block.slice(from, to);
 
 // Use the PAGE's own esc(), not a stand-in: an identity function would sail through the
 // escaping assertion while the real page injected markup.
@@ -60,8 +64,13 @@ if (!escSrc) throw new Error('esc() not found in the page');
 const pageEsc = new Function(escSrc[0] + '\nreturn esc;')();
 
 function render(d) {
-  const el = { innerHTML: '', hidden: true };
-  new Function('$', 'esc', body + '\nreturn epPager;')(() => el, pageEsc)(d);
+  const el = { innerHTML: '', hidden: true, querySelector: () => null };
+  // epPager schedules placeArrows(); give the stub what that needs so the test exercises
+  // the real function rather than a trimmed copy of it
+  new Function('$', 'esc', 'requestAnimationFrame', 'document', 'addEventListener',
+    'innerWidth', 'innerHeight', body + '\nreturn epPager;')(
+    () => el, pageEsc, (f) => f(), { querySelector: () => null }, () => {}, 1200, 800,
+  )(d);
   return el;
 }
 
@@ -92,6 +101,21 @@ ok('a single-episode game shows no arrows', el.innerHTML === '' && el.hidden ===
 // titles are escaped, since they come from the catalogue
 el = render({ prev: { id: 'x', ep: 'EP1', title: '<img src=x>' }, next: null });
 ok('a title is escaped, not injected', !/<img/.test(el.innerHTML));
+
+// ---------------------------------------------------------------- the anchor exists
+// Each game names the element the arrows flank. If that id is renamed the arrows silently
+// stop positioning — they stay wherever CSS left them and nothing errors.
+for (const g of ['phrase-pairs', 'listening-gap', 'sentence-builder', 'story-unlock']) {
+  const src = fs.readFileSync(path.join(ROOT, 'games', g, 'index.html'), 'utf8');
+  const m = src.match(/const BOARD_SEL='([^']+)'/);
+  ok(`${g}: names a board`, !!m, m ? m[1] : '');
+  if (!m) continue;
+  const id = m[1].replace(/^#/, '');
+  ok(`${g}: ${m[1]} is actually in the page`, new RegExp(`id="${id}"`).test(src));
+  ok(`${g}: re-measures on resize and scroll`,
+    /addEventListener\('resize',placeArrows/.test(src)
+    && /addEventListener\('scroll',placeArrows/.test(src));
+}
 
 console.log(bad ? `\n${bad} FAILED` : '\nall assertions passed');
 process.exit(bad ? 1 : 0);
