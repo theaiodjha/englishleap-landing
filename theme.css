@@ -459,6 +459,12 @@ html[data-theme="light"] .pill-eyebrow .dot{
 }
 
 /* account card: paper, not glass — and the plan line needs the light teal ink */
+/* The progress week strip. A filled square must be distinguishable from an empty one at
+   3:1 as a non-text mark: --teal (#1fc4b6) manages only 2.12:1 against the light card, so
+   the fill steps down to #0f9b90 (3.34:1). Same dark-ground trap as the mastery dots. */
+html[data-theme="light"] .wstrip i.on{background:#0f9b90 !important}
+html[data-theme="light"] .wstrip i{border-color:rgba(60,50,110,.20) !important}
+
 /* Progress mastery dots. --gold is a dark-ground colour: at 15px on a white card the
    "started" ring and the "not yet" ring were both pale grey-yellow and read as the same
    state. These are non-text marks, so 3:1 is the bar — #9a6a00 clears it, and the line

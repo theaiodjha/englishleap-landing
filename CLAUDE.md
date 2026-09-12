@@ -198,6 +198,7 @@ tools/audit.py             cross-renderer/consistency audit (pre-push hook)
 tools/{seed-arcade,issue-code}.js      seed arcade to KV; issue member codes
 tools/test-popular.mjs     node tools/test-popular.mjs — asserts the popularity ranking rules
 tools/test-stats.mjs       node tools/test-stats.mjs — asserts the public stats floor + rounding
+tools/test-progress-kpi.js node tools/test-progress-kpi.js — asserts where each KPI tile leads
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
 games/*                    5 game types (clue-room, phrase-pairs, listening-gap,
@@ -380,6 +381,12 @@ The chart only renders once there are 2+ months of data; below that it says so.
 member never reshuffles the other side. **Each card folds** from its heading: the state is
 remembered per device in `elc-progress-shut`, and the body animates on `max-height`, which
 is released to `none` once open or the "See the numbers" table would be clipped inside it.
+**The KPI tiles lead somewhere.** Minutes and phrases open+scroll to the card that already
+tells their story (no second copy of it); recordings and streak open a drawer under the row,
+drawn from `recent` and `weeks` in the dashboard payload — `getSessions()` was already being
+called and discarded, so a click costs **no extra request**. A tile whose target does not
+exist for that member renders as a plain `<div>`, not a button: an affordance that opens an
+empty card is worse than none. `node tools/test-progress-kpi.js` guards exactly that.
 The KPI row and "What next" do not fold — one is the headline, the other is a single button.
 The KPI row is a tile per stat: an emoji chip carrying a pillar colour, and the **numeral in
 an ink token** — a coloured number loses contrast on light and reads as a status. A zero

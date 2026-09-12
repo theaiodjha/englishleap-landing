@@ -83,6 +83,32 @@
     letter-spacing:.1em;text-transform:uppercase;color:var(--soft2)}
   .kpi .k.zero .ic{opacity:.42}
   .kpi .k.zero b{color:var(--soft2)}
+  /* only the tiles that lead somewhere look like they do */
+  .kpi button.k{font:inherit;text-align:left;border:1px solid transparent;border-radius:var(--r-md);
+    background:transparent;cursor:pointer;padding:var(--sp-2);margin:calc(var(--sp-2) * -1);
+    transition:background .15s,border-color .15s,transform .15s}
+  .kpi button.k:hover{background:var(--glass2);border-color:var(--line);transform:translateY(-1px)}
+  .kpi button.k[aria-expanded="true"]{background:var(--glass2);border-color:var(--line)}
+  .kpi button.k .ic{transition:transform .15s}
+  .kpi button.k:hover .ic{transform:scale(1.06)}
+
+  /* the drawer under the KPI row */
+  .kdraw{overflow:hidden;transition:max-height .34s cubic-bezier(.22,1,.36,1)}
+  .kdraw-in{padding-top:var(--sp-5);margin-top:var(--sp-5);border-top:1px solid var(--line)}
+  .slist{display:flex;flex-direction:column;gap:var(--sp-3)}
+  .srow{display:flex;align-items:baseline;gap:var(--sp-3);flex-wrap:wrap;font-size:var(--fs-sm)}
+  .srow .when{color:var(--soft2);flex:0 0 84px;font-variant-numeric:tabular-nums}
+  .srow .what{color:var(--ink);font-family:var(--display);font-weight:600;flex:1 1 200px;min-width:0}
+  .srow .mins{color:var(--soft);font-variant-numeric:tabular-nums}
+  .srow .ws{display:flex;flex-wrap:wrap;gap:5px;flex:1 1 100%}
+  .srow .ws i{font-style:normal;font-size:var(--fs-xs);color:var(--soft);
+    background:var(--glass2);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  .wstrip{display:flex;gap:7px;flex-wrap:wrap}
+  .wstrip i{width:26px;height:26px;border-radius:8px;display:block;background:var(--glass2);
+    border:1px solid var(--line)}
+  .wstrip i.on{background:var(--teal);border-color:transparent}
+  .wstrip i.cur{box-shadow:0 0 0 2px var(--purple)}
+  .kdraw .note{color:var(--soft2);font-size:var(--fs-sm);margin:var(--sp-3) 0 0}
 
   /* entrance, played once after the first render: cards rise in with a small stagger,
      chart columns grow from the baseline, game tracks fill. A fold never replays it. */
@@ -279,6 +305,60 @@ function animateIn(){
   });
 }
 
+/* What each drawer shows. Built from the dashboard payload that is already in hand —
+   clicking a number must not cost another request. */
+function drawerHTML(d,which){
+  if(which==='recent'){
+    const fmt=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    return `<div class="slist">${(d.recent||[]).map(r=>`<div class="srow">
+        <span class="when">${esc(fmt(r.t))}</span>
+        <span class="what">${r.n?`EP${r.n} &middot; `:''}${esc(r.title||'Practice')}</span>
+        <span class="mins">${r.minutes} min${r.wpm?` &middot; ${r.wpm} wpm`:''}</span>
+        ${r.words.length?`<span class="ws">${r.words.map(w=>`<i>${esc(w)}</i>`).join('')}</span>`:''}
+      </div>`).join('')}</div>
+      <p class="note">Your last ${(d.recent||[]).length} recordings. We keep the details, never the audio.</p>`;
+  }
+  // the streak as a shape: eight weeks, oldest left, this week ringed
+  return `<div class="wstrip" role="img" aria-label="Weeks practised in the last 8 weeks">
+      ${(d.weeks||[]).map(w=>`<i class="${w.active?'on':''}${w.current?' cur':''}" title="${esc(w.week)}${w.active?' — practised':''}"></i>`).join('')}
+    </div>
+    <p class="note">The last 8 weeks. A week counts once you practise in it &mdash; missing one is fine.</p>`;
+}
+
+/* Tiles that point at a card open it and scroll to it; tiles that own a drawer toggle it.
+   Only one drawer is open at a time, and re-clicking the same tile closes it. */
+function wireKpi(d){
+  const draw=$('#kdraw'), inner=$('#kdrawIn');
+  let open=null;
+  const shut=()=>{
+    draw.style.maxHeight=draw.scrollHeight+'px';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ draw.style.maxHeight='0px'; }));
+    document.querySelectorAll('.kpi button.k[aria-expanded]').forEach(b=>b.setAttribute('aria-expanded','false'));
+    open=null;
+  };
+  document.querySelectorAll('.kpi button.k').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const which=btn.dataset.go, cardId=btn.dataset.card;
+      if(cardId){
+        // open the card if the member had folded it away, then bring it into view
+        const body=document.getElementById(cardId);
+        const cardEl=body&&body.closest('.card');
+        if(cardEl&&cardEl.classList.contains('shut')){
+          const head=cardEl.querySelector('[data-fold]'); if(head) head.click();
+        }
+        if(cardEl) cardEl.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});
+        return;
+      }
+      if(open===which){ shut(); return; }
+      inner.innerHTML=drawerHTML(d,which);
+      draw.style.maxHeight=draw.scrollHeight+'px';
+      document.querySelectorAll('.kpi button.k[aria-expanded]').forEach(b=>
+        b.setAttribute('aria-expanded', b===btn?'true':'false'));
+      open=which;
+    });
+  });
+}
+
 function wireFolds(){
   document.querySelectorAll('.card .cardbody').forEach(b=>{
     sync(b,!b.parentElement.classList.contains('shut'),false);
@@ -312,16 +392,32 @@ function render(d){
     return;
   }
 
-  /* Colour maps to the pillar a stat belongs to, never to good/bad. */
+  /* Colour maps to the pillar a stat belongs to, never to good/bad.
+     `go` is where the tile leads. Two point at cards further down that already tell the
+     story; two open a drawer. A tile whose target is not on the page for this member
+     gets no `go` at all and renders as plain text — no affordance, nothing to click. */
+  const hasChart=d.monthsWithData>1, hasPhrases=d.mastery.length>0;
+  const hasRecent=(d.recent||[]).length>0, hasWeeks=(d.weeks||[]).some(w=>w.active);
   const kpi=[
-    {v:t.minutes,      l:'minutes practised', e:'&#9201;&#65039;',            c:'var(--teal)'},
-    {v:t.sessions,     l:'recordings',        e:'&#127897;&#65039;',          c:'var(--coral)'},
-    {v:t.phrasesOwned, l:'phrases owned',     e:'&#128142;',                  c:'var(--purple)'},
-    {v:d.streak,       l:'week streak',       e:'&#128293;',                  c:'var(--gold)'}
-  ].map(k=>`<div class="k${k.v?'':' zero'}" style="--kc:${k.c}">
-      <span class="ic" aria-hidden="true">${k.e}</span>
-      <span><b data-to="${k.v}">${k.v}</b><span class="lbl">${esc(k.l)}</span></span>
-    </div>`).join('');
+    {v:t.minutes,      l:'minutes practised', e:'&#9201;&#65039;',            c:'var(--teal)',
+     go: hasChart?{card:'cb-speaking'}:null},
+    {v:t.sessions,     l:'recordings',        e:'&#127897;&#65039;',          c:'var(--coral)',
+     go: hasRecent?{drawer:'recent'}:null},
+    {v:t.phrasesOwned, l:'phrases owned',     e:'&#128142;',                  c:'var(--purple)',
+     go: hasPhrases?{card:'cb-phrases'}:null},
+    {v:d.streak,       l:'week streak',       e:'&#128293;',                  c:'var(--gold)',
+     go: hasWeeks?{drawer:'weeks'}:null}
+  ].map(k=>{
+    const inner=`<span class="ic" aria-hidden="true">${k.e}</span>` +
+      `<span><b data-to="${k.v}">${k.v}</b><span class="lbl">${esc(k.l)}</span></span>`;
+    const cls=`k${k.v?'':' zero'}`;
+    if(!k.go) return `<div class="${cls}" style="--kc:${k.c}">${inner}</div>`;
+    const aria=k.go.drawer
+      ? ` aria-expanded="false" aria-controls="kdraw"`
+      : ` aria-controls="${k.go.card}"`;
+    return `<button type="button" class="${cls}" style="--kc:${k.c}" data-go="${k.go.drawer||''}" `+
+           `data-card="${k.go.card||''}"${aria}>${inner}</button>`;
+  }).join('');
 
   const eps=d.mastery.map(m=>`<div class="ep">
       <span class="who"><b>EP${m.n} &middot; ${esc(m.title)}</b>
@@ -341,7 +437,9 @@ function render(d){
 
   const n=d.next;
   $('#body').innerHTML=`<div class="pgrid">
-    ${card({key:'kpi',fold:false,wide:true,body:`<div class="kpi">${kpi}</div>`})}
+    ${card({key:'kpi',fold:false,wide:true,
+      body:`<div class="kpi">${kpi}</div>
+        <div class="kdraw" id="kdraw" style="max-height:0"><div class="kdraw-in" id="kdrawIn"></div></div>`})}
 
     <div class="pcol">
     ${card({key:'speaking',title:'Speaking practice',
@@ -371,6 +469,7 @@ function render(d){
     </div>
   </div>`;
   wireFolds();
+  wireKpi(d);
   animateIn();
 }
 
