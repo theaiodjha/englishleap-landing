@@ -192,6 +192,8 @@ lib/quiet-deprecations.js  silences DEP0169 (Vercel adapter's url.parse); import
 tools/audit.py             cross-renderer/consistency audit (pre-push hook)
 tools/{seed-arcade,issue-code}.js      seed arcade to KV; issue member codes
 tools/test-popular.mjs     node tools/test-popular.mjs — asserts the popularity ranking rules
+tools/test-stats.mjs       node tools/test-stats.mjs — asserts the public stats floor + rounding
+api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
 games/*                    5 game types (clue-room, phrase-pairs, listening-gap,
                            sentence-builder, story-unlock)
@@ -429,6 +431,39 @@ Facts go to every Fluency member; **interpretation is the upgrade** (`canDeep`, 
 the 600c+ allowance). The rubric never surfaces as a number — the higher tier reads it
 back as a sentence. That is also where the cost boundary falls: facts are free, the
 coaching layer is the model call.
+
+## Site metrics
+
+**Traffic is Vercel Web Analytics, never KV.** `index.html` carries
+`<script defer src="/_vercel/insights/script.js">`; it needs Analytics switched on in the
+Vercel dashboard. Counting page loads in KV would burn the 500K/month free tier and count
+bots as people, and "unique visitors" would need a cookie we do not want to set. Do not
+build a visit counter.
+
+**KV owns the member half**, which no analytics tool can know:
+
+```
+elc:stats           hash  games -> completions, uilsec -> seconds analysed
+elc:members         set   every uid ever seen  (bounded by membership, not traffic)
+elc:active:{week}   set   uids seen this ISO week, EXPIREd after POP_WEEKS
+```
+
+Sets, not counters: one member opening the Arcade twice is one member. `touchMember()` is
+called from **`api/games.js`** — the hub every member session loads — and NOT from the auth
+callback: the cookie lasts 30 days, so counting sign-ins would badly under-count who is
+still here. It is fire-and-forget; a statistic must never delay or fail the request.
+
+**`/api/stats` is public and edge-cached** (`s-maxage=600, stale-while-revalidate=3600`),
+so a thousand visitors cost ONE KV read — without that, social proof would be the most
+expensive thing on the site. It publishes nothing at all below `MIN_MEMBERS` (25), and
+rounds every figure **down** (412 -> "400+"): a small true number does more harm than no
+number, and an exact one invites arithmetic. The home page strip (`#clubStats`, in the
+**Club** section — those are club figures, not the channel's 1.3M) stays `hidden` unless
+the response says `show`. No skeleton, no zeros.
+
+`node tools/test-stats.mjs` asserts the floor, the rounding direction, the omissions and
+the KV-down path. Note it sets `KV_REST_API_*` **before** a dynamic import: `lib/history.js`
+reads them at module load and ESM hoists static imports above every statement.
 
 ## Open decisions
 

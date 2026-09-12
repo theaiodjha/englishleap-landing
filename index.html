@@ -173,6 +173,12 @@ body.menu-open{overflow:hidden}
 @keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
 
 /* ---------- Stats ---------- */
+.clubstats{display:flex;justify-content:center;flex-wrap:wrap;gap:10px 30px;margin:26px auto 0}
+.clubstats i{font-style:normal;display:inline-flex;align-items:baseline;gap:7px;
+  font-size:.92rem;color:var(--muted)}
+.clubstats b{font-family:var(--display);font-weight:600;font-size:1.28rem;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+@media(max-width:560px){.clubstats{gap:8px 20px}.clubstats i{font-size:.86rem}}
 .stats{margin:30px auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
   border:1px solid var(--line);border-radius:24px;overflow:hidden;max-width:900px}
 .stat{background:rgba(8,8,18,.6);padding:38px 22px;text-align:center;backdrop-filter:blur(10px)}
@@ -387,6 +393,10 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
   </div>
 </header>
 
+<!-- Vercel Web Analytics: visitors, referrers, devices, bot filtering. Traffic is
+     measured here, never in KV — a write per page load would burn the free tier and
+     count bots as people. Needs Analytics enabled in the Vercel dashboard. -->
+<script defer src="/_vercel/insights/script.js"></script>
 <script src="/elc-nav.js"></script>
 
 <!-- MOBILE MENU -->
@@ -554,6 +564,9 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
         <h2>The <span class="grad-gold">English Leap Club</span></h2>
         <p>This is where watching turns into practising. Keep the English from every episode — read it, hear it, practise it, and use it. A practice community, not a replacement for formal English education.</p>
         <div class="club-tagline"><b class="r">Read it.</b> <b class="h">Hear it.</b> <b class="p">Practise it.</b> <b class="u">Use it.</b></div>
+        <!-- Live club numbers. Stays hidden until /api/stats says there are enough to
+             be worth showing; see MIN_MEMBERS there. -->
+        <div class="clubstats" id="clubStats" hidden></div>
       </div>
 
       <div class="pack-label reveal">Inside every weekly episode pack</div>
@@ -748,6 +761,20 @@ fetch('/api/me',{credentials:'same-origin'})
   .then(r=>r.json())
   .then(d=>ELCAccount(d&&d.name?{name:d.name,plan:d.plan}:null,{next:'/practice-arcade.html'}))
   .catch(()=>ELCAccount(null,{next:'/practice-arcade.html'}));
+
+/* Club numbers. One cached edge response serves every visitor (see api/stats.js), so
+   this costs nothing per view. Any failure, or `show:false`, leaves the strip hidden —
+   the section is written to read perfectly well without it. */
+fetch('/api/stats').then(r=>r.json()).then(d=>{
+  if(!d||!d.show) return;
+  const fmt=n=>n.toLocaleString('en-GB');
+  const bits=[['members practising',d.members]];
+  if(d.games)   bits.push(['games finished',d.games]);
+  if(d.minutes) bits.push(['minutes spoken',d.minutes]);
+  const el=document.getElementById('clubStats');
+  el.innerHTML=bits.map(([label,n])=>`<i><b>${fmt(n)}+</b>${label}</i>`).join('');
+  el.hidden=false;
+}).catch(()=>{});
 
 // mobile menu toggle
 const menuBtn=document.getElementById('menuBtn');

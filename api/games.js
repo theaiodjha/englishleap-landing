@@ -5,6 +5,7 @@ import "../lib/quiet-deprecations.js";
 // Reuses the exact membership logic from lib/session.js (same live re-check as
 // /api/list), so access tracks paying status identically to the archive.
 import { readSession, revalidateSession } from "../lib/session.js";
+import { touchMember } from "../lib/history.js";
 import { getArcade } from "../lib/arcade-store.js";
 import { fullTitleFor } from "../lib/episode-titles.js";
 
@@ -12,6 +13,11 @@ export default async function handler(req, res) {
   // Logged-in members get a live re-check; anonymous visitors are still allowed a taster.
   let s = readSession(req);
   if (s) s = await revalidateSession(res, s); // becomes null if membership went inactive
+
+  // Site totals for the home page strip. Fire-and-forget: a statistic must never delay
+  // or fail the request that hands someone their games. SADD is idempotent, so doing it
+  // on every load is correct rather than wasteful.
+  if (s && s.uid) touchMember(s.uid).catch(() => {});
 
   const ARCADE = await getArcade(); // server-side store (KV) with static fallback
 
