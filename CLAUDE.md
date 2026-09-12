@@ -200,7 +200,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   tiles, `arcade-type.html`, the progress "Games finished" rows, and the game's own page
   (`#gameIcon`, inline at the START of its h1 — the same `icon + space + name` the Arcade shelf prints). Do not hardcode a glyph on a page — Sentence Builder ended up
   with two identities that way, one of them on a "COMING SOON" card for a game that had
-  already shipped. **When a game ships, remove its card from "More on the way".**
+  already shipped. **When a game ships, remove its card from "More on the way" and move
+  its emoji into the catalogue** — those cards hardcode a glyph because an unbuilt game
+  has no catalogue entry to hold one (`&#127917;` for Role-Play Roulette, `&#9889;` for
+  Fast Word Challenge, in `practice-arcade.html`). Editing an icon in `lib/arcade-data.js`
+  is NOT enough on its own: `getArcade()` reads KV first and falls back to the file, so
+  re-run `node tools/seed-arcade.js` or production keeps the old glyph.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
   (celebrate, exercise, happy, point, read, think). If a PNG is absent, hide it gracefully.
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).
