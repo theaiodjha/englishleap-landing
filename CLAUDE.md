@@ -326,6 +326,11 @@ member never reshuffles the other side. **Each card folds** from its heading: th
 remembered per device in `elc-progress-shut`, and the body animates on `max-height`, which
 is released to `none` once open or the "See the numbers" table would be clipped inside it.
 The KPI row and "What next" do not fold — one is the headline, the other is a single button.
+The KPI row is a tile per stat: an emoji chip carrying a pillar colour, and the **numeral in
+an ink token** — a coloured number loses contrast on light and reads as a status. A zero
+dims instead of shouting. Entrance animation (cards stagger in, chart columns grow from the
+baseline, game tracks fill, KPI numbers count up) runs once via `animateIn()` and is off
+under `prefers-reduced-motion`. A game track floors at `max(6px, N%)` so 1/30 is visible.
 
 ### The rubric (what makes growth chartable)
 

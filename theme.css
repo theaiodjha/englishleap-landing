@@ -437,6 +437,13 @@ html[data-theme="light"] .elcnav-acct a{background:rgba(255,255,255,.72) !import
   border-color:rgba(60,50,110,.20) !important;color:#3a3560 !important}
 
 /* account card: paper, not glass — and the plan line needs the light teal ink */
+/* Progress mastery dots. --gold is a dark-ground colour: at 15px on a white card the
+   "started" ring and the "not yet" ring were both pale grey-yellow and read as the same
+   state. These are non-text marks, so 3:1 is the bar — #9a6a00 clears it, and the line
+   ring gets enough ink to be seen as an outline rather than a smudge. */
+html[data-theme="light"] .dots i.started{box-shadow:inset 0 0 0 2px #9a6a00 !important}
+html[data-theme="light"] .dots i.started::after{background:#9a6a00 !important}
+html[data-theme="light"] .dots i.untouched{box-shadow:inset 0 0 0 1.5px rgba(60,50,110,.34) !important}
 html[data-theme="light"] .elcnav-card{
   background:rgba(255,255,255,.97) !important; border-color:rgba(60,50,110,.16) !important;
   box-shadow:0 24px 50px -24px rgba(80,60,150,.55) !important;

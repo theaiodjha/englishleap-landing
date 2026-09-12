@@ -65,15 +65,40 @@
   .card.shut .cardbody{opacity:0}
   @media (prefers-reduced-motion:reduce){.cardbody,.cardhead .chev{transition:none}}
 
-  /* KPI row — values wear ink, never a brand colour */
-  .kpi{display:flex;flex-wrap:wrap;gap:var(--sp-4) var(--sp-8)}
-  .kpi b{display:block;font-family:var(--display);font-weight:700;font-size:30px;line-height:1.05;color:var(--ink)}
-  .kpi span{display:block;margin-top:5px;font-family:var(--display);font-weight:700;font-size:var(--fs-xs);
+  /* KPI row — one tile per stat. The NUMBER stays in an ink token: a coloured numeral
+     loses contrast on light AND starts to read as a status ("is the red one bad?"). The
+     hue lives in the emoji chip beside it, which is a fill and can carry a pillar colour
+     safely on either ground. A zero is dimmed rather than shouted — four stats at full
+     weight when three are 1 and one is 0 tells the member nothing. */
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-5) var(--sp-4)}
+  @media(max-width:760px){.kpi{grid-template-columns:repeat(2,1fr)}}
+  .kpi .k{display:flex;align-items:center;gap:var(--sp-3);min-width:0}
+  .kpi .ic{width:46px;height:46px;flex:0 0 46px;border-radius:15px;display:grid;place-items:center;
+    font-size:22px/* emoji glyph, not type */;line-height:1;
+    background:color-mix(in srgb,var(--kc) 18%,transparent);
+    border:1px solid color-mix(in srgb,var(--kc) 38%,transparent)}
+  .kpi b{display:block;font-family:var(--display);font-weight:700;font-size:30px;line-height:1.05;
+    color:var(--ink);font-variant-numeric:tabular-nums}
+  .kpi .lbl{display:block;margin-top:3px;font-family:var(--display);font-weight:700;font-size:var(--fs-xs);
     letter-spacing:.1em;text-transform:uppercase;color:var(--soft2)}
+  .kpi .k.zero .ic{opacity:.42}
+  .kpi .k.zero b{color:var(--soft2)}
+
+  /* entrance, played once after the first render: cards rise in with a small stagger,
+     chart columns grow from the baseline, game tracks fill. A fold never replays it. */
+  @keyframes cardin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  @keyframes barin{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+  .anim .card{animation:cardin .5s cubic-bezier(.22,1,.36,1) backwards}
+  .anim .chart .bar{animation:barin .7s cubic-bezier(.22,1,.36,1) .15s backwards}
+  .gt .track>i{transition:width 1s cubic-bezier(.22,1,.36,1)}
+  @media (prefers-reduced-motion:reduce){
+    .anim .card,.anim .chart .bar{animation:none}
+    .gt .track>i{transition:none}
+  }
 
   /* column chart */
   .chart{width:100%;height:190px;display:block;overflow:visible}
-  .chart .bar{fill:var(--teal)}
+  .chart .bar{fill:var(--teal);transform-origin:50% 100%;transform-box:fill-box}
   .chart .bar.dim{fill:var(--teal);opacity:.42}
   .chart .lbl{fill:var(--soft2);font-family:var(--body);font-size:11px;text-anchor:middle}
   .chart .val{fill:var(--ink);font-family:var(--display);font-weight:700;font-size:12px;text-anchor:middle}
@@ -226,6 +251,34 @@ function sync(body,open,animate){
   }
 }
 
+const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* Count a KPI up from zero. Eased, so it settles rather than stopping dead. Skipped for
+   a zero, which has nothing to count, and for anyone who asked for less motion. */
+function countUp(el){
+  const to=Number(el.dataset.to)||0;
+  if(REDUCED||to===0){ el.textContent=to; return; }
+  const dur=800, t0=performance.now();
+  el.textContent='0';
+  requestAnimationFrame(function step(t){
+    const p=Math.min(1,(t-t0)/dur);
+    el.textContent=Math.round(to*(1-Math.pow(1-p,3)));
+    if(p<1) requestAnimationFrame(step);
+  });
+}
+
+/* Played once after the first render. The stagger is capped so the last card still
+   arrives promptly for a member who has every one of them. */
+function animateIn(){
+  const body=$('#body');
+  body.classList.add('anim');
+  body.querySelectorAll('.card').forEach((c,i)=>{ c.style.animationDelay=Math.min(i*70,350)+'ms'; });
+  body.querySelectorAll('.kpi b[data-to]').forEach(countUp);
+  requestAnimationFrame(()=>{
+    body.querySelectorAll('.gt .track>i[data-w]').forEach(i=>{ i.style.width=i.dataset.w; });
+  });
+}
+
 function wireFolds(){
   document.querySelectorAll('.card .cardbody').forEach(b=>{
     sync(b,!b.parentElement.classList.contains('shut'),false);
@@ -259,9 +312,16 @@ function render(d){
     return;
   }
 
-  const kpi=[[t.minutes,'minutes practised'],[t.sessions,'recordings'],
-             [t.phrasesOwned,'phrases owned'],[d.streak,d.streak===1?'week streak':'week streak']]
-    .map(k=>`<div><b>${k[0]}</b><span>${esc(k[1])}</span></div>`).join('');
+  /* Colour maps to the pillar a stat belongs to, never to good/bad. */
+  const kpi=[
+    {v:t.minutes,      l:'minutes practised', e:'&#9201;&#65039;',            c:'var(--teal)'},
+    {v:t.sessions,     l:'recordings',        e:'&#127897;&#65039;',          c:'var(--coral)'},
+    {v:t.phrasesOwned, l:'phrases owned',     e:'&#128142;',                  c:'var(--purple)'},
+    {v:d.streak,       l:'week streak',       e:'&#128293;',                  c:'var(--gold)'}
+  ].map(k=>`<div class="k${k.v?'':' zero'}" style="--kc:${k.c}">
+      <span class="ic" aria-hidden="true">${k.e}</span>
+      <span><b data-to="${k.v}">${k.v}</b><span class="lbl">${esc(k.l)}</span></span>
+    </div>`).join('');
 
   const eps=d.mastery.map(m=>`<div class="ep">
       <span class="who"><b>EP${m.n} &middot; ${esc(m.title)}</b>
@@ -272,8 +332,10 @@ function render(d){
 
   const games=(d.types||[]).map(ty=>{
     const done=(d.byType||{})[ty.type]||0, total=d.episodesTotal||1;
+    // max(6px, ...) so one episode out of thirty is a bar and not an invisible sliver
+    const pct=done?`max(6px, ${Math.round(done/total*100)}%)`:'0px';
     return `<div class="gt"><span class="nm">${esc(ty.name)}</span>
-      <span class="track"><i style="width:${Math.round(done/total*100)}%"></i></span>
+      <span class="track"><i data-w="${pct}" style="width:0"></i></span>
       <span class="num">${done}/${total}</span></div>`;
   }).join('');
 
@@ -309,6 +371,7 @@ function render(d){
     </div>
   </div>`;
   wireFolds();
+  animateIn();
 }
 
 
