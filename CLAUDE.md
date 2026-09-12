@@ -194,10 +194,18 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **`ELCAccount` adds `.elcnav-acct` to the slot itself.** The card is absolutely
   positioned against that class; a slot without it anchors to whatever ancestor happens
   to be positioned, and the card hangs off the right edge of the screen. The game bars
-  did exactly that with a bare `<div id="acct">`.
+  did exactly that with a bare `<div id="acct">`. For the same reason `bootAccount()`
+  calls **`setFloating()` before it touches the DOM**: whether the floating controls belong
+  on a page does not depend on markup, and ELCAccount returns early when `#acct` has not
+  been parsed yet — the case on the game pages, where the script sits above the bar. That
+  early return was what made the toggle paint and then vanish there.
   Removing each game's `.out` pill rule was part of
   this — the card's Sign out ROW is also `.out`, so leaving it would have painted the old
-  pill around it, the same collision as `.ep.go` and `.elcnav-acct a`. **No game uses
+  pill around it, the same collision as `.ep.go` and `.elcnav-acct a`.
+  The four standard games use the shared `.elcback` chevron ("All episodes" — their parent
+  is that game's episode list); **Clue Room keeps the pill**, because its back sits over a
+  3D scene where a bare text link has nothing to hold contrast against. `tools/audit.py`
+  accepts either form. **No game uses
   `history.back()`**: the href already names the parent, and history sends a member arriving
   from a shared link somewhere unrelated. The two pages a level below the Arcade (`arcade-browse.html`,
   `arcade-type.html`) carry a `.elcback` link naming their PARENT ("Practice Arcade",
@@ -292,6 +300,7 @@ tools/test-stats.mjs       node tools/test-stats.mjs — asserts the public stat
 tools/test-progress-kpi.js node tools/test-progress-kpi.js — asserts where each KPI tile leads
 tools/test-progress-drawer.js  node … — drives the KPI drawer open/close state machine
 tools/test-notice.js       node tools/test-notice.js — notice dismissal + quota thresholds
+tools/test-back-link.js    node tools/test-back-link.js — every arrival route for the back link
 tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
