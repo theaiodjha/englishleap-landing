@@ -70,6 +70,14 @@ export default async function handler(req, res) {
     const next = nextAction({ episodes, counts: agg.words, games, sessions, types });
     return res.json({
       ok: true, name: s.name, plan: planOf(s), next,
+      access: s.access || null,          // 'trial' until the first Patreon payment lands
+      // most recent practice of ANY kind, for the "it has been a while" nudge. Both of
+      // these were already fetched for nextAction(); nothing extra is read.
+      lastAt: Math.max(
+        0,
+        ...sessions.map((x) => Number(x && x.t) || 0),
+        ...Object.values(games || {}).map((v) => Number(v) || 0),
+      ) || null,
       // enough context for the card to show progress without a second round trip
       current: episodes[0] ? {
         id: episodes[0].id, n: episodes[0].n, title: episodes[0].title,

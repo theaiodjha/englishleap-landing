@@ -15,6 +15,8 @@
 (function () {
   // Use It Live is still hidden behind UIL_ENABLED — flip this the day it launches.
   var SHOW_UIL = false;
+  // published so a page can announce the launch from the same single switch
+  window.ELC_SHOW_UIL = SHOW_UIL;
 
   var ICON = {
     arcade: '<path d="M7 12h4M9 10v4"/><circle cx="15.5" cy="11" r="1"/><circle cx="17.5" cy="13.5" r="1"/>' +

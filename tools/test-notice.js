@@ -122,5 +122,58 @@ ok('...and not before', q.calls.length === 0);
 q = runQuota({ limitMin: 0, remainingMin: 0, usedMin: 0 });
 ok('no limit configured: say nothing', q.el.innerHTML === '' && q.calls.length === 0);
 
+// ---------------------------------------------------------------- arcadeNotices
+// Exactly one notice, chosen by priority. Three strips above the games is a wall.
+const ARC = fs.readFileSync(path.join(ROOT, 'practice-arcade.html'), 'utf8');
+const arcBlock = [...ARC.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)]
+  .map((x) => x[1]).find((x) => /function arcadeNotices/.test(x));
+if (!arcBlock) throw new Error('arcadeNotices() not found');
+const arcFn = arcBlock.slice(arcBlock.indexOf('function arcadeNotices'));
+const arcBody = arcFn.slice(0, arcFn.indexOf('\n}') + 2);
+
+function runArcade(d, { launched = false } = {}) {
+  const calls = [];
+  const el = { innerHTML: '' };
+  const fn = new Function('document', 'ELCNotice', 'window', 'Date',
+    arcBody + '\nreturn arcadeNotices;')(
+    { getElementById: () => el },
+    (target, o) => { calls.push(o); return true; },
+    { ELC_SHOW_UIL: launched },
+    Date,
+  );
+  fn(d);
+  return calls;
+}
+
+const DAY = 86400000;
+const fresh = { access: 'paid', lastAt: Date.now() - 2 * DAY };
+const away = { access: 'paid', lastAt: Date.now() - 30 * DAY };
+
+ok('a recent, paid member is told nothing', runArcade(fresh).length === 0);
+
+let c = runArcade(fresh, { launched: true });
+ok('the launch is announced once live', c.length === 1 && c[0].key === 'uil-launch');
+ok('...with no period in the key, because it is genuinely once', !/\d{4}/.test(c[0].key));
+
+c = runArcade({ access: 'trial', lastAt: Date.now() - 2 * DAY });
+ok('a trial member is told what happens next', c.length === 1 && c[0].key === 'trial-open');
+
+c = runArcade(away);
+ok('three weeks away earns a nudge', c.length === 1 && /^away-/.test(c[0].key));
+ok('...keyed to the week, so it can return if they stay away',
+  /^away-\d{4}-\d{1,2}$/.test(c[0].key), c[0] && c[0].key);
+
+ok('two weeks away is not yet a nudge',
+  runArcade({ access: 'paid', lastAt: Date.now() - 14 * DAY }).length === 0);
+ok('a member who has never practised is not nudged',
+  runArcade({ access: 'paid', lastAt: null }).length === 0);
+
+// priority, and only ever one
+c = runArcade({ access: 'trial', lastAt: Date.now() - 30 * DAY }, { launched: true });
+ok('with everything true at once, exactly ONE strip shows', c.length === 1);
+ok('...and it is the news', c[0].key === 'uil-launch');
+c = runArcade({ access: 'trial', lastAt: Date.now() - 30 * DAY });
+ok('without the launch, state beats the nudge', c.length === 1 && c[0].key === 'trial-open');
+
 console.log(bad ? `\n${bad} FAILED` : '\nall assertions passed');
 process.exit(bad ? 1 : 0);

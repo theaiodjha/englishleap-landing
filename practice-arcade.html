@@ -281,6 +281,9 @@
   <script src="/elc-nav.js"></script>
 
 
+  <!-- At most one notice, chosen in arcadeNotices(). Empty unless something is true. -->
+  <div id="notices"></div>
+
   <section class="recap" id="recapCard" aria-live="polite"></section>
   <section class="focus" id="focusCard" aria-live="polite"></section>
 
@@ -580,12 +583,50 @@ function hlWords(text, words){
   return parts.map(p=>typeof p==='string'?esc(p):'<b class="hlw">'+esc(p.w)+'</b>').join('');
 }
 
+/* The one notice worth showing right now, if any. News first, then a state that will end
+   by itself, then a nudge — and never more than one, because three strips above the games
+   is a wall nobody reads. */
+function arcadeNotices(d){
+  const el=document.getElementById('notices');
+  if(!el) return;
+
+  // 1. news: Use It Live has opened. Truly one-time, so the key carries no period.
+  if(window.ELC_SHOW_UIL && ELCNotice(el,{
+    key:'uil-launch', tone:'good', icon:'&#127897;&#65039;',
+    html:`<b>Use It Live is open.</b> Record your English and get warm, specific feedback
+      &mdash; <a href="/use-it-live.html">try it</a>.`
+  })) return;
+
+  // 2. state: still on trial. Ends on its own, so a plain key is right.
+  if(d.access==='trial' && ELCNotice(el,{
+    key:'trial-open', icon:'&#128153;',
+    html:`<b>You&rsquo;re on a free trial.</b> Everything here stays open once your first
+      Patreon payment goes through.`
+  })) return;
+
+  // 3. nudge: away a while. Keyed to the WEEK so it can return if they stay away — a
+  //    re-engagement notice that can be silenced forever does nothing.
+  const away=d.lastAt?Math.floor((Date.now()-d.lastAt)/86400000):0;
+  if(away>=21){
+    const d2=new Date(), wk=`${d2.getUTCFullYear()}-${Math.ceil(((d2-new Date(Date.UTC(d2.getUTCFullYear(),0,1)))/86400000+1)/7)}`;
+    ELCNotice(el,{
+      key:'away-'+wk, icon:'&#128075;',
+      html:`<b>It&rsquo;s been a few weeks.</b> Your phrases are all still here &mdash;
+        pick anything below and start where you left off.`
+    });
+  }
+}
+
 (async function focusCard(){
   try{
     const r=await fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'next'})});
     if(!r.ok) return;                                   // logged out → card never appears
     const d=await r.json();
+    // before the early return below: a notice does not depend on there being a
+    // recommendation to show, and a member with nothing due is exactly who the
+    // "it has been a while" nudge is for
+    arcadeNotices(d);
     const n=d&&d.next; if(!n) return;
     const cur=d.current||{};
     // no chips when the whole episode is new: nothing is singled out, so showing two
