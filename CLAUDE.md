@@ -131,8 +131,14 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   (`uil-quota-2026-09`, not `uil-quota`) — a notice that can be switched off permanently
   will be, and then the once it mattered it is gone. **A notice about the CURRENT state is
   not dismissible** (the at-zero quota message is rendered directly, with no close button):
-  you cannot dismiss a fact. First use is the Use It Live quota warning, at whichever is
-  kinder of a fifth of the allowance or 15 minutes.
+  you cannot dismiss a fact. Four exist: the Use It Live **quota warning** (at whichever is
+  kinder of a fifth of the allowance or 15 minutes; at zero it becomes a non-dismissible
+  statement), and three on the Arcade via `arcadeNotices()` — the **Use It Live launch**
+  (`uil-launch`, fired by `window.ELC_SHOW_UIL`, the same switch as the nav tab), the
+  **trial** state (`trial-open`, ends by itself), and the **away three weeks** nudge
+  (`away-{year}-{week}`, so it can return). **Only ONE ever shows**, in that order — news,
+  then state, then nudge: three strips above the games is a wall nobody reads.
+  `action:'next'` already loaded the sessions and games, so `lastAt` costs no extra read.
 - **Every fetch has a deadline.** `window.ELCFetch(url, opts, ms)` (elc-nav.js) aborts at
   12s by default; `window.ELCBusy(el, html, ms)` shows a placeholder only if the wait passes
   ~450ms, because below that a spinner just flashes and makes a fast page feel slower.
