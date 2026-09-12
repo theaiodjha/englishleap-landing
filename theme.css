@@ -432,6 +432,17 @@ html[data-theme="light"] .elcnav-out,
 html[data-theme="light"] .elcnav-acct a{background:rgba(255,255,255,.72) !important;
   border-color:rgba(60,50,110,.20) !important;color:#3a3560 !important}
 
+/* account card: paper, not glass — and the plan line needs the light teal ink */
+html[data-theme="light"] .elcnav-card{
+  background:rgba(255,255,255,.97) !important; border-color:rgba(60,50,110,.16) !important;
+  box-shadow:0 24px 50px -24px rgba(80,60,150,.55) !important;
+}
+html[data-theme="light"] .elcnav-card-id{border-bottom-color:rgba(60,50,110,.14) !important}
+html[data-theme="light"] .elcnav-card-plan{color:#0b6f68 !important}
+html[data-theme="light"] .elcnav-card-row:hover{background:rgba(60,50,110,.07) !important}
+html[data-theme="light"] .elcnav-card-row.out:hover{color:#b02a2a !important}
+html[data-theme="light"] .elcnav-av{border-color:rgba(255,255,255,.55) !important;
+  box-shadow:0 6px 18px -10px rgba(80,60,150,.55) !important}
 html[data-theme="light"] .elcnav.scrolled{
   background:rgba(255,255,255,.80) !important; border-color:rgba(60,50,110,.16) !important;
   box-shadow:0 14px 34px -22px rgba(80,60,150,.6) !important;

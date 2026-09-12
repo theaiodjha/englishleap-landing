@@ -10,7 +10,7 @@ import "../lib/quiet-deprecations.js";
 //
 // Anything gated stays gated elsewhere — this route only ever records or returns a
 // member's OWN progress, keyed to the verified session cookie.
-import { readSession } from '../lib/session.js';
+import { readSession, planOf } from '../lib/session.js';
 import { logGame, logGamesBulk, getGames, getSessions, getAggregates,
          getRecapSeen, setRecapSeen } from '../lib/history.js';
 import { buildRecap, prevMonth, thisMonth, needsDeep, headline } from '../lib/recap.js';
@@ -54,7 +54,7 @@ export default async function handler(req, res) {
       getGames(s.uid), getSessions(s.uid), getAggregates(s.uid), getUsage(s.uid),
     ]);
     return res.json({
-      ok: true, name: s.name, games, sessions,
+      ok: true, name: s.name, plan: planOf(s), games, sessions,
       months: agg.months, words: agg.words,
       usedMin: usage.usedMin, limitMin: usage.limitMin, remainingMin: usage.remainingMin,
     });
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     ]);
     const next = nextAction({ episodes, counts: agg.words, games, sessions, types });
     return res.json({
-      ok: true, name: s.name, next,
+      ok: true, name: s.name, plan: planOf(s), next,
       // enough context for the card to show progress without a second round trip
       current: episodes[0] ? {
         id: episodes[0].id, n: episodes[0].n, title: episodes[0].title,
@@ -86,7 +86,7 @@ export default async function handler(req, res) {
     ]);
     const d = buildDashboard({ months: agg.months, words: agg.words, games, sessions, episodes });
     return res.json({
-      ok: true, name: s.name, ...d,
+      ok: true, name: s.name, plan: planOf(s), ...d,
       types: types.map((t) => ({ type: t.type, name: t.name })),
       episodesTotal: episodes.length,
       usedMin: usage.usedMin, limitMin: usage.limitMin, remainingMin: usage.remainingMin,
@@ -103,7 +103,7 @@ export default async function handler(req, res) {
     ]);
     const r = buildRecap(ym, { months: agg.months, words: agg.words, sessions, episodes });
     return res.json({
-      ok: true, name: s.name, ...r,
+      ok: true, name: s.name, plan: planOf(s), ...r,
       headline: headline(r),
       seen: seen === ym,
       // Interpretation — the rubric read back as a sentence, and a goal for next month —

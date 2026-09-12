@@ -8,7 +8,7 @@ import "../lib/quiet-deprecations.js";
 // Fluency Club only (same cents>=200 rule as /api/games). Audio is analysed by
 // Gemini (Claude can't take audio); swap analyzeAudio() for any audio model.
 
-import { readSession, revalidateSession } from '../lib/session.js';
+import { readSession, revalidateSession, planOf } from '../lib/session.js';
 import { getUsage, addUsage, clampRecordingSec, limitFor, MAX_REC_SEC } from '../lib/quota.js';
 import { getEpisodes } from '../lib/arcade-store.js';
 import { logSession, getAggregates } from '../lib/history.js';
@@ -228,7 +228,7 @@ export default async function handler(req, res) {
   if (action === 'usage') {
     const u = await getUsage(s.uid, allowance);
     return res.json({
-      ok: true, name: s.name, ...publicUsage(u),
+      ok: true, name: s.name, plan: planOf(s), ...publicUsage(u),
       prompt: ep.prompt, episode: ep.number, episodeId: ep.id, title: ep.title, words: ep.words,
       ...(await focusWords(s.uid, ep.words)),     // { focus, fresh }
       episodes: await episodeChoices(),

@@ -26,7 +26,6 @@
   .back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--soft);font-weight:600;font-size:var(--fs-md);
     background:var(--glass);border:1px solid var(--line);padding:9px 15px;border-radius:999px}
   .back:hover{color:var(--ink)}
-  .acct{color:var(--soft);font-size:var(--fs-sm)}
   .head{display:flex;align-items:center;gap:var(--sp-4);margin:6px 0 30px}
   .gicon{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:26px/* icon glyph, not type */;flex:0 0 auto;
     background:var(--glass);border:1px solid var(--line)}
@@ -111,7 +110,7 @@ function tile(type,ep,locked,access){
 async function load(){
   let data;
   try{ const r=await fetch('/api/games'); data=await r.json(); }catch(e){ $('#deck').innerHTML='<div class="note">Couldn\u2019t load the arcade. Please try again.</div>'; return; }
-  if(data&&data.name) $('#acct').innerHTML='Signed in as <b style="color:var(--ink)">'+esc(data.name)+'</b>';
+  ELCAccount(data&&data.name?{name:data.name, plan:data.level}:null);
   const gt=(data.arcade||[]).find(g=>g.type===TYPE);
   if(!gt){ $('#head').innerHTML='<h1>Game not found</h1>'; return; }
   $('#head').innerHTML=`<div class="gicon">${gt.icon||'\uD83C\uDFAE'}</div>

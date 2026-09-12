@@ -239,6 +239,7 @@ function render(d){
     const d=await r.json();
     $('#app').classList.remove('hidden');
     if(d.name) $('#title').textContent=`${d.name}, here is your progress`;
+    ELCAccount(d.name?{name:d.name, plan:d.plan}:null,{next:'/progress.html'});
     render(d);
   }catch(e){
     $('#gate').innerHTML=`<div class="card gate"><h2>Just a moment</h2>

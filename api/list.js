@@ -2,7 +2,7 @@
 // Re-confirms membership with Patreon at most every RECHECK_HOURS. If they cancelled, the archive
 // closes itself. If Patreon's API is briefly down, the cached status is honoured so real members
 // aren't locked out by an outage.
-import { readSession, sessionCookie, clearCookie, signedLink, checkMembership, refreshToken, RECHECK_HOURS } from '../lib/session.js';
+import { readSession, planOf, sessionCookie, clearCookie, signedLink, checkMembership, refreshToken, RECHECK_HOURS } from '../lib/session.js';
 
 // Add one block per episode as you publish. (Or move this into KV to avoid redeploys.)
 // `cover` is a PUBLIC image (your pack cover is fine to be public — it's marketing art).
@@ -61,5 +61,5 @@ export default async function handler(req, res) {
       files: ep.files.map(f => ({ name: f.name, pillar: f.pillar, kind: f.kind, url: signedLink(f.id) })),
     }));
 
-  return res.json({ ok: true, name: s.name, access: s.access, items });
+  return res.json({ ok: true, name: s.name, plan: planOf(s), access: s.access, items });
 }

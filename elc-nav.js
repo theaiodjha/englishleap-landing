@@ -35,6 +35,86 @@
            'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[name] + '</svg>';
   }
 
+  // ---- the account control -------------------------------------------------
+  // An avatar with the member's initials; clicking it opens a card with their name,
+  // plan and sign-out. Six pages previously printed "Signed in as Fahad" plus a bare
+  // button into the header, which ate horizontal room on phones and read as a form
+  // control rather than an account.
+  var PLAN = {
+    fluency: 'Fluency Club', transcript: 'Transcript Library',
+    trial: 'Free trial', none: ''
+  };
+
+  function esc(t) {
+    return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // "Mohammad Fahad" -> MF, "Fahad" -> F. Non-Latin names keep their first character,
+  // so an initial is never an empty circle.
+  function initials(name) {
+    var parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    var first = Array.from(parts[0])[0] || '';
+    var last = parts.length > 1 ? (Array.from(parts[parts.length - 1])[0] || '') : '';
+    return (first + last).toUpperCase();
+  }
+
+  // ELCAccount({name, plan}) signed in, or ELCAccount(null, {next}) signed out.
+  window.ELCAccount = function (user, opts) {
+    var slot = document.getElementById('acct');
+    if (!slot) return;
+    var next = (opts && opts.next) || location.pathname;
+
+    if (!user || !user.name) {
+      slot.innerHTML = '<a class="elcnav-login" href="/api/auth/login?next=' + encodeURIComponent(next) + '">' +
+        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+        '<path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6Z"/></svg>' +
+        '<span>Member Login</span></a>';
+      return;
+    }
+
+    var ini = initials(user.name);
+    var plan = PLAN[user.plan] || '';
+    slot.innerHTML =
+      '<button class="elcnav-av" id="acctBtn" type="button" aria-haspopup="true" aria-expanded="false" ' +
+        'aria-label="Account: ' + esc(user.name) + '"><span aria-hidden="true">' + esc(ini) + '</span></button>' +
+      '<div class="elcnav-card" id="acctCard" role="menu" hidden>' +
+        '<div class="elcnav-card-id">' +
+          '<span class="elcnav-av lg" aria-hidden="true"><span>' + esc(ini) + '</span></span>' +
+          '<span class="elcnav-card-who"><b>' + esc(user.name) + '</b>' +
+            (plan ? '<span class="elcnav-card-plan">' + esc(plan) + '</span>' : '') + '</span>' +
+        '</div>' +
+        '<a class="elcnav-card-row" role="menuitem" href="/progress.html">' +
+          svg('progress') + '<span>Your progress</span></a>' +
+        '<button class="elcnav-card-row out" role="menuitem" type="button" id="acctOut">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+            'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/></svg>' +
+          '<span>Sign out</span></button>' +
+      '</div>';
+
+    var btn = document.getElementById('acctBtn');
+    var card = document.getElementById('acctCard');
+    var open = function (on) {
+      card.hidden = !on;
+      btn.setAttribute('aria-expanded', on ? 'true' : 'false');
+      btn.classList.toggle('on', !!on);
+    };
+    btn.addEventListener('click', function (e) { e.stopPropagation(); open(card.hidden); });
+    card.addEventListener('click', function (e) { e.stopPropagation(); });
+    document.addEventListener('click', function () { if (!card.hidden) open(false); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !card.hidden) { open(false); btn.focus(); }
+    });
+    document.getElementById('acctOut').addEventListener('click', function () {
+      fetch('/api/auth/signout', { method: 'POST' })
+        .catch(function () {})
+        .then(function () { location.href = '/'; });
+    });
+  };
+
   function render() {
     var slot = document.getElementById('elcnav');
     if (!slot) return;
@@ -62,14 +142,12 @@
       onScroll();
     }
 
-    // Pages fill #acct themselves once they know who is signed in. If a page has nothing
-    // to say, fall back to a sign-out link so the slot is never just empty.
+    // Pages call ELCAccount() once they know who is signed in. If a page never does,
+    // fall back to the signed-out control so the slot is never just empty.
     document.addEventListener('DOMContentLoaded', function () {
       setTimeout(function () {
         var a = document.getElementById('acct');
-        if (a && !a.innerHTML.trim()) {
-          a.innerHTML = '<a class="elcnav-out" href="/api/auth/signout">Sign out</a>';
-        }
+        if (a && !a.innerHTML.trim()) window.ELCAccount(null);
       }, 600);
     });
   }

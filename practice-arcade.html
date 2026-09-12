@@ -96,13 +96,6 @@
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 0 8px}
   .brandmark{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:var(--fs-lg)}
   .brandmark .b{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:var(--fs-md)}
-  .acct{font-size:var(--fs-sm);color:var(--soft)}
-  .out{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--soft);font:inherit;font-size:var(--fs-sm);font-weight:600;padding:var(--sp-2) 13px;border-radius:999px;cursor:pointer;margin-left:6px}
-  .out:hover{color:var(--ink)}
-  .signlink{display:inline-flex;align-items:center;gap:7px;color:var(--ink);font-weight:700;text-decoration:none;font-size:var(--fs-sm);
-    padding:var(--sp-2) 15px;border-radius:999px;border:1px solid var(--line);background:var(--glass);transition:border-color .2s,background .2s,transform .2s}
-  .signlink:hover{border-color:rgba(139,108,255,.6);background:rgba(139,108,255,.14);transform:translateY(-1px)}
-  .signlink svg{width:15px;height:15px;flex:0 0 15px}
 
   /* hero */
   .hero{text-align:center;padding:var(--sp-10) 8px 26px}
@@ -461,11 +454,9 @@ function thisWeek(types){
 }
 function render(data){
   const signedIn=!!data.name;
-  const acct=$('#acct');
   if(signedIn){
-    acct.innerHTML=`Signed in as <b style="color:var(--ink)">${esc(data.name)}</b><button class="out" id="signoutBtn">Sign out</button>`;
-    $('#signoutBtn').onclick=async()=>{await fetch('/api/auth/signout',{method:'POST'});location.reload();};
-  } else { acct.innerHTML='<a class="signlink" href="/api/auth/login?next=/practice-arcade.html"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6Z"/></svg>Member Login</a>'; }
+    ELCAccount({name:data.name, plan:data.level});
+  } else { ELCAccount(null,{next:'/practice-arcade.html'}); }
 
   const types=(data.arcade||[]);
   // hero free CTA -> clue-room current ep

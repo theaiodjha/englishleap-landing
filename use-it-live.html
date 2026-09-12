@@ -360,6 +360,7 @@ $('#epPick').addEventListener('change',async ev=>{
     renderPicker(u.episodes);
     setUsage(u);
     if(u.name) $('#title').textContent=`Hi ${u.name} — record, get feedback, improve.`;
+    ELCAccount(u.name?{name:u.name, plan:u.plan}:null,{next:'/use-it-live.html'});
   }catch(err){
     if(err.data && err.data.coming_soon){
       gate(`<div class="gate"><span class="eyebrow">&#10024; Coming soon</span><h2>&#127897;&#65039; Use It Live is almost ready</h2>

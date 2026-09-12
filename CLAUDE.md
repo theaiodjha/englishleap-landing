@@ -80,7 +80,15 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   `overflow-x:hidden` on an ancestor — use `clip`, or sticky stops working)
   and nothing else — the script renders synchronously so page scripts still find `#acct`.
   Six pages previously had five different headers with drifting labels, and Progress and
-  Use It Live did not link to each other. **The games keep their minimal back-only bar**
+  Use It Live did not link to each other.
+- **The account control is `window.ELCAccount(user, {next})`**, also in `elc-nav.js`: an
+  initials avatar that opens a card with the member's name, plan and sign-out, replacing
+  six copies of "Signed in as … [Sign out]" (which ate the header on phones). Pass
+  `{name, plan}` where plan is `fluency|transcript|trial|none`; pass `null` for the
+  signed-out Member Login link. The plan comes from **`planOf(s)` in `lib/session.js`** —
+  derived from `cents`, not `s.tier`, which is `'fluency'` for ANY paid pledge and so
+  labels a $1 Transcript backer a Fluency member. `api/games.js` ships it as `level`;
+  `api/list.js`, `api/progress.js` and `api/use-it-live.js` ship it as `plan`. **The games keep their minimal back-only bar**
   (a game is a focus task) and `index.html` keeps its marketing nav.
 - **The Member Archive is hidden from the whole site** until it actually works: no nav
   tab, and every link commented with "Member Archive hidden until it is a working
