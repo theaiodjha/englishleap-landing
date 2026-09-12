@@ -155,6 +155,11 @@
   .chart .lbl{fill:var(--soft2);font-family:var(--body);font-size:11px;text-anchor:middle}
   .chart .val{fill:var(--ink);font-family:var(--display);font-weight:700;font-size:12px;text-anchor:middle}
   .chart .base{stroke:var(--line);stroke-width:1}
+  .chart .col{cursor:pointer}
+  .chart .col .hit{fill:transparent}
+  .chart .col:hover .bar,.chart .col:focus-visible .bar{opacity:1;filter:brightness(1.12)}
+  .chart .col:hover .hit,.chart .col:focus-visible .hit{fill:color-mix(in srgb,var(--teal) 10%,transparent)}
+  .chart .col:focus{outline:none}
   details.tbl{margin-top:var(--sp-4)}
   details.tbl summary{cursor:pointer;color:var(--soft2);font-family:var(--display);font-weight:600;font-size:var(--fs-sm)}
   details.tbl table{border-collapse:collapse;margin-top:10px;font-size:var(--fs-sm);color:var(--soft)}
@@ -220,9 +225,24 @@
   .gt .track>i{display:block;height:100%;border-radius:var(--r-full);background:var(--ga,var(--purple))}
   .gt .num{font-family:var(--display);font-weight:700;font-size:var(--fs-sm);color:var(--soft)}
 
+  /* the phrases the recommendation is actually about, so it is a thing you can picture */
+  .nextwords{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--sp-4)}
+  .nextwords i{font-style:normal;font-size:var(--fs-xs);font-weight:600;color:var(--ink);
+    background:color-mix(in srgb,var(--gold) 20%,transparent);
+    border:1px solid color-mix(in srgb,var(--gold) 34%,transparent);
+    border-radius:999px;padding:3px 10px}
   .go{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:12px 22px;border-radius:var(--r-full);
     font-family:var(--display);font-weight:700;font-size:var(--fs-md);text-decoration:none;color:#fff;
     background:linear-gradient(110deg,var(--purple),var(--electric));box-shadow:0 14px 36px -14px rgba(139,108,255,.7)}
+  .soon{list-style:none;margin:var(--sp-6) auto;padding:0;max-width:30em;
+    display:grid;gap:var(--sp-4);text-align:left}
+  .soon li{display:flex;align-items:flex-start;gap:var(--sp-3)}
+  .soon .ic{width:38px;height:38px;flex:0 0 38px;border-radius:12px;display:grid;place-items:center;
+    font-size:18px/* emoji glyph, not type */;
+    background:color-mix(in srgb,var(--kc) 16%,transparent);
+    border:1px solid color-mix(in srgb,var(--kc) 30%,transparent)}
+  .soon b{display:block;font-family:var(--display);font-weight:600;font-size:var(--fs-md);color:var(--ink)}
+  .soon li>span>span{color:var(--soft);font-size:var(--fs-sm);line-height:1.5}
   .empty{text-align:center;padding:var(--sp-8) var(--sp-5)}
   .empty p{color:var(--soft);font-size:var(--fs-md);line-height:1.6;max-width:34em;margin:0 auto var(--sp-5)}
   .gate{text-align:center;padding:30px 26px}
@@ -280,8 +300,12 @@ function chart(bars){
     const x=Math.round(i*slot+(slot-bw)/2), y=H-h;
     const last=i===n-1;
     const label=(i===tallest&&b.minutes)||(last&&b.minutes);
-    return `<g>
+    // a month with sessions is a way into them; an empty one is just a label
+    const live=b.sessions>0;
+    return `<g${live?` class="col" data-ym="${esc(b.ym)}" role="button" tabindex="0"
+        aria-label="${esc(b.label)}: ${plural(b.minutes,'minute','minutes')}, ${plural(b.sessions,'session','sessions')} — show them"`:''}>
       <title>${esc(b.label)}: ${plural(b.minutes,'minute','minutes')}, ${plural(b.sessions,'session','sessions')}</title>
+      ${live?`<rect class="hit" x="${Math.round(i*slot)}" y="0" width="${Math.round(slot)}" height="${H}" rx="6"></rect>`:''}
       ${h?`<rect class="bar${last?' dim':''}" x="${x}" y="${y}" width="${bw}" height="${h}" rx="4"></rect>`:''}
       ${label?`<text class="val" x="${x+bw/2}" y="${y-7}">${b.minutes}</text>`:''}
       <text class="lbl" x="${x+bw/2}" y="${H+15}">${esc(b.label)}</text>
@@ -369,19 +393,31 @@ function animateIn(){
 
 /* What each drawer shows. Built from the dashboard payload that is already in hand —
    clicking a number must not cost another request. */
-function drawerHTML(d,which,tile){
+const RECENT_AT_ONCE=8;
+
+function drawerHTML(d,which,tile,ym){
   const head=(icon,title)=>`<div class="kdraw-head"><span class="ic" aria-hidden="true">${icon}</span><b>${title}</b></div>`;
   if(which==='recent'){
     const fmt=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    const n=(d.recent||[]).length;
-    return head(tile?tile.e:'',`Your last ${plural(n,'recording','recordings')}`)+
-      `<div class="slist">${(d.recent||[]).map(r=>`<div class="srow">
+    const all=d.recent||[];
+    const list=(ym?all.filter(r=>r.ym===ym):all).slice(0,RECENT_AT_ONCE);
+    const bar=ym?(d.bars||[]).find(b=>b.ym===ym):null;
+    // the log keeps the last 100 sessions and we ship 24 of them, so an old busy month can
+    // legitimately have counted sessions whose detail is no longer here — say so plainly
+    const trimmed=bar&&bar.sessions>list.length;
+    const title=ym
+      ? `${esc(bar?bar.label:ym)} — ${plural(bar?bar.sessions:list.length,'recording','recordings')}`
+      : `Your last ${plural(list.length,'recording','recordings')}`;
+    if(!list.length) return head(tile?tile.e:'',title)+
+      `<p class="note">The details for this month are no longer kept &mdash; only the totals above.</p>`;
+    return head(tile?tile.e:'',title)+
+      `<div class="slist">${list.map(r=>`<div class="srow">
         <span class="when">${esc(fmt(r.t))}</span>
         <span class="what">${r.n?`EP${r.n} &middot; `:''}${esc(r.title||'Practice')}</span>
         <span class="mins">${r.minutes} min${r.wpm?` &middot; ${r.wpm} wpm`:''}</span>
         ${r.words.length?`<span class="ws">${r.words.map(w=>`<i>${esc(w)}</i>`).join('')}</span>`:''}
       </div>`).join('')}</div>
-      <p class="note">We keep the details, never the audio.</p>`;
+      <p class="note">${trimmed?'Older details for this month have been trimmed. ':''}We keep the details, never the audio.</p>`;
   }
   // the streak as a shape: eight weeks, oldest left, this week ringed
   const wks=d.weeks||[];
@@ -401,6 +437,15 @@ function drawerHTML(d,which,tile){
 const KPIBY={recent:{e:'&#127897;&#65039;',c:'var(--coral)'},weeks:{e:'&#128293;',c:'var(--gold)'}};
 
 // episode rows open to show their phrases; keyboard too, since they are not <button>
+// a chart column opens the Recordings drawer for that month
+function wireChart(){
+  document.querySelectorAll('.chart .col').forEach(g=>{
+    const go=()=>window.__openRecent && window.__openRecent(g.dataset.ym);
+    g.addEventListener('click',go);
+    g.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
+  });
+}
+
 function wireEpisodes(){
   document.querySelectorAll('.ep.go').forEach(row=>{
     const toggle=()=>{
@@ -420,6 +465,26 @@ function wireEpisodes(){
 function wireKpi(d){
   const draw=$('#kdraw'), inner=$('#kdrawIn');
   let open=null;
+  // opening the drawer from somewhere other than a tile (the chart) still has to point
+  // the connector at the Recordings tile, since that is what the panel belongs to
+  const recentBtn=()=>document.querySelector('.kpi button.k[data-go="recent"]');
+  const show=(which,btn,ym)=>{
+    inner.innerHTML=drawerHTML(d,which,KPIBY[which],ym);
+    inner.style.setProperty('--kc', btn?btn.style.getPropertyValue('--kc'):'var(--coral)');
+    if(btn){
+      const br=btn.getBoundingClientRect(), dr=inner.getBoundingClientRect();
+      inner.style.setProperty('--cx', Math.round(br.left + br.width/2 - dr.left)+'px');
+    }
+    draw.style.maxHeight=draw.scrollHeight+'px';
+    document.querySelectorAll('.kpi button.k[aria-expanded]').forEach(b=>
+      b.setAttribute('aria-expanded', b===btn?'true':'false'));
+  };
+  window.__openRecent=(ym)=>{
+    const btn=recentBtn();
+    show('recent',btn,ym);
+    open='recent:'+(ym||'');
+    draw.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'nearest'});
+  };
   const shut=()=>{
     draw.style.maxHeight=draw.scrollHeight+'px';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{ draw.style.maxHeight='0px'; }));
@@ -440,14 +505,7 @@ function wireKpi(d){
         return;
       }
       if(open===which){ shut(); return; }
-      inner.innerHTML=drawerHTML(d,which,KPIBY[which]);
-      // carry the tile's hue into the panel, and point the caret at the tile itself
-      inner.style.setProperty('--kc', btn.style.getPropertyValue('--kc'));
-      const br=btn.getBoundingClientRect(), dr=inner.getBoundingClientRect();
-      inner.style.setProperty('--cx', Math.round(br.left + br.width/2 - dr.left)+'px');
-      draw.style.maxHeight=draw.scrollHeight+'px';
-      document.querySelectorAll('.kpi button.k[aria-expanded]').forEach(b=>
-        b.setAttribute('aria-expanded', b===btn?'true':'false'));
+      show(which,btn);
       open=which;
     });
   });
@@ -494,10 +552,19 @@ function allowance(d){
 function render(d){
   const t=d.totals;
   if(!d.hasAnything){
+    // Name what will appear, rather than showing four zeros. A member who has done nothing
+    // yet cannot be told how they are doing; they can be told what this page is for.
+    const soon=[
+      ['&#9201;&#65039;','var(--teal)','Minutes practised','Every recording you get feedback on is counted here.'],
+      ['&#128142;','var(--purple)','Phrases you own','Use one naturally three times and it is yours.'],
+      ['&#127918;','var(--coral)','Games finished','Across all five games, every episode in the Arcade.'],
+      ['&#128293;','var(--gold)','Your streak','A week counts once you practise in it.']
+    ].map(x=>`<li style="--kc:${x[1]}"><span class="ic" aria-hidden="true">${x[0]}</span>
+        <span><b>${x[2]}</b><span>${x[3]}</span></span></li>`).join('');
     $('#body').innerHTML=`<div class="card empty">
-      <h2>Nothing to show yet — and that is fine</h2>
-      <p>Play a game or record one answer, and this page starts filling in: minutes practised,
-         the phrases you own, and how far through each episode you are.</p>
+      <h2>Nothing to show yet &mdash; and that is fine</h2>
+      <p>Record one answer or play a game, and this page starts filling in.</p>
+      <ul class="soon">${soon}</ul>
       <a class="go" href="/practice-arcade.html">&#127918; Start practising</a></div>`;
     return;
   }
@@ -570,7 +637,7 @@ function render(d){
            this becomes a trend you can watch.</p>`)})}
 
     ${d.mastery.length?card({key:'phrases',title:'Phrases you are building',
-      sub:'A phrase is yours once you have used it naturally three times',
+      sub:'Closest to yours first &mdash; a phrase is yours after three natural uses',
       body:`${eps}
         ${d.untouchedEpisodes?`<p class="sub" style="margin:var(--sp-4) 0 0">
           ${plural(d.untouchedEpisodes,'episode is','episodes are')} still untouched.</p>`:''}
@@ -583,7 +650,8 @@ function render(d){
 
     <div class="pcol">
     ${n?card({key:'next',fold:false,title:'&#127919; What next',sub:esc(n.why||''),
-      body:`<a class="go" href="${esc(n.href||'/practice-arcade.html')}">${esc(n.cta||'Keep going')}</a>`}):''}
+      body:`${(n.words||[]).length?`<div class="nextwords">${n.words.map(w=>`<i>${esc(w)}</i>`).join('')}</div>`:''}
+        <a class="go" href="${esc(n.href||'/practice-arcade.html')}">${esc(n.cta||'Keep going')}</a>`}):''}
 
     ${card({key:'games',title:'Games finished',
       sub:`Across all ${d.episodesTotal} episodes in the Arcade`,body:games})}
@@ -592,6 +660,7 @@ function render(d){
   wireFolds();
   wireKpi(d);
   wireEpisodes();
+  wireChart();
   animateIn();
 }
 

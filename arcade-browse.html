@@ -197,6 +197,10 @@ async function load(){
   setView(view, false);   // apply the remembered choice without re-saving it
 }
 $('#q').addEventListener('input',applySearch);
+/* ?q= pre-fills the search, so a link can point at one episode — the Arcade's
+   "practising this week" tiles use it, and it makes any search shareable. */
+(function(){ const q=new URLSearchParams(location.search).get('q');
+  if(q){ $('#q').value=q; } })();
 document.querySelectorAll('#seg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 load();
 </script>

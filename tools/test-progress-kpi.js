@@ -42,8 +42,9 @@ const full = {
   hasAnything: true,
   totals: { minutes: 84, sessions: 6, phrasesOwned: 7, episodesTotal: 30 },
   streak: 3, pace: 118, monthsWithData: 3, episodesTotal: 30, untouchedEpisodes: 24,
-  bars: [{ label: 'Jul', minutes: 20, sessions: 3 }, { label: 'Aug', minutes: 35, sessions: 5 },
-         { label: 'Sep', minutes: 29, sessions: 4 }],
+  bars: [{ ym: '2026-07', label: 'Jul', minutes: 20, sessions: 3 },
+         { ym: '2026-08', label: 'Aug', minutes: 35, sessions: 5 },
+         { ym: '2026-09', label: 'Sep', minutes: 29, sessions: 0 }],
   mastery: [{ n: 280, title: 'Listen & Speak', owned: 2, started: 1, untouched: 3,
               words: [{ w: 'a', state: 'owned' }] }],
   byType: { 'clue-room': 1 },
@@ -53,7 +54,7 @@ const full = {
              minutes: 2, words: ['retrieve'], wpm: 110 }],
   weeks: [{ week: '2026-W30', active: false, current: false },
           { week: '2026-W37', active: true, current: true }],
-  next: { why: 'x', cta: 'Go', href: '/' },
+  next: { why: 'x', cta: 'Go', href: '/', words: ['put off', 'slip away'] },
 };
 
 m.render(full);
@@ -95,6 +96,17 @@ ok('game rows are links into that game',
 ok('...wearing the catalogue accent and icon',
   /--ga:#8b6cff/.test(hFull) && /class="gi"[^>]*>\u{1F50D}</u.test(hFull));
 ok('no duplicate style attribute on the track', !/style="[^"]*" style="/.test(hFull));
+
+ok('a month with sessions is a clickable column', /class="col" data-ym="2026-08"/.test(hFull));
+ok('...with a hit area bigger than the bar itself', /class="hit"/.test(hFull));
+ok('What next shows the phrases it means', /class="nextwords"/.test(hFull) && /<i>put off<\/i>/.test(hFull));
+
+// the blank first visit names what will appear rather than showing four zeros
+m.render({ hasAnything: false, totals: {} });
+const hEmpty = out.html;
+ok('empty state lists what the page will show', /class="soon"/.test(hEmpty)
+  && /Minutes practised/.test(hEmpty) && /Phrases you own/.test(hEmpty));
+ok('empty state still offers a way to start', /Start practising/.test(hEmpty));
 
 const rec = m.drawerHTML(full, 'recent', {e:'M'});
 ok('recent drawer names the episode', /EP280/.test(rec));

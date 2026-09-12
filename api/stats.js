@@ -14,7 +14,9 @@
 //      more harm than no numbers, and a visitor who can infer the membership is about
 //      nine people has learned something you did not mean to tell them.
 import '../lib/quiet-deprecations.js';
-import { getSiteStats } from '../lib/history.js';
+import { getSiteStats, getPopularity } from '../lib/history.js';
+import { getEpisodes, getGameTypes } from '../lib/arcade-store.js';
+import { buildPopular } from '../lib/popular.js';
 
 export const MIN_MEMBERS = 25;   // below this, the strip does not exist
 const MIN_GAMES = 200;
@@ -28,18 +30,30 @@ function floorTo(n) {
 }
 
 export default async function handler(req, res) {
-  const s = await getSiteStats();
+  // One shared edge-cached response feeds both the home page strip and the Arcade's
+  // "practising this week" tiles, so neither costs a KV read per visitor.
+  const [s, counts, episodes, types] = await Promise.all([
+    getSiteStats(), getPopularity('week'), getEpisodes(), getGameTypes(),
+  ]);
+  const pop = buildPopular({ counts, episodes, types, limit: 4 });
 
   // One shared copy for ten minutes; serve the stale one for an hour while it refreshes,
   // so a cold cache never makes a visitor wait on KV.
   res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=3600');
 
+  // The two are published independently: a young club can have enough plays to rank
+  // episodes without having enough members to boast about, and vice versa.
+  const popular = pop.enough
+    ? { episodes: pop.episodes, types: pop.types, pairs: pop.pairs }
+    : null;
+
   const show = s.members >= MIN_MEMBERS;
-  if (!show) return res.json({ ok: true, show: false });
+  if (!show) return res.json({ ok: true, show: false, popular });
 
   return res.json({
     ok: true,
     show: true,
+    popular,
     members: floorTo(s.members),
     // "active this week" is only worth saying when it is not a near-copy of the total
     active: s.active >= 10 ? floorTo(s.active) : null,

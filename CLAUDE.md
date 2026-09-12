@@ -351,7 +351,15 @@ take every finish, which is what makes them a frequency. **`logGamesBulk` does n
 those completions are historical, and a member signing in on a second device would backfill
 twice. **The rolling week is the one to display**: an all-time list is a ratchet that buries
 every episode outside the first few to get plays, which is wrong for a product whose value
-is the breadth of its vocabulary. `/api/progress` `action:'popular'` returns the three views
+is the breadth of its vocabulary. **The Arcade shows it, the progress page does not.** "Practising this week"
+(`#popWeek` on `practice-arcade.html`, below the member's own focus card — their business
+first) is served from **`/api/stats`**, not from the per-member `action:'popular'`: the
+progress route is uncached, so every Arcade load would cost a KV read for data identical
+for everyone, while `/api/stats` is already edge-cached for ten minutes. It is NOT on
+`progress.html` on purpose — that page promises "everything here comes from your own
+practice", and social proof belongs where a member CHOOSES, not where they reflect. Tiles
+deep-link to `arcade-browse.html?q=EP<n>`, which now pre-fills its search from `?q=`.
+`/api/progress` `action:'popular'` returns the three views
 (episodes, game types, and the cross-section) plus **`enough`** — false until the leader
 clears `MIN_TOP` (20). **Render nothing when `enough` is false**: a "most played" list built
 on four plays is noise wearing the costume of a recommendation. Known property: it counts
@@ -391,6 +399,12 @@ the tile's **hue** carried in via `--kc` (colour identifying, not decorating), a
 **header** naming the number in words for anyone who can use neither. A tile whose target
 does not exist for that member renders as a plain `<div>`, not a button: an affordance that opens an
 empty card is worse than none. `node tools/test-progress-kpi.js` guards exactly that.
+A chart column with sessions is a **way in**: clicking it opens the Recordings drawer
+filtered to that month (`recent` ships 24 sessions so the filter has something to find; an
+older month whose detail has been trimmed says so rather than showing an empty list).
+Phrase episodes sort **closest to owning first** — newest-first buried the one row a member
+could finish today. "What next" shows the phrases it means, and the blank first visit names
+what will appear instead of showing four zeros.
 Each card below it does one more thing than it used to: **Speaking practice** opens with
 this month's **allowance meter** (`usedMin`/`limitMin` were in the payload and unused —
 "how much have I got left?" is the question members ask unprompted, and it works from the

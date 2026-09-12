@@ -249,6 +249,26 @@
 
   footer{text-align:center;color:var(--soft);font-size:var(--fs-xs);margin-top:48px;line-height:1.6}
   footer .tag{color:var(--ink);font-family:var(--display);font-weight:600}
+
+  /* "Practising this week" — aggregate, so it says what OTHERS are doing. Kept visually
+     quieter than the member's own focus card: this is a suggestion, not their business. */
+  .popweek{margin:var(--sp-6) 0 var(--sp-2)}
+  .popweek h3{font-family:var(--display);font-weight:600;font-size:var(--fs-lg);margin:0 0 3px}
+  .popweek .psub{color:var(--soft2);font-size:var(--fs-sm);margin:0 0 var(--sp-4)}
+  .poprow{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:var(--sp-3)}
+  .poptile{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-3) var(--sp-4);
+    border-radius:var(--r-lg);text-decoration:none;color:inherit;
+    background:var(--glass);border:1px solid var(--line);
+    transition:transform .15s,border-color .15s,background .15s}
+  .poptile:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--teal) 40%,transparent);
+    background:color-mix(in srgb,var(--teal) 8%,var(--glass))}
+  .poptile .rank{width:26px;height:26px;flex:0 0 26px;border-radius:9px;display:grid;place-items:center;
+    font-family:var(--display);font-weight:700;font-size:var(--fs-xs);color:#fff;
+    background:linear-gradient(135deg,var(--teal),var(--purple))}
+  .poptile .t{min-width:0}
+  .poptile .t b{display:block;font-family:var(--display);font-weight:600;font-size:var(--fs-sm);
+    color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .poptile .t span{font-size:var(--fs-xs);color:var(--soft2)}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -263,6 +283,10 @@
 
   <section class="recap" id="recapCard" aria-live="polite"></section>
   <section class="focus" id="focusCard" aria-live="polite"></section>
+
+  <!-- What other members are practising. Stays empty until enough plays exist
+       to rank honestly; see buildPopular().enough. -->
+  <section class="popweek" id="popWeek" hidden></section>
 
   <!-- HERO -->
   <div class="hero">
@@ -589,6 +613,24 @@ function hlWords(text, words){
     document.getElementById('focusCard').classList.add('show','has-oriva');
   }catch(e){ /* never let the coach break the arcade */ }
 })();
+
+/* What members are practising this week. One edge-cached response (see api/stats.js), so
+   this costs nothing per visit. Absent or below the floor -> the section never appears;
+   a "most played" list built on four plays is noise, and members can tell. */
+fetch('/api/stats').then(r=>r.json()).then(d=>{
+  const p = d && d.popular;
+  if(!p || !p.episodes || !p.episodes.length) return;
+  const el = document.getElementById('popWeek');
+  el.innerHTML = '<h3>Practising this week</h3>' +
+    '<p class="psub">What other members have been working on</p>' +
+    '<div class="poprow">' + p.episodes.map((e,i)=>
+      `<a class="poptile" href="/arcade-browse.html?q=${encodeURIComponent('EP'+e.n)}">
+         <span class="rank" aria-hidden="true">${i+1}</span>
+         <span class="t"><b>EP${e.n} &middot; ${esc(e.title)}</b>
+           <span>${e.plays} plays this week</span></span>
+       </a>`).join('') + '</div>';
+  el.hidden = false;
+}).catch(()=>{});
 </script>
 <script defer src="/elc-tour.js"></script>
 </body>
