@@ -3,6 +3,7 @@ import "../lib/quiet-deprecations.js";
 //   POST { action:'complete', type, ep }        → one finished game
 //   POST { action:'backfill', items:[{type,ep,ts}] } → migrate a device's localStorage
 //   POST { action:'get' }                       → everything the dashboard needs
+//   POST { action:'popular', window }           → site-wide play counts, ranked
 //
 // progress.js keeps playing to localStorage regardless: anonymous visitors can finish
 // the free Clue Room without an account, and a signed-in member's device history still
@@ -12,7 +13,8 @@ import "../lib/quiet-deprecations.js";
 // member's OWN progress, keyed to the verified session cookie.
 import { readSession, planOf } from '../lib/session.js';
 import { logGame, logGamesBulk, getGames, getSessions, getAggregates,
-         getRecapSeen, setRecapSeen } from '../lib/history.js';
+         getRecapSeen, setRecapSeen, getPopularity } from '../lib/history.js';
+import { buildPopular } from '../lib/popular.js';
 import { buildRecap, prevMonth, thisMonth, needsDeep, headline } from '../lib/recap.js';
 import { getUsage, limitFor } from '../lib/quota.js';
 import { getEpisodes, getGameTypes } from '../lib/arcade-store.js';
@@ -110,6 +112,26 @@ export default async function handler(req, res) {
       // is the upgrade. The facts above are every Fluency member's own data.
       canDeep: needsDeep(limitFor(s.cents)),   // entitled to the coaching layer
       deep: null,                              // not built yet; lights up for canDeep members
+    });
+  }
+
+  /* What everyone is practising. The only action here that is not about the caller's own
+     data — it is an aggregate over all members, with nothing identifying in it. Default
+     window is the rolling week: an all-time list is a ratchet that buries every episode
+     outside the first few to get plays.
+
+     `enough:false` means the leader has not cleared the floor yet. The caller must render
+     NOTHING in that case — the lists are still returned so this route stays inspectable
+     while the numbers build up, but a card drawn from four plays is noise. */
+  if (action === 'popular') {
+    const window = body.window === 'all' ? 'all' : 'week';
+    const [counts, episodes, types] = await Promise.all([
+      getPopularity(window), getEpisodes(), getGameTypes(),
+    ]);
+    const limit = Math.min(10, Math.max(1, Number(body.limit) || 5));
+    return res.json({
+      ok: true, window,
+      ...buildPopular({ counts, episodes, types, limit }),
     });
   }
 

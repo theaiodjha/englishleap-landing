@@ -191,6 +191,8 @@ lib/episode-titles.js      long/searchable episode titles for the arcade browser
 lib/quiet-deprecations.js  silences DEP0169 (Vercel adapter's url.parse); imported by api routes
 tools/audit.py             cross-renderer/consistency audit (pre-push hook)
 tools/{seed-arcade,issue-code}.js      seed arcade to KV; issue member codes
+tools/test-popular.mjs     node tools/test-popular.mjs — asserts the popularity ranking rules
+lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
 games/*                    5 game types (clue-room, phrase-pairs, listening-gap,
                            sentence-builder, story-unlock)
 ```
@@ -327,6 +329,26 @@ uil:log:{uid}    list  last 100 sessions, newest first (~110-250B each, hard cap
 uil:agg:{uid}    hash  NEVER trimmed: {YYYY-MM}:sec, {YYYY-MM}:n, w:{word} counts
 elc:games:{uid}  hash  `{type}:{ep}` → ts, bounded by the catalogue (5 types x episodes)
 ```
+
+**Site-wide play counts** (no uid — these belong to nobody):
+
+```
+elc:pop             hash  `{type}:{ep}` -> all-time plays (150 fields at 5 x 30)
+elc:pop:{YYYY-Www}  hash  the same, this ISO week, EXPIREd after POP_WEEKS (8)
+```
+
+Both ride the pipeline `logGame()` already opens, so a completion is still ONE round trip.
+The member's own entry stays idempotent (a replay only moves the timestamp); the counters
+take every finish, which is what makes them a frequency. **`logGamesBulk` does not count** —
+those completions are historical, and a member signing in on a second device would backfill
+twice. **The rolling week is the one to display**: an all-time list is a ratchet that buries
+every episode outside the first few to get plays, which is wrong for a product whose value
+is the breadth of its vocabulary. `/api/progress` `action:'popular'` returns the three views
+(episodes, game types, and the cross-section) plus **`enough`** — false until the leader
+clears `MIN_TOP` (20). **Render nothing when `enough` is false**: a "most played" list built
+on four plays is noise wearing the costume of a recommendation. Known property: it counts
+finishes, so one member replaying hard can skew a quiet week — add a per-member-per-day
+dedupe key with a TTL if that ever shows up.
 
 The aggregates are the point: trimming old detail never destroys the long-term growth
 story. Ceiling is **~40KB per member, forever**; measured cost is ~9 KV commands per
