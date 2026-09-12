@@ -184,6 +184,8 @@
       <p class="welcome" id="title"></p>
     </div>
 
+    <div id="notice"></div>
+
     <div class="card meter">
       <div class="row">
         <span>&#9201;&#65039; Your practice minutes this month</span>
@@ -278,7 +280,35 @@ function setUsage(u){
   $('#rem').textContent=u.remainingMin; $('#lim').textContent=u.limitMin;
   const pct=Math.min(100,Math.round((u.usedMin/u.limitMin)*100));
   $('#barfill').style.width=pct+'%';
+  quotaNotice(u);
   updateUI();
+}
+
+/* Warn BEFORE the wall. The meter has always shown the number, but a member on their 95th
+   minute got no warning and then simply could not record — the only genuinely frustrating
+   moment in the feature, and entirely avoidable.
+   Threshold is whichever is kinder: a fifth of the allowance, or 15 minutes. On the 100-min
+   tier that is 20 minutes; on a 400-min tier it is 80, which is still enough runway. */
+function quotaNotice(u){
+  const el=$('#notice'); if(!el) return;
+  const lim=Number(u.limitMin)||0, left=Number(u.remainingMin)||0;
+  if(!lim) return;
+  const soon=Math.max(15,Math.round(lim*0.2));
+  if(left<=0){
+    // the key has no period: at zero this is a fact about right now, not a warning
+    el.innerHTML=`<div class="elcnotice warn" role="status">
+      <span class="ni" aria-hidden="true">&#9201;&#65039;</span>
+      <span class="nt"><b>You have used this month's ${lim} minutes.</b>
+        They reset on the 1st &mdash; the Arcade games are still open in the meantime.</span></div>`;
+    return;
+  }
+  if(left>soon){ el.innerHTML=''; return; }
+  const period=new Date().toISOString().slice(0,7);      // dismiss this month only
+  ELCNotice(el,{
+    key:'uil-quota-'+period, tone:'warn', icon:'&#9201;&#65039;',
+    html:`<b>About ${left} ${left===1?'minute':'minutes'} left this month.</b>
+      Your minutes reset on the 1st.`
+  });
 }
 
 function gate(html){ $('#app').classList.add('hidden'); $('#gate').innerHTML=html; }

@@ -94,6 +94,28 @@
   border:1px solid var(--line);background:var(--glass2);border-radius:var(--r-full);
   padding:8px 14px;min-height:38px;display:inline-flex;align-items:center}
 .elcnav-login:hover{color:var(--ink);border-color:rgba(255,255,255,.24)}
+/* ---- notice strip -------------------------------------------------------------
+   State, not decoration: rendered only while something is true about this member, and
+   dismissible. `--nc` carries the tone so one rule set serves them all. */
+.elcnotice{display:flex;align-items:flex-start;gap:var(--sp-3);
+  padding:var(--sp-3) var(--sp-4);margin:0 0 var(--sp-4);
+  border-radius:var(--r-lg);
+  background:color-mix(in srgb,var(--nc) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--nc) 30%,transparent);
+  --nc:var(--teal)}
+.elcnotice.warn{--nc:var(--gold)}
+.elcnotice.good{--nc:var(--teal)}
+.elcnotice .ni{font-size:17px/* emoji glyph, not type */;line-height:1.3;flex:0 0 auto}
+.elcnotice .nt{flex:1;min-width:0;font-size:var(--fs-sm);line-height:1.55;color:var(--ink)}
+.elcnotice .nt b{font-family:var(--display);font-weight:600}
+.elcnotice .nt a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.elcnotice .nx{flex:0 0 26px;width:26px;height:26px;border-radius:50%;padding:0;cursor:pointer;
+  display:grid;place-items:center;background:transparent;border:1px solid transparent;
+  color:var(--soft2);transition:color .15s,background .15s,border-color .15s}
+.elcnotice .nx svg{width:13px;height:13px}
+.elcnotice .nx:hover{color:var(--ink);background:color-mix(in srgb,var(--nc) 18%,transparent);
+  border-color:color-mix(in srgb,var(--nc) 34%,transparent)}
+
 /* Contextual back link: sits under the header, above the page title, and names its
    PARENT — it is a breadcrumb step, not browser history, so it goes to the same place
    however the member arrived. The member header has no global back button on purpose;

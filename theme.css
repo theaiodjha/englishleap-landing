@@ -443,6 +443,12 @@ html[data-theme="light"] .elcnav-tabs a:hover{color:#241f3a}
 html[data-theme="light"] .elcnav-login{background:rgba(255,255,255,.72) !important;
   border-color:rgba(60,50,110,.20) !important;color:#3a3560 !important}
 
+/* The notice tint on light. --gold is a dark-ground colour, so a 12% wash of it on paper
+   is almost invisible; the warn tone gets a warmer, denser fill and a real edge. */
+html[data-theme="light"] .elcnotice{background:color-mix(in srgb,var(--nc) 16%,#fff) !important}
+html[data-theme="light"] .elcnotice.warn{background:rgba(255,203,84,.26) !important;
+  border-color:rgba(154,106,0,.42) !important}
+
 /* Eyebrows on light. Small letterspaced caps need MORE contrast than body text, not
    less — thin strokes with wide gaps give the eye little to hold on to. The teal LABEL
    form keeps its hue at the legible step (#1fc4b6 is 2.0:1 on white); the PILL form takes

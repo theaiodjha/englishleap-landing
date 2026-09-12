@@ -82,6 +82,49 @@
     if (label) label.textContent = name;
   }
 
+  /* ---- notice strips -------------------------------------------------------
+     ELCNotice(el, {key, tone, icon, html}) renders one strip into `el`, or nothing at all
+     if this device has dismissed that key. Returns true if it rendered.
+
+     The KEY should carry a period where the notice recurs — 'quota-2026-09' rather than
+     'quota' — so dismissing this month's warning does not silence next month's. A notice
+     that can be permanently switched off is a notice that will be, and then the one time
+     it mattered it will not be there. */
+  var SEEN_KEY = 'elc-notice-seen';
+
+  function seenSet() {
+    try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); }
+    catch (e) { return new Set(); }
+  }
+  function markSeen(key) {
+    try {
+      var set = seenSet();
+      set.add(key);
+      // Array.from, NOT slice.call: a Set has no length, so slice.call returns [] and every
+      // dismissal is silently forgotten. Bounded because old periods never recur.
+      localStorage.setItem(SEEN_KEY, JSON.stringify(Array.from(set).slice(-40)));
+    } catch (e) {}
+  }
+
+  window.ELCNotice = function (el, o) {
+    if (!el || !o || !o.key) return false;
+    if (seenSet().has(o.key)) return false;
+    el.innerHTML =
+      '<div class="elcnotice ' + (o.tone || '') + '" role="status">' +
+        '<span class="ni" aria-hidden="true">' + (o.icon || '') + '</span>' +
+        '<span class="nt">' + (o.html || '') + '</span>' +
+        '<button type="button" class="nx" aria-label="Dismiss">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+            'stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
+        '</button>' +
+      '</div>';
+    el.querySelector('.nx').addEventListener('click', function () {
+      markSeen(o.key);
+      el.innerHTML = '';
+    });
+    return true;
+  };
+
   /* ---- slow and dead responses ---------------------------------------------
      fetch() has no timeout of its own: a hung connection hangs until the browser gives
      up, which can be minutes, with the page showing nothing and saying nothing. */
