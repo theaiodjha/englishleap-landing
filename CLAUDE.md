@@ -90,7 +90,10 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   six copies of "Signed in as … [Sign out]" (which ate the header on phones). Pass
   `{name, plan}` where plan is `fluency|transcript|trial|none`; pass `null` for the
   signed-out Member Login link. The card also carries the theme choice and, where the page
-  has a tour (`ELCTour.pageTour()`), a "Take the tour" row. Each row sets its own `--rc`
+  has a tour (`ELCTour.pageTour()`), a "Take the tour" row — **on every page**: where the
+  tour can run in place it is a button, everywhere else a link to
+  `/practice-arcade.html?elctour=arcade` (elc-tour.js honours that param), so the menu never
+  changes shape from page to page and pages need not carry the tour script. Each row sets its own `--rc`
   (violet for progress, teal for the tour, red for sign out): the icon wears it and the
   hover is a 16% wash of it, never grey. `theme.css` re-points `--rc` to a darker step for
   light and changes nothing else. **Never write `.elcnav-acct a`** — the card lives inside

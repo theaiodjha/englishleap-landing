@@ -108,6 +108,15 @@
     return (first + last).toUpperCase();
   }
 
+  // elc-tour.js honours ?elctour=<id> on load, so a page with no tour of its own can still
+  // offer one without carrying the script.
+  var TOURHREF = '/practice-arcade.html?elctour=arcade';
+  var TOURICON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 1 1 3.2 2.5c-.5.2-.7.6-.7 1.1v.4"/>' +
+      '<path d="M12 17h.01"/></svg>';
+
   // ELCAccount({name, plan}) signed in, or ELCAccount(null, {next}) signed out.
   window.ELCAccount = function (user, opts) {
     var slot = document.getElementById('acct');
@@ -140,11 +149,12 @@
         '</div>' +
         '<a class="elcnav-card-row r-progress" role="menuitem" href="/progress.html">' +
           svg('progress') + '<span>Your progress</span></a>' +
-        (tour ? '<button class="elcnav-card-row r-tour" role="menuitem" type="button" id="acctTour">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
-            'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-            '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 1 1 3.2 2.5c-.5.2-.7.6-.7 1.1v.4"/>' +
-            '<path d="M12 17h.01"/></svg><span>Take the tour</span></button>' : '') +
+        // a button where the tour can run here, a link to the Arcade tour where it cannot
+        (tour
+          ? '<button class="elcnav-card-row r-tour" role="menuitem" type="button" id="acctTour">' + TOURICON +
+            '<span>Take the tour</span></button>'
+          : '<a class="elcnav-card-row r-tour" role="menuitem" href="' + TOURHREF + '">' + TOURICON +
+            '<span>Take the tour</span></a>') +
         '<div class="elcnav-card-theme" role="group" aria-label="Theme">' +
           '<span class="elcnav-card-theme-lbl">Theme</span>' +
           '<span class="elcnav-seg">' +
