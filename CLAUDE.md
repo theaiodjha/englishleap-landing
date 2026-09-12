@@ -182,7 +182,9 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   their minimal bar** — back, brand, account, no tabs (a game is a focus task) — while
   `index.html` keeps its marketing nav. The four standard games DO use the shared account
   control: they load `elc-nav.js` for `ELCAccount` alone (no `#elcnav` slot, so no header is
-  rendered) and show the logo + "English Leap" like every other page. **Clue Room is the
+  rendered). **The game bar carries no brand**: the way out on the left, the account on the
+  right, nothing else. A logo inside a game names something the member already knows, and
+  the vertical space belongs to the puzzle. **Clue Room is the
   exception**: a 3D scene with a kebab HUD rather than a page with a header, and its menu
   reaches the Arcade, sign-out and — since it has no account card to hold it — **the
   theme**, in a segment mirroring `.elcnav-card-theme`. So no page on the site shows the

@@ -29,11 +29,6 @@
   .wrap{max-width:1100px;margin:0 auto;padding:14px 18px 60px;min-height:100%}
   .bar{display:flex;align-items:center;gap:var(--sp-3);justify-content:space-between;padding:6px 2px 14px}
   .bar .elcback{margin:0}
-  .bar .left{display:flex;align-items:center;gap:var(--sp-3);min-width:0}
-  /* same logo and wordmark as every other page; see elc-nav.js */
-  .brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);
-    font-family:var(--display);font-weight:600;font-size:var(--fs-md);white-space:nowrap}
-  .brand img{width:26px;height:26px;border-radius:8px;display:block}
   .brand .dot{color:var(--coral)}
 
   .head{text-align:center;margin:6px 0 14px}
@@ -119,10 +114,7 @@
   <!-- for ELCAccount. Renders no header here: there is no #elcnav slot. -->
   <script src="/elc-nav.js"></script>
   <div class="bar">
-    <div class="left">
-      <a class="elcback" href="/arcade-type.html?type=listening-gap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>All episodes</span></a>
-      <a class="brand" href="/practice-arcade.html"><img src="/assets/brand/elc-icon-64.png" alt="" width="26" height="26">English Leap</a>
-    </div>
+    <a class="elcback" href="/arcade-type.html?type=listening-gap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>All episodes</span></a>
     <div class="elcnav-acct" id="acct"></div>
   </div>
 
