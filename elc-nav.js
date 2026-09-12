@@ -245,6 +245,9 @@
   }
 
   render();
-  // outside render(): the back link does not depend on the header slot existing
-  smartBack();
+  /* The back link sits BELOW this script in the document, so it does not exist yet when
+     this file runs (the header is rendered synchronously on purpose, so page scripts can
+     find #acct). Wait for the parse to finish before looking for it. */
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', smartBack);
+  else smartBack();
 })();

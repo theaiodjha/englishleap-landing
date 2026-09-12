@@ -110,7 +110,9 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   `elc-nav.js` rewrites it from `document.referrer` — but only for a same-origin page it
   can NAME (see the PAGE map; `arcade-type.html` is named by its `?type=`), so the label
   is never a bare URL. Reload, off-site, no referrer, unnamed page → the markup's own href
-  stands, which is why it is a real `<a>` and not built in JS.
+  stands, which is why it is a real `<a>` and not built in JS. It runs on DOMContentLoaded,
+  not inline: `elc-nav.js` is deliberately synchronous (so page scripts find `#acct`), which
+  means anything BELOW it in the markup — the back link included — does not exist yet.
 - **The Member Archive is hidden from the whole site** until it actually works: no nav
   tab, and every link commented with "Member Archive hidden until it is a working
   feature" (`index.html` x2, `games/clue-room`). `archive.html` still exists at its URL.
