@@ -133,10 +133,13 @@
   .readsec{max-width:1000px;margin:var(--sp-5) auto 0;text-align:center}
   /* On a laptop the win screen was a 680px column ~1200px tall, so the bonus ending —
      the Fluency Club reward — sat below the fold. Two columns put it in view. */
-  .rescols{display:grid;grid-template-columns:1fr;gap:var(--sp-4);align-items:start;margin-top:var(--sp-4)}
-  @media(min-width:900px){ .rescols{grid-template-columns:1fr 1fr;gap:var(--sp-6)} }
-  .rescol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-3);
-    padding:var(--sp-5) var(--sp-4);border:1px solid var(--line);border-radius:22px;background:var(--glass)}
+  .rescols{display:grid;grid-template-columns:1fr;gap:var(--sp-4);align-items:stretch;margin-top:var(--sp-4)}
+  /* the bonus card carries far more content, so give it the wider column; stretch
+     keeps both cards the same height rather than leaving a short, sparse one */
+  @media(min-width:900px){ .rescols{grid-template-columns:1fr 1.35fr;gap:var(--sp-6)} }
+  .rescol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-4);
+    padding:var(--sp-6) var(--sp-5);border:1px solid var(--line);border-radius:22px;background:var(--glass)}
+  .rescol h3{font-family:var(--display);font-weight:700;font-size:var(--fs-xl);margin:0}
   .rescol .readbtn{margin:0}
   .rescol .vctl{margin:0}
   .card.result{max-width:1000px}
@@ -363,7 +366,7 @@ function revealResult(){
     + '<a class="sec" href="/arcade-type.html?type='+TYPE+'">More episodes</a></div>'
     + '</div>';
   html+='<div class="readsec"><div class="rescols">'
-      + '<div class="rescol"><div id="voiceControls"></div>'
+      + '<div class="rescol"><h3>Hear it again</h3><div id="voiceControls"></div>'
       + '<button class="readbtn" id="readStory"><span>&#9654;</span> Read the story again</button></div>';
   if(BONUS){
     html+='<div class="bonus"><span class="btag">&#10024; Bonus ending &middot; Fluency Club</span>'
