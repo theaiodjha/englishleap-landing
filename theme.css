@@ -377,8 +377,9 @@ html[data-theme="light"] #stagebg::before{
     radial-gradient(38% 38% at 30% 32%, rgba(139,108,255,.10), transparent 62%),
     radial-gradient(34% 34% at 72% 60%, rgba(31,196,182,.09), transparent 62%) !important;
 }
-/* an unfilled gap needs an edge to read as a slot on a pale card */
-html[data-theme="light"] .gap{
+/* story-unlock's gaps are slots and need a fill to be visible; listening-gap's are a
+   coral underline and must stay one — a fill there just draws a grey box. */
+html[data-theme="light"] .story .gap{
   background:rgba(60,50,110,.07) !important;
   border-bottom:2px solid rgba(60,50,110,.35) !important;
 }
@@ -392,3 +393,13 @@ html[data-theme="light"] .kw.on{
   background:rgba(255,205,70,.42) !important; color:#4a3100 !important;
   box-shadow:0 0 0 2px rgba(154,95,6,.28) !important;
 }
+
+/* Saturated chip fills read well on a dark ground and shout on a light one. The colour
+   is inline (per word), so soften it with an inset white wash rather than replacing it —
+   the hue still identifies the phrase, at a weight that suits daylight. */
+html[data-theme="light"] .chip{
+  box-shadow:inset 0 0 0 999px rgba(255,255,255,.56) !important;
+  border-color:rgba(60,50,110,.22) !important;
+}
+html[data-theme="light"] .chip:hover{box-shadow:inset 0 0 0 999px rgba(255,255,255,.42) !important}
+html[data-theme="light"] .gap.filled{box-shadow:inset 0 0 0 999px rgba(255,255,255,.5) !important}

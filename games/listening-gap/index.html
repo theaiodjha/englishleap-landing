@@ -183,7 +183,7 @@ function renderRound(){
     <div class="card">
       <div class="sentence" id="sentence">${gapHTML(r.text,r.phrase)}</div>
       <div><button class="play" id="playBtn"><span class="ic">&#9654;</span> Hear the sentence</button></div>
-      <div><button class="replay" id="replayBtn">Play again</button></div>
+      <div><button class="replay" id="replayBtn">Hear it again</button></div>
     </div>
     <div class="bank" id="bank">${bank.map(w=>{const c=byPhrase[w];return `<button class="chip" data-w="${esc(w)}" style="background:${c};color:${textOn(c)}">${esc(w)}</button>`;}).join('')}</div>`;
   $('#playBtn').onclick=()=>speak(r.text);
