@@ -78,6 +78,14 @@
     color:#22304a;font-family:var(--body);font-weight:600;font-size:clamp(11.5px,2.9vw,15px);line-height:1.26;
     overflow-wrap:break-word;hyphens:auto;
     border:1px solid rgba(255,255,255,.6)}
+  /* On a match the meaning card takes a washed version of its partner's colour, so the
+     pair reads as one unit. Unmatched meanings stay neutral — the tint IS the signal. */
+  .card.matched .front.meaning{
+    background:linear-gradient(150deg,
+      color-mix(in srgb, var(--c) 26%, #ffffff),
+      color-mix(in srgb, var(--c) 16%, #ffffff));
+    color:#22304a;
+  }
   .card.matched{cursor:default}
   .card.matched .front{box-shadow:0 0 0 3px var(--c),0 12px 30px -8px var(--c)}
   .card.matched .inner{animation:pop .42s ease}
@@ -208,7 +216,7 @@ function renderDeck(){
     b.setAttribute('aria-label','Card '+(idx+1));
     const front = c.kind==='word'
       ? `<div class="face front word" style="--c:${esc(c.color)};color:${textOn(c.color)}">${esc(c.text)}</div>`
-      : `<div class="face front meaning">${esc(c.text)}</div>`;
+      : `<div class="face front meaning" style="--c:${esc(c.color)}">${esc(c.text)}</div>`;
     b.innerHTML=`<div class="inner"><div class="face back">&#10022;</div>${front}</div>`;
     b.addEventListener('click',()=>onFlip(idx,b));
     grid.appendChild(b);
