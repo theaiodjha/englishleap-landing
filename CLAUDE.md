@@ -179,8 +179,16 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   labels a $1 Transcript backer a Fluency member. `api/games.js` ships it as `level`;
   `api/list.js`, `api/progress.js` and `api/use-it-live.js` ship it as `plan`.
 - **There is no global back button** — the tabs are the way around, and **the games keep
-  their minimal back-only bar** (a game is a focus task) while `index.html` keeps its
-  marketing nav. The two pages a level below the Arcade (`arcade-browse.html`,
+  their minimal bar** — back, brand, account, no tabs (a game is a focus task) — while
+  `index.html` keeps its marketing nav. The four standard games DO use the shared account
+  control: they load `elc-nav.js` for `ELCAccount` alone (no `#elcnav` slot, so no header is
+  rendered) and show the logo + "English Leap" like every other page. **Clue Room is the
+  exception**: a 3D scene with a kebab HUD rather than a page with a header, and its menu
+  already reaches the Arcade and sign-out. Removing each game's `.out` pill rule was part of
+  this — the card's Sign out ROW is also `.out`, so leaving it would have painted the old
+  pill around it, the same collision as `.ep.go` and `.elcnav-acct a`. **No game uses
+  `history.back()`**: the href already names the parent, and history sends a member arriving
+  from a shared link somewhere unrelated. The two pages a level below the Arcade (`arcade-browse.html`,
   `arcade-type.html`) carry a `.elcback` link naming their PARENT ("Practice Arcade",
   "Browse all games"): a breadcrumb step, so it lands in the same place however the
   member arrived — not browser history. **`progress.html` is the exception**: it is a
