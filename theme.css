@@ -434,8 +434,10 @@ html[data-theme="light"] .elcnav-tabs a.on{
   box-shadow:0 6px 18px -8px rgba(255,178,66,.75);
 }
 html[data-theme="light"] .elcnav-tabs a:hover{color:#241f3a}
-html[data-theme="light"] .elcnav-out,
-html[data-theme="light"] .elcnav-acct a{background:rgba(255,255,255,.72) !important;
+/* The signed-out control only. NOT `.elcnav-acct a` — the account card is a descendant
+   of .elcnav-acct, so that form paints the old header pill around every row in the menu.
+   This copy outlived the elc.css one because it carries !important. */
+html[data-theme="light"] .elcnav-login{background:rgba(255,255,255,.72) !important;
   border-color:rgba(60,50,110,.20) !important;color:#3a3560 !important}
 
 /* account card: paper, not glass — and the plan line needs the light teal ink */
