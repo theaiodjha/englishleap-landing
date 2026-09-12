@@ -88,10 +88,12 @@
 .elcnav-tabs a:hover{color:var(--ink)}
 .elcnav-tabs a.on{background:linear-gradient(100deg,var(--teal),var(--purple));color:#fff}
 .elcnav-acct{display:inline-flex;align-items:center;gap:10px;font-size:var(--fs-sm);color:var(--soft)}
-.elcnav-out,.elcnav-acct a{color:var(--soft);text-decoration:none;font-weight:600;
+/* Scoped to the control itself, never descendants: the card is inside .elcnav-acct, so
+   a bare `.elcnav-acct a` also hit every row in the menu and boxed them in a pill. */
+.elcnav-login{color:var(--soft);text-decoration:none;font-weight:600;
   border:1px solid var(--line);background:var(--glass2);border-radius:var(--r-full);
   padding:8px 14px;min-height:38px;display:inline-flex;align-items:center}
-.elcnav-acct a:hover{color:var(--ink);border-color:rgba(255,255,255,.24)}
+.elcnav-login:hover{color:var(--ink);border-color:rgba(255,255,255,.24)}
 /* Contextual back link: sits under the header, above the page title, and names its
    PARENT — it is a breadcrumb step, not browser history, so it goes to the same place
    however the member arrived. The member header has no global back button on purpose;
@@ -130,9 +132,15 @@
   padding:0 var(--sp-3);border:0;border-radius:var(--r-md);background:transparent;cursor:pointer;
   font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--soft);
   text-decoration:none;text-align:left;transition:background .15s,color .15s}
-.elcnav-card-row svg{width:17px;height:17px;flex:0 0 17px}
-.elcnav-card-row:hover{background:var(--glass2);color:var(--ink)}
-.elcnav-card-row.out:hover{color:#ff9a9a}
+.elcnav-card-row svg{width:17px;height:17px;flex:0 0 17px;color:var(--rc);transition:transform .15s}
+.elcnav-card-row{--rc:var(--teal)}
+.elcnav-card-row.r-progress{--rc:var(--purple)}
+.elcnav-card-row.r-tour{--rc:var(--teal)}
+.elcnav-card-row.out{--rc:#ff8f8f}
+.elcnav-card-row:hover{background:color-mix(in srgb,var(--rc) 16%,transparent);color:var(--ink)}
+.elcnav-card-row:hover svg{transform:scale(1.12)}
+.elcnav-card-row.out:hover{color:var(--rc)}
+@media (prefers-reduced-motion:reduce){.elcnav-card-row:hover svg{transform:none}}
 .elcnav-card-theme{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);
   padding:var(--sp-2) var(--sp-3);margin:var(--sp-1) 0;
   border-top:1px solid var(--line);border-bottom:1px solid var(--line)}

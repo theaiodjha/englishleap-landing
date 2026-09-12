@@ -138,9 +138,9 @@
           '<span class="elcnav-card-who"><b>' + esc(user.name) + '</b>' +
             (plan ? '<span class="elcnav-card-plan">' + esc(plan) + '</span>' : '') + '</span>' +
         '</div>' +
-        '<a class="elcnav-card-row" role="menuitem" href="/progress.html">' +
+        '<a class="elcnav-card-row r-progress" role="menuitem" href="/progress.html">' +
           svg('progress') + '<span>Your progress</span></a>' +
-        (tour ? '<button class="elcnav-card-row" role="menuitem" type="button" id="acctTour">' +
+        (tour ? '<button class="elcnav-card-row r-tour" role="menuitem" type="button" id="acctTour">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
             '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 1 1 3.2 2.5c-.5.2-.7.6-.7 1.1v.4"/>' +

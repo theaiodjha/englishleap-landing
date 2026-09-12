@@ -90,7 +90,11 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   six copies of "Signed in as … [Sign out]" (which ate the header on phones). Pass
   `{name, plan}` where plan is `fluency|transcript|trial|none`; pass `null` for the
   signed-out Member Login link. The card also carries the theme choice and, where the page
-  has a tour (`ELCTour.pageTour()`), a "Take the tour" row. **`index.html` uses it too** —
+  has a tour (`ELCTour.pageTour()`), a "Take the tour" row. Each row sets its own `--rc`
+  (violet for progress, teal for the tour, red for sign out): the icon wears it and the
+  hover is a 16% wash of it, never grey. `theme.css` re-points `--rc` to a darker step for
+  light and changes nothing else. **Never write `.elcnav-acct a`** — the card lives inside
+  that element, so a descendant selector boxes every row in the old header pill. **`index.html` uses it too** —
   it loads `elc-nav.js` for the control alone (no `#elcnav` slot, so no header is rendered)
   and asks **`/api/me`**, which reads the cookie and nothing else; /api/games would ship the
   whole catalogue to answer a question about one cookie. It is a label, never a gate: every
