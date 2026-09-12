@@ -4,7 +4,7 @@ import "../lib/quiet-deprecations.js";
 //   GET /api/games?type=clue-room&ep=ep232 → the gated content for one game
 // Reuses the exact membership logic from lib/session.js (same live re-check as
 // /api/list), so access tracks paying status identically to the archive.
-import { readSession, revalidateSession } from "../lib/session.js";
+import { readSession, revalidateSession, planOf } from "../lib/session.js";
 import { touchMember } from "../lib/history.js";
 import { getArcade } from "../lib/arcade-store.js";
 import { fullTitleFor } from "../lib/episode-titles.js";
@@ -66,5 +66,5 @@ export default async function handler(req, res) {
   }
   // icon + accent so a game page can wear the same identity as its tile in the Arcade,
   // rather than each page hardcoding its own
-  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, icon: gt.icon || "", accent: gt.accent || "", walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "", user: s ? s.name : null, content: e.content });
+  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, icon: gt.icon || "", accent: gt.accent || "", walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "", user: s ? s.name : null, plan: planOf(s), content: e.content });
 }

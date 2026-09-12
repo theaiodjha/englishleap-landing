@@ -40,10 +40,11 @@
   .back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--soft);font-weight:600;font-size:var(--fs-md);
     background:var(--glass);border:1px solid var(--line);padding:var(--sp-2) 13px;border-radius:999px;white-space:nowrap}
   .back:hover{color:var(--ink)}
-  .brand{font-family:var(--display);font-weight:700;font-size:var(--fs-lg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* same logo and wordmark as every other page; see elc-nav.js */
+  .brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);
+    font-family:var(--display);font-weight:600;font-size:var(--fs-md);white-space:nowrap}
+  .brand img{width:26px;height:26px;border-radius:8px;display:block}
   .brand .dot{color:var(--teal)}
-  .out{appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--soft);font:inherit;font-size:var(--fs-sm);font-weight:600;padding:var(--sp-2) 13px;border-radius:999px;cursor:pointer}
-  .out:hover{color:var(--ink)}
 
   .head{text-align:center;margin:6px 0 14px}
   .ep{font-family:var(--display);font-weight:700;font-size:var(--fs-sm);letter-spacing:.06em;color:var(--teal)}
@@ -136,10 +137,12 @@
 <body>
 <div id="stagebg"></div>
 <div class="wrap">
+  <!-- for ELCAccount. Renders no header here: there is no #elcnav slot. -->
+  <script src="/elc-nav.js"></script>
   <div class="bar">
     <div class="left">
-      <a class="back" href="/arcade-type.html?type=sentence-builder" onclick="if(history.length>1){history.back();return false}">&#8592; Back</a>
-      <div class="brand">Practice Arcade</div>
+      <a class="back" href="/arcade-type.html?type=sentence-builder">&#8592; Back</a>
+      <a class="brand" href="/practice-arcade.html"><img src="/assets/brand/elc-icon-64.png" alt="" width="26" height="26">English Leap</a>
     </div>
     <div id="acct"></div>
   </div>
@@ -328,10 +331,9 @@ function gate(title,msg,cta,how){
   const hb=$('#gateHow'); if(hb){ if(how&&how.src){ hb.style.display='inline-flex'; hb.onclick=function(){ if(window.ELC) ELC.playVideo(how.src,how.title||'How to play',how.poster); }; } else hb.style.display='none'; }
   $('#gateview').classList.add('show');
 }
-function acctBar(name){
-  const acct=$('#acct');
-  if(name){acct.innerHTML=`<button class="out" id="signoutMenu">Sign out</button>`;$('#signoutMenu').onclick=async()=>{try{await fetch('/api/auth/signout',{method:'POST'});}catch(e){}location.href='/practice-arcade.html';};}
-  else acct.innerHTML='';
+function acctBar(name, plan){
+  /* the same avatar + card as every other page, not a bare Sign out button */
+  ELCAccount(name ? { name: name, plan: plan } : null, { next: location.pathname + location.search });
 }
 async function load(){
   let res;
@@ -348,7 +350,7 @@ async function load(){
   if(d.icon) $('#gameIcon').textContent=d.icon;
   if(d.content.intro) $('#sub').textContent=d.content.intro;
   $('#pRound').textContent='1/'+(sentences.length||1);
-  acctBar(d.user);
+  acctBar(d.user, d.plan);
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}
   try{ window.ELC&&d.walkthrough&&ELC.howToPlay(d.walkthrough,(d.name||"")+" \u2014 how to play",(d.walkthroughPoster||("/covers/"+TYPE+".png"))); }catch(e){}
   idx=0; score=0; $('#pScore').textContent='0';
