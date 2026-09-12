@@ -46,7 +46,9 @@ const full = {
          { label: 'Sep', minutes: 29, sessions: 4 }],
   mastery: [{ n: 280, title: 'Listen & Speak', owned: 2, started: 1, untouched: 3,
               words: [{ w: 'a', state: 'owned' }] }],
-  byType: { 'clue-room': 1 }, types: [{ type: 'clue-room', name: 'Clue Room' }],
+  byType: { 'clue-room': 1 },
+  types: [{ type: 'clue-room', name: 'Clue Room', icon: '\u{1F50D}', accent: '#8b6cff' }],
+  usedMin: 2, limitMin: 100,
   recent: [{ t: Date.parse('2026-09-12'), episodeId: 'ep280', n: 280, title: 'Listen & Speak',
              minutes: 2, words: ['retrieve'], wpm: 110 }],
   weeks: [{ week: '2026-W30', active: false, current: false },
@@ -56,6 +58,7 @@ const full = {
 
 m.render(full);
 let h = out.html;
+const hFull = h;   // kept for the assertions further down, after `h` is reassigned
 
 ok('a member with history gets four clickable tiles',
   (h.match(/<button type="button" class="k/g) || []).length === 4);
@@ -78,6 +81,20 @@ ok('with nothing to show, only the tile that leads somewhere is a button',
 ok('...and it is recordings', /data-go="recent"/.test(h));
 ok('no dead affordance on the empty tiles',
   !/data-card="cb-phrases"/.test(h) && !/data-card="cb-speaking"/.test(h));
+
+// --- the three cards below the KPI row ---
+ok('the KPI card may overflow, so a selected tile is not clipped',
+  /class="card wide nofold"/.test(hFull));
+ok('allowance meter is drawn from usedMin/limitMin the API already sent',
+  /of 100 minutes this month/.test(hFull) && /98 left/.test(hFull));
+ok('episode rows open to name the phrases, not just count them',
+  /class="ep go"/.test(hFull) && /class="epwords"/.test(hFull));
+ok('...and each phrase carries its own state', /<i class="owned">a<\/i>/.test(hFull));
+ok('game rows are links into that game',
+  /<a class="gt" href="\/arcade-type.html\?type=clue-room"/.test(hFull));
+ok('...wearing the catalogue accent and icon',
+  /--ga:#8b6cff/.test(hFull) && /class="gi"[^>]*>\u{1F50D}</u.test(hFull));
+ok('no duplicate style attribute on the track', !/style="[^"]*" style="/.test(hFull));
 
 const rec = m.drawerHTML(full, 'recent', {e:'M'});
 ok('recent drawer names the episode', /EP280/.test(rec));

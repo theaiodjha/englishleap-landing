@@ -391,6 +391,14 @@ the tile's **hue** carried in via `--kc` (colour identifying, not decorating), a
 **header** naming the number in words for anyone who can use neither. A tile whose target
 does not exist for that member renders as a plain `<div>`, not a button: an affordance that opens an
 empty card is worse than none. `node tools/test-progress-kpi.js` guards exactly that.
+Each card below it does one more thing than it used to: **Speaking practice** opens with
+this month's **allowance meter** (`usedMin`/`limitMin` were in the payload and unused —
+"how much have I got left?" is the question members ask unprompted, and it works from the
+first session, chart or no chart); **Phrases** rows open to NAME the phrases rather than
+only counting them in dots; **Games finished** rows are links into that game wearing its
+catalogue `accent`/`icon`. A card built with `fold:false` gets `.nofold`, which restores
+`overflow:visible` — `.cardbody`'s `overflow:hidden` is only there to animate a fold, and
+on the KPI card it clipped the selected tile.
 The KPI row and "What next" do not fold — one is the headline, the other is a single button.
 The KPI row is a tile per stat: an emoji chip carrying a pillar colour, and the **numeral in
 an ink token** — a coloured number loses contrast on light and reads as a status. A zero

@@ -61,6 +61,9 @@
   .cardhead:hover .chev{color:var(--ink)}
   .card.shut .cardhead .chev{transform:rotate(-90deg)}
   .cardbody{overflow:hidden;transition:max-height .34s cubic-bezier(.4,0,.2,1),opacity .24s ease}
+  /* a card that cannot fold has nothing to animate, so hiding overflow only clipped the
+     selected KPI tile, which sits proud of the row by its own padding */
+  .card.nofold .cardbody{overflow:visible}
   .cardinner{padding-top:var(--sp-5)}
   .card.shut .cardbody{opacity:0}
   @media (prefers-reduced-motion:reduce){.cardbody,.cardhead .chev{transition:none}}
@@ -158,6 +161,19 @@
   details.tbl th,details.tbl td{text-align:left;padding:6px 18px 6px 0;border-bottom:1px solid var(--line)}
   details.tbl th{color:var(--soft2);font-weight:600}
 
+  /* this month's speaking allowance — the number a member actually asks for */
+  .allow{margin-bottom:var(--sp-5)}
+  .allow-top{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3);
+    margin-bottom:9px}
+  .allow-top b{font-family:var(--display);font-weight:700;font-size:var(--fs-lg);color:var(--ink);
+    font-variant-numeric:tabular-nums}
+  .allow-top span{font-size:var(--fs-sm);color:var(--soft2)}
+  .allow-track{height:10px;border-radius:var(--r-full);background:var(--glass2);
+    border:1px solid var(--line);overflow:hidden}
+  .allow-track>i{display:block;height:100%;border-radius:var(--r-full);
+    background:linear-gradient(90deg,var(--teal),var(--purple));
+    transition:width 1s cubic-bezier(.22,1,.36,1)}
+
   /* phrase mastery */
   .ep{display:flex;align-items:center;gap:var(--sp-3);padding:11px 0;border-top:1px solid var(--line);flex-wrap:wrap}
   .ep:first-of-type{border-top:0}
@@ -171,14 +187,37 @@
   .dots i.started{background:transparent;box-shadow:inset 0 0 0 2px var(--gold);position:relative}
   .dots i.started::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--gold)}
   .dots i.untouched{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
+  .ep.go{cursor:pointer;border-radius:var(--r-md);padding-left:var(--sp-2);padding-right:var(--sp-2);
+    margin-left:calc(var(--sp-2) * -1);margin-right:calc(var(--sp-2) * -1);
+    transition:background .15s}
+  .ep.go:hover{background:var(--glass2)}
+  .ep .chev{width:16px;height:16px;flex:0 0 16px;color:var(--soft2);transition:transform .25s}
+  .ep.open .chev{transform:rotate(90deg)}
+  .epwords{flex:1 1 100%;display:none;flex-wrap:wrap;gap:6px;padding:var(--sp-1) 0 var(--sp-2)}
+  .ep.open .epwords{display:flex}
+  .epwords i{font-style:normal;display:inline-flex;align-items:center;gap:6px;
+    font-size:var(--fs-xs);color:var(--soft);border-radius:999px;padding:3px 10px 3px 7px;
+    background:var(--glass2);border:1px solid var(--line)}
+  .epwords i::before{content:"";width:9px;height:9px;border-radius:50%;
+    box-shadow:inset 0 0 0 1.5px var(--line)}
+  .epwords i.owned{color:var(--ink)}
+  .epwords i.owned::before{background:var(--teal);box-shadow:none}
+  .epwords i.started::before{background:var(--gold);box-shadow:none}
   .key{display:flex;flex-wrap:wrap;gap:var(--sp-4);margin-top:var(--sp-5);font-size:var(--fs-xs);color:var(--soft2)}
   .key span{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 
   /* games */
-  .gt{display:grid;grid-template-columns:minmax(110px,1fr) 2fr auto;align-items:center;gap:var(--sp-3);padding:9px 0}
+  .gt{display:grid;grid-template-columns:auto minmax(96px,1fr) 2fr auto;align-items:center;
+    gap:var(--sp-3);padding:9px var(--sp-2);margin:0 calc(var(--sp-2) * -1);
+    border-radius:var(--r-md);text-decoration:none;transition:background .15s}
+  a.gt:hover{background:color-mix(in srgb,var(--ga) 12%,transparent)}
+  .gt .gi{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
+    font-size:15px/* emoji glyph, not type */;
+    background:color-mix(in srgb,var(--ga) 16%,transparent);
+    border:1px solid color-mix(in srgb,var(--ga) 30%,transparent)}
   .gt .nm{font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink)}
   .gt .track{height:9px;border-radius:var(--r-full);background:rgba(255,255,255,.08);overflow:hidden}
-  .gt .track>i{display:block;height:100%;border-radius:var(--r-full);background:var(--purple)}
+  .gt .track>i{display:block;height:100%;border-radius:var(--r-full);background:var(--ga,var(--purple))}
   .gt .num{font-family:var(--display);font-weight:700;font-size:var(--fs-sm);color:var(--soft)}
 
   .go{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:12px 22px;border-radius:var(--r-full);
@@ -278,7 +317,7 @@ function card(o){
     : `<button class="cardhead" type="button" data-fold="${o.key}" aria-expanded="${!shut}" aria-controls="${id}">
          <span class="ct"><span class="h2" role="heading" aria-level="2">${o.title}</span>${o.sub?`<span class="sub">${o.sub}</span>`:''}</span>
          ${CHEV}</button>`;
-  return `<section class="card${o.wide?' wide':''}${shut?' shut':''}">${head}
+  return `<section class="card${o.wide?' wide':''}${shut?' shut':''}${o.fold===false?' nofold':''}">${head}
     <div class="cardbody" id="${id}"><div class="cardinner"${head?'':' style="padding-top:0"'}>${o.body}</div></div>
   </section>`;
 }
@@ -324,7 +363,7 @@ function animateIn(){
   body.querySelectorAll('.card').forEach((c,i)=>{ c.style.animationDelay=Math.min(i*70,350)+'ms'; });
   body.querySelectorAll('.kpi b[data-to]').forEach(countUp);
   requestAnimationFrame(()=>{
-    body.querySelectorAll('.gt .track>i[data-w]').forEach(i=>{ i.style.width=i.dataset.w; });
+    body.querySelectorAll('[data-w]').forEach(i=>{ i.style.width=i.dataset.w; });
   });
 }
 
@@ -360,6 +399,23 @@ function drawerHTML(d,which,tile){
    Only one drawer is open at a time, and re-clicking the same tile closes it. */
 // emoji + hue per drawer, so the panel can repeat the tile it belongs to
 const KPIBY={recent:{e:'&#127897;&#65039;',c:'var(--coral)'},weeks:{e:'&#128293;',c:'var(--gold)'}};
+
+// episode rows open to show their phrases; keyboard too, since they are not <button>
+function wireEpisodes(){
+  document.querySelectorAll('.ep.go').forEach(row=>{
+    const toggle=()=>{
+      const open=row.classList.toggle('open');
+      row.setAttribute('aria-expanded', open?'true':'false');
+      // the card measured its height while this row was closed
+      const body=row.closest('.cardbody');
+      if(body && body.style.maxHeight!=='none') body.style.maxHeight='none';
+    };
+    row.addEventListener('click',toggle);
+    row.addEventListener('keydown',e=>{
+      if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); }
+    });
+  });
+}
 
 function wireKpi(d){
   const draw=$('#kdraw'), inner=$('#kdrawIn');
@@ -419,6 +475,22 @@ function wireFolds(){
   },{passive:true});
 }
 
+/* Minutes used against this month's allowance. The dashboard has always returned these
+   and the page never drew them — yet "how much have I got left?" is the one number a
+   member asks unprompted. Works from the very first session, chart or no chart. */
+function allowance(d){
+  const lim=Number(d.limitMin)||0, used=Math.min(Number(d.usedMin)||0, lim);
+  if(!lim) return '';
+  const pct=Math.max(used>0?3:0, Math.round(used/lim*100));   // a sliver is still visible
+  return `<div class="allow">
+    <div class="allow-top">
+      <b>${used} <span>of ${lim} minutes this month</span></b>
+      <span>${lim-used} left</span>
+    </div>
+    <div class="allow-track"><i data-w="${pct}%" style="width:0"></i></div>
+  </div>`;
+}
+
 function render(d){
   const t=d.totals;
   if(!d.hasAnything){
@@ -457,20 +529,31 @@ function render(d){
            `data-card="${k.go.card||''}"${aria}>${inner}</button>`;
   }).join('');
 
-  const eps=d.mastery.map(m=>`<div class="ep">
+  /* Six dots say 2 of 6; they cannot say WHICH two, which is the only part a member can
+     act on. The row opens to name the phrases. */
+  const eps=d.mastery.map((m,i)=>`<div class="ep go" data-ep="${i}" role="button" tabindex="0" aria-expanded="false">
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
       <span class="who"><b>EP${m.n} &middot; ${esc(m.title)}</b>
         <span>${m.owned} owned &middot; ${m.started} started &middot; ${m.untouched} to go</span></span>
       <span class="dots" role="img" aria-label="${m.owned} of ${m.words.length} phrases owned">
         ${m.words.map(w=>`<i class="${w.state}" title="${esc(w.w)} — ${w.state}"></i>`).join('')}</span>
+      <span class="epwords">${m.words.map(w=>`<i class="${w.state}">${esc(w.w)}</i>`).join('')}</span>
     </div>`).join('');
 
+  /* A link, wearing the game's own accent and icon from the catalogue: "Sentence Builder
+     0/30" should be somewhere to go, not a fact about yourself. */
   const games=(d.types||[]).map(ty=>{
     const done=(d.byType||{})[ty.type]||0, total=d.episodesTotal||1;
     // max(6px, ...) so one episode out of thirty is a bar and not an invisible sliver
     const pct=done?`max(6px, ${Math.round(done/total*100)}%)`:'0px';
-    return `<div class="gt"><span class="nm">${esc(ty.name)}</span>
+    const ga=ty.accent||'var(--purple)';
+    return `<a class="gt" href="/arcade-type.html?type=${encodeURIComponent(ty.type)}"
+        style="--ga:${esc(ga)}" aria-label="${esc(ty.name)}: ${done} of ${total} episodes finished">
+      <span class="gi" aria-hidden="true">${esc(ty.icon||'')}</span>
+      <span class="nm">${esc(ty.name)}</span>
       <span class="track"><i data-w="${pct}" style="width:0"></i></span>
-      <span class="num">${done}/${total}</span></div>`;
+      <span class="num">${done}/${total}</span></a>`;
   }).join('');
 
   const n=d.next;
@@ -482,9 +565,9 @@ function render(d){
     <div class="pcol">
     ${card({key:'speaking',title:'Speaking practice',
       sub:`Minutes analysed each month${d.pace?` &middot; you speak at about ${d.pace} words a minute`:''}`,
-      body: d.monthsWithData>1 ? chart(d.bars)
+      body: allowance(d) + (d.monthsWithData>1 ? chart(d.bars)
         : `<p class="sub">This is your first month of recording. Come back next month and
-           this becomes a trend you can watch.</p>`})}
+           this becomes a trend you can watch.</p>`)})}
 
     ${d.mastery.length?card({key:'phrases',title:'Phrases you are building',
       sub:'A phrase is yours once you have used it naturally three times',
@@ -508,6 +591,7 @@ function render(d){
   </div>`;
   wireFolds();
   wireKpi(d);
+  wireEpisodes();
   animateIn();
 }
 

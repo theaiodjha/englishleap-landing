@@ -89,7 +89,8 @@ export default async function handler(req, res) {
     const d = buildDashboard({ months: agg.months, words: agg.words, games, sessions, episodes });
     return res.json({
       ok: true, name: s.name, plan: planOf(s), ...d,
-      types: types.map((t) => ({ type: t.type, name: t.name })),
+      // accent + icon so the progress page can show each game as itself, not as a row
+      types: types.map((t) => ({ type: t.type, name: t.name, icon: t.icon || '', accent: t.accent || '' })),
       episodesTotal: episodes.length,
       usedMin: usage.usedMin, limitMin: usage.limitMin, remainingMin: usage.remainingMin,
       next: nextAction({ episodes, counts: agg.words, games, sessions, types }),
