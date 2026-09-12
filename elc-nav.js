@@ -20,7 +20,6 @@
     arcade: '<path d="M7 12h4M9 10v4"/><circle cx="15.5" cy="11" r="1"/><circle cx="17.5" cy="13.5" r="1"/>' +
             '<rect x="2.5" y="6.5" width="19" height="11" rx="4"/>',
     progress: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
-    archive: '<path d="M4 7v12a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V7"/><path d="M2.5 4.5h19v3h-19z"/><path d="M10 12h4"/>',
     live: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'
   };
 
@@ -28,7 +27,6 @@
     { href: '/practice-arcade.html', label: 'Arcade',      icon: 'arcade',
       match: ['/practice-arcade.html', '/arcade-browse.html', '/arcade-type.html'] },
     { href: '/progress.html',        label: 'Progress',    icon: 'progress', match: ['/progress.html'] },
-    { href: '/archive.html',         label: 'Archive',     icon: 'archive',  match: ['/archive.html'] },
     { href: '/use-it-live.html',     label: 'Use It Live', icon: 'live',     match: ['/use-it-live.html'], uil: true }
   ];
 
@@ -49,7 +47,9 @@
 
     slot.outerHTML =
       '<header class="elcnav">' +
-        '<a class="elcnav-brand" href="/"><span class="d"></span>English Leap Club</a>' +
+        '<a class="elcnav-brand" href="/">' +
+          '<span class="mark"><img src="/assets/brand/elc-icon-64.png" alt="" width="30" height="30"></span>' +
+          'English Leap</a>' +
         '<nav class="elcnav-tabs" aria-label="Member sections">' + tabs + '</nav>' +
         '<div class="elcnav-acct" id="acct"></div>' +
       '</header>';

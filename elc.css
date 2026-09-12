@@ -70,7 +70,8 @@
   padding:var(--sp-4) 0 var(--sp-3);position:relative;z-index:3}
 .elcnav-brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);
   font-family:var(--display);font-weight:600;font-size:var(--fs-md);white-space:nowrap}
-.elcnav-brand .d{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--cyan)}
+.elcnav-brand .mark{width:30px;height:30px;border-radius:9px;overflow:hidden;display:grid;place-items:center;flex:0 0 30px}
+.elcnav-brand .mark img{width:100%;height:100%;object-fit:cover;display:block}
 .elcnav-tabs{display:inline-flex;gap:2px;padding:4px;border-radius:var(--r-full);
   background:var(--glass2);border:1px solid var(--line);margin-left:auto}
 .elcnav-tabs a{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 15px;
