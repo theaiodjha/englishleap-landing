@@ -66,6 +66,10 @@
       var t = titleCase(u.searchParams.get('type'));
       return t || 'Browse the arcade';
     }
+    // /games/phrase-pairs/ -> "Phrase Pairs". Leaving a game to check Progress and coming
+    // back should return to the GAME, not to the Arcade.
+    var game = path.match(/^\/games\/([a-z0-9-]+)\/?$/);
+    if (game) return titleCase(game[1]);
     if (path === '/') return 'Home';
     return PAGE[path] || null;
   }
@@ -399,7 +403,18 @@
      there silently skipped the busiest page on the site. */
   function bootAccount() {
     var hint = readHint();
-    if (hint) window.ELCAccount(hint, { hint: true });
+    if (hint) {
+      /* Do this FIRST and unconditionally: whether the floating controls belong on this
+         page does not depend on the DOM, and ELCAccount returns early when #acct is not
+         parsed yet — which is the case on the game pages, where the script sits above the
+         bar. That early return was leaving the class unset until the fetch came back, so
+         the toggle painted and then vanished. */
+      setFloating(true);
+      if (document.getElementById('acct')) window.ELCAccount(hint, { hint: true });
+      else document.addEventListener('DOMContentLoaded', function () {
+        window.ELCAccount(hint, { hint: true });
+      });
+    }
 
     /* Safety net only. It used to fire at 600ms, which is INSIDE a normal round trip — so
        a signed-in member on a slow connection was shown "Member Login" and then had it

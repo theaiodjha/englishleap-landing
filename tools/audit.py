@@ -34,9 +34,12 @@ for p in pages:
     for h in re.findall(r'href="(/[^"#?]+\.html)',s):
         if not os.path.exists(h.lstrip('/')): add(MED,p,f'link to missing {h}')
 # game consistency
-need={'back link':'class="back"','fireworks layer':'id="fx"','result card':'result','progress hook':'progress.js'}
+# `back` is Clue Room's pill over the 3D scene; `elcback` is the shared chevron the four
+# standard games use, as every other page does. Either satisfies the rule.
+need={'fireworks layer':'id="fx"','result card':'result','progress hook':'progress.js'}
 for g in games:
     s=rd(g)
+    if 'class="back"' not in s and 'class="elcback"' not in s: add(MED,g,'missing back link')
     for label,token in need.items():
         if token not in s: add(MED,g,f'missing {label}')
 print("== HIGH ==");[print(' -',x) for x in HIGH] or print('  none')

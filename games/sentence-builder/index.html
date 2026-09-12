@@ -36,10 +36,8 @@
   @keyframes aurora{from{transform:translate3d(-3%,-2%,0) rotate(0deg) scale(1.06)}to{transform:translate3d(3%,2%,0) rotate(7deg) scale(1.14)}}
   .wrap{max-width:1100px;margin:0 auto;padding:14px 18px 60px;min-height:100%}
   .bar{display:flex;align-items:center;gap:var(--sp-3);justify-content:space-between;padding:6px 2px 14px}
+  .bar .elcback{margin:0}
   .bar .left{display:flex;align-items:center;gap:var(--sp-3);min-width:0}
-  .back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--soft);font-weight:600;font-size:var(--fs-md);
-    background:var(--glass);border:1px solid var(--line);padding:var(--sp-2) 13px;border-radius:999px;white-space:nowrap}
-  .back:hover{color:var(--ink)}
   /* same logo and wordmark as every other page; see elc-nav.js */
   .brand{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);
     font-family:var(--display);font-weight:600;font-size:var(--fs-md);white-space:nowrap}
@@ -141,7 +139,7 @@
   <script src="/elc-nav.js"></script>
   <div class="bar">
     <div class="left">
-      <a class="back" href="/arcade-type.html?type=sentence-builder">&#8592; Back</a>
+      <a class="elcback" href="/arcade-type.html?type=sentence-builder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>All episodes</span></a>
       <a class="brand" href="/practice-arcade.html"><img src="/assets/brand/elc-icon-64.png" alt="" width="26" height="26">English Leap</a>
     </div>
     <div class="elcnav-acct" id="acct"></div>
