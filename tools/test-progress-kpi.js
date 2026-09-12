@@ -91,10 +91,13 @@ ok('no dead affordance on the empty tiles',
 // --- the three cards below the KPI row ---
 ok('the KPI card may overflow, so a selected tile is not clipped',
   /class="card wide nofold"/.test(hFull));
-// the meter reads the same monthly aggregate as the chart and the KPI, so no two minute
-// figures on the page can disagree (the quota meter still enforces the cap server-side)
-ok('allowance reads this month from the same source as everything else',
-  /29 <span>of 100 minutes practised this month/.test(hFull) && /71 left/.test(hFull));
+// The allowance must match the METER (what Use It Live enforces), not the practice
+// history — the two are separate counters and the meter can legitimately be ahead.
+ok('allowance shows the meter, not the history aggregate',
+  /2 <span>of 100 minutes used this month/.test(hFull) && /98 left/.test(hFull),
+  'history for that month says 29 min; the meter says 2');
+ok('...and says what it counts, so it cannot be read as the all-time total',
+  /Counted when a recording is analysed/.test(hFull));
 ok('episode rows open to name the phrases, not just count them',
   /class="ep opens"/.test(hFull) && /class="epwords"/.test(hFull));
 ok('...and do NOT reuse .go, which is the page gradient CTA class',

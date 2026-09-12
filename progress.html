@@ -36,10 +36,14 @@
 
   /* Centred, and led by the member's name rather than a page title. This is the one page
      that is entirely about them; "Your progress" could be anyone's. */
-  .phead{text-align:center;max-width:34em;margin:var(--sp-6) auto var(--sp-2)}
+  /* The heading gets the full column so it stays on ONE line; only the lede is held to a
+     comfortable measure. Capping the whole block at 34em wrapped the title in two. */
+  .phead{text-align:center;margin:var(--sp-6) auto var(--sp-2)}
+  .phead .lede{max-width:34em;margin-left:auto;margin-right:auto}
   .phead .hi{display:block;font-family:var(--display);font-weight:700;font-size:var(--fs-sm);
     letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
-  h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,5vw,38px);line-height:1.1;margin:0}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(24px,4.4vw,36px);line-height:1.12;
+    margin:0;text-wrap:balance}
   .lede{color:var(--soft);font-size:var(--fs-md);line-height:1.55;margin:10px 0 0}
 
   /* Two columns on a wide screen: the page was one 860px stack, which left half a
@@ -197,6 +201,7 @@
   .allow-top span{font-size:var(--fs-sm);color:var(--soft2)}
   .allow-track{height:10px;border-radius:var(--r-full);background:var(--glass2);
     border:1px solid var(--line);overflow:hidden}
+  .allow-note{margin:9px 0 0;color:var(--soft2);font-size:var(--fs-xs);line-height:1.5}
   .allow-track>i{display:block;height:100%;border-radius:var(--r-full);
     background:linear-gradient(90deg,var(--teal),var(--purple));
     transition:width 1s cubic-bezier(.22,1,.36,1)}
@@ -596,23 +601,26 @@ function wireFolds(){
 /* Minutes used against this month's allowance. The dashboard has always returned these
    and the page never drew them — yet "how much have I got left?" is the one number a
    member asks unprompted. Works from the very first session, chart or no chart. */
+/* THE METER, not the practice history. These are two different counters: the quota is
+   incremented the moment an analysis succeeds and is what decides whether the next
+   recording is allowed; the history is written separately by logSession(), which fails
+   open. The meter can therefore be ahead, and it is the number Use It Live shows — so
+   this row must match it, or the page and the recorder contradict each other about
+   something the member is actually subject to. The KPI above is all-time practice, a
+   different question, which the caption makes explicit. */
 function allowance(d){
   const lim=Number(d.limitMin)||0;
-  /* Read from the SAME place as every other minute on this page (the monthly aggregate
-     behind the chart and the KPI), not from the quota meter. The meter floors seconds and
-     covers a different window, so the two disagreed on screen — "1 minute practised" above
-     "2 of 100 this month". The meter is still what actually enforces the cap server-side;
-     this is only what the member is shown, and it must not contradict its neighbours. */
-  const thisMonth=(d.bars||[])[(d.bars||[]).length-1];
-  const used=Math.min(thisMonth?thisMonth.minutes:0, lim);
+  const used=Math.min(Number(d.usedMin)||0, lim);
   if(!lim) return '';
   const pct=Math.max(used>0?3:0, Math.round(used/lim*100));   // a sliver is still visible
   return `<div class="allow">
     <div class="allow-top">
-      <b>${used} <span>of ${lim} minutes practised this month</span></b>
+      <b>${used} <span>of ${lim} minutes used this month</span></b>
       <span>${lim-used} left</span>
     </div>
     <div class="allow-track"><i data-w="${pct}%" style="width:0"></i></div>
+    <p class="allow-note">Counted when a recording is analysed &mdash; the same figure
+      Use It Live shows. Your total practice is the number at the top of the page.</p>
   </div>`;
 }
 

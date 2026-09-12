@@ -105,10 +105,17 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   **A page must not call `ELCAccount(null)` speculatively** — that clears the hint and
   un-hides the floating controls, recreating the very flash the hint prevents. Let the
   hint paint, and call ELCAccount only with a real answer.
-- **Every minute shown on `progress.html` comes from the monthly aggregate**, never the
-  quota meter. The meter floors seconds and covers a different window, so the two
-  disagreed on screen ("1 minute practised" above "2 of 100 this month"). The meter is
-  still what enforces the cap server-side; it is simply not what the member is shown.
+- **Two minute counters exist and they are NOT redundant.** `uil:min:{uid}:{YYYY-MM}` is
+  the quota: incremented the instant an analysis succeeds, and the thing that decides
+  whether the next recording is allowed. `uil:agg:{uid}` `{YYYY-MM}:sec` is the practice
+  history, written by `logSession()` which **fails open** — so anything analysed while
+  that write failed, or before history existed, is metered but never logged, and the
+  meter runs ahead. The allowance row on `progress.html` must therefore show the
+  **meter** (`usedMin`/`limitMin`), the same figure Use It Live shows: pointing it at the
+  history aggregate to match the all-time KPI was tried and traded a cosmetic mismatch
+  for a real one — the page disagreed with the recorder about a limit the member is
+  subject to. The KPI above is all-time practice, a different question; the caption under
+  the bar says which is which.
 - **Watch for class collisions in these long single-file pages.** `.ep.go` picked up
   `.go`, the gradient CTA button, and rendered an episode row as an orange button with
   unreadable text — the same shape of bug as the `.oriva` collision. Two-letter utility
