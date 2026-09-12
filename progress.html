@@ -34,7 +34,12 @@
   .hd-tabs a.active{background:linear-gradient(100deg,var(--teal),var(--purple));color:#fff}
   @media(max-width:560px){.hd-tabs{width:100%;justify-content:space-between}.hd-tabs a{flex:1;text-align:center}}
 
-  h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,5vw,38px);line-height:1.1;margin:22px 0 0}
+  /* Centred, and led by the member's name rather than a page title. This is the one page
+     that is entirely about them; "Your progress" could be anyone's. */
+  .phead{text-align:center;max-width:34em;margin:var(--sp-6) auto var(--sp-2)}
+  .phead .hi{display:block;font-family:var(--display);font-weight:700;font-size:var(--fs-sm);
+    letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,5vw,38px);line-height:1.1;margin:0}
   .lede{color:var(--soft);font-size:var(--fs-md);line-height:1.55;margin:10px 0 0}
 
   /* Two columns on a wide screen: the page was one 860px stack, which left half a
@@ -192,10 +197,12 @@
   .dots i.started{background:transparent;box-shadow:inset 0 0 0 2px var(--gold);position:relative}
   .dots i.started::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--gold)}
   .dots i.untouched{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
-  .ep.go{cursor:pointer;border-radius:var(--r-md);padding-left:var(--sp-2);padding-right:var(--sp-2);
-    margin-left:calc(var(--sp-2) * -1);margin-right:calc(var(--sp-2) * -1);
+  /* NOT `.go` — that is the page's gradient CTA button, and an episode row picked it up
+     wholesale: orange-purple fill, white text, the lot. Two-letter utility classes are a
+     landmine in a file this size. */
+  .ep.opens{cursor:pointer;border-radius:var(--r-md);padding-left:var(--sp-2);padding-right:var(--sp-2);
     transition:background .15s}
-  .ep.go:hover{background:var(--glass2)}
+  .ep.opens:hover{background:var(--glass2)}
   .ep .chev{width:16px;height:16px;flex:0 0 16px;color:var(--soft2);transition:transform .25s}
   .ep.open .chev{transform:rotate(90deg)}
   .epwords{flex:1 1 100%;display:none;flex-wrap:wrap;gap:6px;padding:var(--sp-1) 0 var(--sp-2)}
@@ -212,8 +219,11 @@
   .key span{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 
   /* games */
+  /* No negative margins. A foldable card's body has overflow:hidden so its height can be
+     animated, which clips anything bleeding past the padding — the selected row was cut off
+     at both ends. An inset highlight reads fine and cannot be clipped. */
   .gt{display:grid;grid-template-columns:auto minmax(96px,1fr) 2fr auto;align-items:center;
-    gap:var(--sp-3);padding:9px var(--sp-2);margin:0 calc(var(--sp-2) * -1);
+    gap:var(--sp-3);padding:9px var(--sp-2);
     border-radius:var(--r-md);text-decoration:none;transition:background .15s}
   a.gt:hover{background:color-mix(in srgb,var(--ga) 12%,transparent)}
   .gt .gi{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
@@ -278,8 +288,11 @@
   <a class="elcback" data-smart href="/practice-arcade.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>Practice Arcade</span></a>
 
   <div id="app" class="hidden">
-    <h1 id="title">Your progress</h1>
-    <p class="lede" id="lede">Everything here comes from your own practice.</p>
+    <div class="phead">
+      <span class="hi" id="hi" hidden></span>
+      <h1 id="title">How your English is coming along</h1>
+      <p class="lede" id="lede">Everything on this page comes from your own practice.</p>
+    </div>
     <div id="body"></div>
   </div>
   <div id="gate"></div>
@@ -456,7 +469,7 @@ function wireChart(){
 }
 
 function wireEpisodes(){
-  document.querySelectorAll('.ep.go').forEach(row=>{
+  document.querySelectorAll('.ep.opens').forEach(row=>{
     const toggle=()=>{
       const open=row.classList.toggle('open');
       row.setAttribute('aria-expanded', open?'true':'false');
@@ -546,12 +559,19 @@ function wireFolds(){
    and the page never drew them — yet "how much have I got left?" is the one number a
    member asks unprompted. Works from the very first session, chart or no chart. */
 function allowance(d){
-  const lim=Number(d.limitMin)||0, used=Math.min(Number(d.usedMin)||0, lim);
+  const lim=Number(d.limitMin)||0;
+  /* Read from the SAME place as every other minute on this page (the monthly aggregate
+     behind the chart and the KPI), not from the quota meter. The meter floors seconds and
+     covers a different window, so the two disagreed on screen — "1 minute practised" above
+     "2 of 100 this month". The meter is still what actually enforces the cap server-side;
+     this is only what the member is shown, and it must not contradict its neighbours. */
+  const thisMonth=(d.bars||[])[(d.bars||[]).length-1];
+  const used=Math.min(thisMonth?thisMonth.minutes:0, lim);
   if(!lim) return '';
   const pct=Math.max(used>0?3:0, Math.round(used/lim*100));   // a sliver is still visible
   return `<div class="allow">
     <div class="allow-top">
-      <b>${used} <span>of ${lim} minutes this month</span></b>
+      <b>${used} <span>of ${lim} minutes practised this month</span></b>
       <span>${lim-used} left</span>
     </div>
     <div class="allow-track"><i data-w="${pct}%" style="width:0"></i></div>
@@ -607,7 +627,7 @@ function render(d){
 
   /* Six dots say 2 of 6; they cannot say WHICH two, which is the only part a member can
      act on. The row opens to name the phrases. */
-  const eps=d.mastery.map((m,i)=>`<div class="ep go" data-ep="${i}" role="button" tabindex="0" aria-expanded="false">
+  const eps=d.mastery.map((m,i)=>`<div class="ep opens" data-ep="${i}" role="button" tabindex="0" aria-expanded="false">
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
       <span class="who"><b>EP${m.n} &middot; ${esc(m.title)}</b>
@@ -691,7 +711,11 @@ function render(d){
     if(!r.ok) throw new Error('load');
     const d=await r.json();
     $('#app').classList.remove('hidden');
-    if(d.name) $('#title').textContent=`${d.name}, here is your progress`;
+    // first name only: "Fahad preview, here is your progress" is a database row talking
+    if(d.name){
+      const first=String(d.name).trim().split(/\s+/)[0];
+      const hi=$('#hi'); hi.textContent=`Hi ${first}`; hi.hidden=false;
+    }
     ELCAccount(d.name?{name:d.name, plan:d.plan}:null,{next:'/progress.html'});
     render(d);
   }catch(e){

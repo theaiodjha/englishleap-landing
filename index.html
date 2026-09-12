@@ -756,7 +756,6 @@ onScroll();window.addEventListener('scroll',onScroll,{passive:true});
    because this decides what the header says, not what anyone may open. Signed out (or
    if the call fails) the visitor gets Member Login, pointed at the Arcade rather than
    back here: a member signing in wants to land somewhere they can practise. */
-ELCAccount(null,{next:'/practice-arcade.html'});   // paint the signed-out state first, so the slot is never empty
 ELCFetch('/api/me',{credentials:'same-origin'},6000)
   .then(r=>r.json())
   .then(d=>ELCAccount(d&&d.name?{name:d.name,plan:d.plan}:null,{next:'/practice-arcade.html'}))

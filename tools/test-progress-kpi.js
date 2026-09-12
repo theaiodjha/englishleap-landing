@@ -86,10 +86,18 @@ ok('no dead affordance on the empty tiles',
 // --- the three cards below the KPI row ---
 ok('the KPI card may overflow, so a selected tile is not clipped',
   /class="card wide nofold"/.test(hFull));
-ok('allowance meter is drawn from usedMin/limitMin the API already sent',
-  /of 100 minutes this month/.test(hFull) && /98 left/.test(hFull));
+// the meter reads the same monthly aggregate as the chart and the KPI, so no two minute
+// figures on the page can disagree (the quota meter still enforces the cap server-side)
+ok('allowance reads this month from the same source as everything else',
+  /29 <span>of 100 minutes practised this month/.test(hFull) && /71 left/.test(hFull));
 ok('episode rows open to name the phrases, not just count them',
-  /class="ep go"/.test(hFull) && /class="epwords"/.test(hFull));
+  /class="ep opens"/.test(hFull) && /class="epwords"/.test(hFull));
+ok('...and do NOT reuse .go, which is the page gradient CTA class',
+  !/class="ep go"/.test(hFull));
+ok('row highlights are inset, not bled past a clipping card body',
+  !/margin:0 calc\(var\(--sp-2\) \* -1\)/.test(page));
+ok('the header greets by first name only',
+  /id="hi"/.test(page) && page.includes('String(d.name).trim().split('));
 ok('...and each phrase carries its own state', /<i class="owned">a<\/i>/.test(hFull));
 ok('game rows are links into that game',
   /<a class="gt" href="\/arcade-type.html\?type=clue-room"/.test(hFull));

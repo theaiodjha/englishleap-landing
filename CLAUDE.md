@@ -102,6 +102,20 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   safety-net fallback fires at **2500ms and never overrides a hint** — at 600ms it was
   inside a normal round trip. `bootAccount()` runs OUTSIDE `render()`: `index.html` has
   `#acct` but no `#elcnav`, and `render()` returns early without that slot.
+  **A page must not call `ELCAccount(null)` speculatively** — that clears the hint and
+  un-hides the floating controls, recreating the very flash the hint prevents. Let the
+  hint paint, and call ELCAccount only with a real answer.
+- **Every minute shown on `progress.html` comes from the monthly aggregate**, never the
+  quota meter. The meter floors seconds and covers a different window, so the two
+  disagreed on screen ("1 minute practised" above "2 of 100 this month"). The meter is
+  still what enforces the cap server-side; it is simply not what the member is shown.
+- **Watch for class collisions in these long single-file pages.** `.ep.go` picked up
+  `.go`, the gradient CTA button, and rendered an episode row as an orange button with
+  unreadable text — the same shape of bug as the `.oriva` collision. Two-letter utility
+  class names are a landmine; scope or rename rather than reuse.
+- **A foldable card's body has `overflow:hidden`** so its height can animate, which clips
+  anything bleeding past the padding. Row highlights are INSET (no negative margins);
+  cards built with `fold:false` get `.nofold`, which restores `overflow:visible`.
 - **Every fetch has a deadline.** `window.ELCFetch(url, opts, ms)` (elc-nav.js) aborts at
   12s by default; `window.ELCBusy(el, html, ms)` shows a placeholder only if the wait passes
   ~450ms, because below that a spinner just flashes and makes a fast page feel slower.
