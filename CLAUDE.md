@@ -38,7 +38,11 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   launcher and the game "How to play" pill each set their own `bottom` from it. Do **not** test
   `offsetParent` to decide whether the toggle is floating — CSSOM returns null for every
   `position:fixed` element, so the check silently always fails. A shared dock that re-parented
-  these was tried and reverted: it broke clicks site-wide.
+  these was tried and reverted: it broke clicks site-wide. **On member pages the account
+  card owns both instead** — it renders its own Auto/Light/Dark segment and a "Take the
+  tour" row, then calls `ELCTheme.hide()` (a class on `<html>`) and
+  `ELCTour.hideLauncher()` (removes the pill). Still no re-parenting. Signed-out visitors
+  have no card, so the floating toggle stays for them.
 - **`--gold` / `--amber` are dark-ground colours.** As TEXT on light they measure ~1.2:1
   (a pale label on a gold pill was 1.09:1). Fills may stay gold; the ink must become
   **`#7a5100`** — `theme.css` carries the light overrides. Same for teal text: `#0f9b90`
@@ -85,7 +89,8 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   initials avatar that opens a card with the member's name, plan and sign-out, replacing
   six copies of "Signed in as … [Sign out]" (which ate the header on phones). Pass
   `{name, plan}` where plan is `fluency|transcript|trial|none`; pass `null` for the
-  signed-out Member Login link. The plan comes from **`planOf(s)` in `lib/session.js`** —
+  signed-out Member Login link. The card also carries the theme choice and, where the page
+  has a tour (`ELCTour.pageTour()`), a "Take the tour" row. The plan comes from **`planOf(s)` in `lib/session.js`** —
   derived from `cents`, not `s.tier`, which is `'fluency'` for ANY paid pledge and so
   labels a $1 Transcript backer a Fluency member. `api/games.js` ships it as `level`;
   `api/list.js`, `api/progress.js` and `api/use-it-live.js` ship it as `plan`. **The games keep their minimal back-only bar**

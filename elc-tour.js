@@ -234,7 +234,15 @@
     mountLauncher();
   }
 
-  window.ELCTour = { define: define, start: start, end: end, config: function (o) { for (var k in o) CFG[k] = o[k]; }, autostart: autostart };
+  window.ELCTour = { define: define, start: start, end: end, config: function (o) { for (var k in o) CFG[k] = o[k]; }, autostart: autostart,
+    // Which tour (if any) this page has — so a menu can offer it only where it exists.
+    pageTour: detectPageTour,
+    // Hand the replay affordance to that menu: the floating pill is removed, not moved.
+    hideLauncher: function () {
+      CFG.showLauncher = false;
+      var b = document.querySelector('.elct-launch');
+      if (b && b.parentNode) b.parentNode.removeChild(b);
+    } };
 
   /* =======================================================================
      TOUR CONTENT — edit freely. Plain B1–B2 English, short and warm.

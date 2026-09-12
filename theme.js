@@ -143,6 +143,18 @@
     document.body.appendChild(el);
   }
 
+  /* Public API, so a menu elsewhere on the page can own the theme choice without
+     re-parenting #elc-theme-toggle — moving that element is what broke clicks
+     site-wide the last time it was tried. `hide()` takes the floating control off
+     the page; ELCToggleClearance() then reports 0 and the tour launcher drops back
+     to its base spot on its own. */
+  window.ELCTheme = {
+    mode: getMode,
+    set: function (m) { if (m === 'auto' || m === 'light' || m === 'dark') start(m); },
+    hide: function () { document.documentElement.classList.add('elc-nofloat-theme'); },
+    show: function () { document.documentElement.classList.remove('elc-nofloat-theme'); }
+  };
+
   function init() { build(); start(getMode()); }
   if (document.readyState !== "loading") init();
   else document.addEventListener("DOMContentLoaded", init);

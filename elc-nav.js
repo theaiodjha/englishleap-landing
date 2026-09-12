@@ -72,11 +72,16 @@
         '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
         '<path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6Z"/></svg>' +
         '<span>Member Login</span></a>';
+      // No card to hold it, so the floating theme toggle stays where it is.
+      if (window.ELCTheme) window.ELCTheme.show();
       return;
     }
 
     var ini = initials(user.name);
     var plan = PLAN[user.plan] || '';
+    var mode = (window.ELCTheme && window.ELCTheme.mode()) || 'auto';
+    var tour = (window.ELCTour && window.ELCTour.pageTour && window.ELCTour.pageTour()) || null;
+
     slot.innerHTML =
       '<button class="elcnav-av" id="acctBtn" type="button" aria-haspopup="true" aria-expanded="false" ' +
         'aria-label="Account: ' + esc(user.name) + '"><span aria-hidden="true">' + esc(ini) + '</span></button>' +
@@ -88,12 +93,34 @@
         '</div>' +
         '<a class="elcnav-card-row" role="menuitem" href="/progress.html">' +
           svg('progress') + '<span>Your progress</span></a>' +
+        (tour ? '<button class="elcnav-card-row" role="menuitem" type="button" id="acctTour">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+            'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 1 1 3.2 2.5c-.5.2-.7.6-.7 1.1v.4"/>' +
+            '<path d="M12 17h.01"/></svg><span>Take the tour</span></button>' : '') +
+        '<div class="elcnav-card-theme" role="group" aria-label="Theme">' +
+          '<span class="elcnav-card-theme-lbl">Theme</span>' +
+          '<span class="elcnav-seg">' +
+            '<button type="button" data-mode="auto"' + (mode === 'auto' ? ' class="on"' : '') +
+              ' aria-pressed="' + (mode === 'auto') + '" title="Match local sunrise and sunset">Auto</button>' +
+            '<button type="button" data-mode="light"' + (mode === 'light' ? ' class="on"' : '') +
+              ' aria-pressed="' + (mode === 'light') + '" aria-label="Light" title="Light">\u2600</button>' +
+            '<button type="button" data-mode="dark"' + (mode === 'dark' ? ' class="on"' : '') +
+              ' aria-pressed="' + (mode === 'dark') + '" aria-label="Dark" title="Dark">\u263E</button>' +
+          '</span>' +
+        '</div>' +
         '<button class="elcnav-card-row out" role="menuitem" type="button" id="acctOut">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
             '<path d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/></svg>' +
           '<span>Sign out</span></button>' +
       '</div>';
+
+    // The card now owns both: take the floating controls off this page. Neither element
+    // is moved — the theme toggle is hidden by a class and the tour pill is removed —
+    // because re-parenting them broke clicks site-wide when it was tried.
+    if (window.ELCTheme) window.ELCTheme.hide();
+    if (tour && window.ELCTour && window.ELCTour.hideLauncher) window.ELCTour.hideLauncher();
 
     var btn = document.getElementById('acctBtn');
     var card = document.getElementById('acctCard');
@@ -108,6 +135,24 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !card.hidden) { open(false); btn.focus(); }
     });
+
+    var seg = card.querySelector('.elcnav-seg');
+    seg.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (window.ELCTheme) window.ELCTheme.set(b.dataset.mode);
+      Array.prototype.forEach.call(seg.querySelectorAll('button'), function (x) {
+        var on = x === b;
+        x.classList.toggle('on', on);
+        x.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    });
+
+    var tourBtn = document.getElementById('acctTour');
+    if (tourBtn) tourBtn.addEventListener('click', function () {
+      open(false);
+      window.ELCTour.start(tour);
+    });
+
     document.getElementById('acctOut').addEventListener('click', function () {
       fetch('/api/auth/signout', { method: 'POST' })
         .catch(function () {})

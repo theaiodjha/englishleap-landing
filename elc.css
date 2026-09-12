@@ -121,6 +121,18 @@
 .elcnav-card-row svg{width:17px;height:17px;flex:0 0 17px}
 .elcnav-card-row:hover{background:var(--glass2);color:var(--ink)}
 .elcnav-card-row.out:hover{color:#ff9a9a}
+.elcnav-card-theme{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);
+  padding:var(--sp-2) var(--sp-3);margin:var(--sp-1) 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.elcnav-card-theme-lbl{font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--soft)}
+.elcnav-seg{display:inline-flex;gap:2px;padding:3px;border-radius:var(--r-full);
+  background:var(--glass2);border:1px solid var(--line)}
+.elcnav-seg button{min-width:32px;height:26px;padding:0 9px;border:0;border-radius:var(--r-full);
+  background:transparent;cursor:pointer;color:var(--soft);
+  font-family:var(--display);font-weight:600;font-size:var(--fs-xs);line-height:1;
+  transition:background .15s,color .15s}
+.elcnav-seg button:hover{color:var(--ink)}
+.elcnav-seg button.on{background:linear-gradient(100deg,var(--teal),var(--purple));color:#fff}
 .elcnav-login{display:inline-flex;align-items:center;gap:8px}
 .elcnav-login svg{width:16px;height:16px}
 /* phones: brand on its own line, tabs full width and evenly split */
