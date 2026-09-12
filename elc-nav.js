@@ -84,6 +84,34 @@
     if (label) label.textContent = name;
   }
 
+  /* ---- revealing a card that arrived late ----------------------------------
+     A card that waits on a fetch and then flips display:none -> block appears at full
+     opacity AND shoves the page down by its whole height, in one frame. Animating the
+     height makes the push followable. */
+  window.ELCReveal = function (el, cls) {
+    if (!el) return;
+    if (cls) el.classList.add.apply(el.classList, cls.split(' '));
+    else el.hidden = false;
+
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    if (reduced) return;                       // the whole point of that setting is stillness
+
+    var h = el.scrollHeight;
+    if (!h) return;
+    var st = el.style;
+    st.overflow = 'hidden'; st.height = '0px'; st.opacity = '0'; st.transform = 'translateY(-6px)';
+    void el.offsetHeight;                      // commit the start state before transitioning
+    st.transition = 'height .38s cubic-bezier(.22,1,.36,1),opacity .32s ease,transform .38s cubic-bezier(.22,1,.36,1)';
+    st.height = h + 'px'; st.opacity = '1'; st.transform = 'none';
+
+    el.addEventListener('transitionend', function done(e) {
+      if (e.propertyName !== 'height') return;
+      el.removeEventListener('transitionend', done);
+      // release it: a card pinned to a measured height is wrong as soon as text rewraps
+      st.height = ''; st.overflow = ''; st.transition = ''; st.transform = '';
+    });
+  };
+
   /* ---- notice strips -------------------------------------------------------
      ELCNotice(el, {key, tone, icon, html}) renders one strip into `el`, or nothing at all
      if this device has dismissed that key. Returns true if it rendered.

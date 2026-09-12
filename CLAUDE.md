@@ -123,6 +123,13 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **A foldable card's body has `overflow:hidden`** so its height can animate, which clips
   anything bleeding past the padding. Row highlights are INSET (no negative margins);
   cards built with `fold:false` get `.nofold`, which restores `overflow:visible`.
+- **A card that arrives late should ARRIVE, not appear.** `window.ELCReveal(el, 'cls')`
+  (elc-nav.js) animates height from 0 with a short fade and a 6px rise, then **releases**
+  the height to auto — a card pinned to a measured pixel height is wrong the moment its
+  text rewraps. Flipping `display:none`→`block` puts the appearance and a full-height
+  layout shove in the same frame, which reads as a blast; the Arcade's recap, focus and
+  "practising this week" cards all used to do that. Under `prefers-reduced-motion` it just
+  shows — the point of that setting is stillness.
 - **There are no banner slots, and there should not be.** A banner is a place that must be
   filled; `window.ELCNotice(el, {key, tone, icon, html})` (elc-nav.js) is a strip that
   appears only while something is true about THIS member and vanishes when it stops being.

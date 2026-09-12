@@ -105,5 +105,46 @@ const h = boot({ hint: { name: 'Fahad preview', plan: 'fluency' } });
 ok('the hint render leaves the stored hint untouched',
   JSON.parse(h.store['elc-acct']).plan === 'fluency');
 
+// ---------------------------------------------------------------- ELCReveal
+// Presentation, but with a non-cosmetic failure mode: if the class is not applied the
+// card stays display:none and the member never sees it at all.
+function revealEl() {
+  const cls = new Set();
+  return {
+    hidden: true, scrollHeight: 180, offsetHeight: 0,
+    classList: { add(...c) { c.forEach((x) => cls.add(x)); }, has: (c) => cls.has(c), _s: cls },
+    style: {}, addEventListener() {}, removeEventListener() {},
+  };
+}
+function withMotion(reduce) {
+  global.window = global;
+  global.matchMedia = () => ({ matches: reduce });
+  boot();                                     // re-evaluates elc-nav.js, redefining ELCReveal
+}
+
+withMotion(false);
+let r = revealEl();
+global.ELCReveal(r, 'show has-oriva');
+ok('reveal applies every class it is given',
+  r.classList.has('show') && r.classList.has('has-oriva'));
+ok('...and animates from zero height', r.style.height === '180px' && r.style.opacity === '1');
+ok('...having started from nothing', typeof r.style.transition === 'string'
+  && /height/.test(r.style.transition));
+
+r = revealEl();
+global.ELCReveal(r);
+ok('with no class it unhides instead', r.hidden === false);
+
+withMotion(true);
+r = revealEl();
+global.ELCReveal(r, 'show');
+ok('reduced motion: the card still shows', r.classList.has('show'));
+ok('...but nothing moves', r.style.height === undefined && r.style.transition === undefined);
+
+r = revealEl();
+r.scrollHeight = 0;                           // nothing to reveal yet
+global.ELCReveal(r, 'show');
+ok('a zero-height card is left alone rather than pinned at 0', r.style.height === undefined);
+
 console.log(bad ? `\n${bad} FAILED` : '\nall assertions passed');
 process.exit(bad ? 1 : 0);

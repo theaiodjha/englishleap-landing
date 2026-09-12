@@ -553,7 +553,7 @@ tryLoad();
       <div class="kpi">${kpi}</div>
       ${eps?`<div class="eps">${eps}</div>`:''}
       <button class="done" id="recapDone">Got it</button>`;
-    el.classList.add('show');
+    ELCReveal(el,'show');                 // arrives rather than appearing
     document.getElementById('recapDone').onclick=()=>{
       el.classList.remove('show');
       fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -651,7 +651,7 @@ function arcadeNotices(d){
          ${own}
        </div>
        ${oriva}`;
-    document.getElementById('focusCard').classList.add('show','has-oriva');
+    ELCReveal(document.getElementById('focusCard'),'show has-oriva');
   }catch(e){ /* never let the coach break the arcade */ }
 })();
 
@@ -670,7 +670,7 @@ ELCFetch('/api/stats', {}, 6000).then(r=>r.json()).then(d=>{
          <span class="t"><b>EP${e.n} &middot; ${esc(e.title)}</b>
            <span>${e.plays} plays this week</span></span>
        </a>`).join('') + '</div>';
-  el.hidden = false;
+  ELCReveal(el);
 }).catch(()=>{});
 </script>
 <script defer src="/elc-tour.js"></script>
