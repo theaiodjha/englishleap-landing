@@ -17,6 +17,7 @@ import { buildRecap, prevMonth, thisMonth, needsDeep, headline } from '../lib/re
 import { getUsage, limitFor } from '../lib/quota.js';
 import { getEpisodes, getGameTypes } from '../lib/arcade-store.js';
 import { nextAction, focusFor, ownership } from '../lib/coach.js';
+import { buildDashboard } from '../lib/dashboard.js';
 
 const ID = /^[a-z0-9-]{1,40}$/i; // game types and episode ids are simple slugs
 
@@ -74,6 +75,22 @@ export default async function handler(req, res) {
         owned: Math.round(ownership(episodes[0].words, agg.words) * 100),
       } : null,
       sessions: sessions.length,
+    });
+  }
+
+  // Everything the progress page draws. Pure arithmetic over the member's own history.
+  if (action === 'dashboard') {
+    const [agg, sessions, games, episodes, types, usage] = await Promise.all([
+      getAggregates(s.uid), getSessions(s.uid), getGames(s.uid),
+      getEpisodes(), getGameTypes(), getUsage(s.uid, limitFor(s.cents)),
+    ]);
+    const d = buildDashboard({ months: agg.months, words: agg.words, games, sessions, episodes });
+    return res.json({
+      ok: true, name: s.name, ...d,
+      types: types.map((t) => ({ type: t.type, name: t.name })),
+      episodesTotal: episodes.length,
+      usedMin: usage.usedMin, limitMin: usage.limitMin, remainingMin: usage.remainingMin,
+      next: nextAction({ episodes, counts: agg.words, games, sessions, types }),
     });
   }
 

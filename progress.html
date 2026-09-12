@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#06060f" />
+<meta name="description" content="Your English Leap Club progress — minutes practised, phrases you own, and what to work on next." />
+<title>English Leap Club · Your progress</title>
+<script src="/theme.js"></script>
+<link rel="stylesheet" href="/elc.css" />
+<link rel="stylesheet" href="/theme.css" />
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{font-family:var(--body);color:var(--ink);min-height:100vh;background:var(--space);-webkit-tap-highlight-color:transparent}
+  .aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+  .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;mix-blend-mode:screen;will-change:transform}
+  .b1{width:58vw;height:58vw;left:-14vw;top:-18vh;background:radial-gradient(circle at 30% 30%,var(--purple),transparent 70%);animation:drift1 28s ease-in-out infinite}
+  .b2{width:52vw;height:52vw;right:-14vw;top:6vh;background:radial-gradient(circle at 60% 40%,var(--cyan),transparent 70%);animation:drift2 34s ease-in-out infinite}
+  .b3{width:46vw;height:46vw;left:18vw;bottom:-24vh;background:radial-gradient(circle at 50% 50%,var(--magenta),transparent 70%);opacity:.32;animation:drift1 31s ease-in-out infinite reverse}
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(5vw,4vh) scale(1.1)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-5vw,5vh) scale(1.08)}}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(120% 80% at 50% -10%,transparent 40%,rgba(2,2,8,.55) 100%)}
+
+  .wrap{position:relative;z-index:2;max-width:860px;margin:0 auto;padding:22px 20px 80px}
+  a{color:var(--teal)}
+
+  .hd{display:flex;align-items:center;justify-content:space-between;gap:14px 18px;flex-wrap:wrap;padding:18px 0 6px}
+  .brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);font-family:var(--display);font-weight:600;font-size:var(--fs-md)}
+  .brand .d{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--cyan)}
+  .hd-tabs{display:inline-flex;gap:2px;padding:4px;border-radius:var(--r-full);background:var(--glass2);border:1px solid var(--line)}
+  .hd-tabs a{padding:8px 15px;border-radius:var(--r-full);font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--soft);text-decoration:none;white-space:nowrap}
+  .hd-tabs a:hover{color:var(--ink)}
+  .hd-tabs a.active{background:linear-gradient(100deg,var(--teal),var(--purple));color:#fff}
+  @media(max-width:560px){.hd-tabs{width:100%;justify-content:space-between}.hd-tabs a{flex:1;text-align:center}}
+
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,5vw,38px);line-height:1.1;margin:22px 0 0}
+  .lede{color:var(--soft);font-size:var(--fs-md);line-height:1.55;margin:10px 0 0}
+
+  .card{background:var(--glass2);border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--sp-6);margin-top:var(--sp-4);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .card h2{font-family:var(--display);font-weight:600;font-size:var(--fs-lg);margin:0 0 4px}
+  .card .sub{color:var(--soft2);font-size:var(--fs-sm);margin:0 0 var(--sp-5)}
+
+  /* KPI row — values wear ink, never a brand colour */
+  .kpi{display:flex;flex-wrap:wrap;gap:var(--sp-4) var(--sp-8)}
+  .kpi b{display:block;font-family:var(--display);font-weight:700;font-size:30px;line-height:1.05;color:var(--ink)}
+  .kpi span{display:block;margin-top:5px;font-family:var(--display);font-weight:700;font-size:var(--fs-xs);
+    letter-spacing:.1em;text-transform:uppercase;color:var(--soft2)}
+
+  /* column chart */
+  .chart{width:100%;height:190px;display:block;overflow:visible}
+  .chart .bar{fill:var(--teal)}
+  .chart .bar.dim{fill:var(--teal);opacity:.42}
+  .chart .lbl{fill:var(--soft2);font-family:var(--body);font-size:11px;text-anchor:middle}
+  .chart .val{fill:var(--ink);font-family:var(--display);font-weight:700;font-size:12px;text-anchor:middle}
+  .chart .base{stroke:var(--line);stroke-width:1}
+  details.tbl{margin-top:var(--sp-4)}
+  details.tbl summary{cursor:pointer;color:var(--soft2);font-family:var(--display);font-weight:600;font-size:var(--fs-sm)}
+  details.tbl table{border-collapse:collapse;margin-top:10px;font-size:var(--fs-sm);color:var(--soft)}
+  details.tbl th,details.tbl td{text-align:left;padding:6px 18px 6px 0;border-bottom:1px solid var(--line)}
+  details.tbl th{color:var(--soft2);font-weight:600}
+
+  /* phrase mastery */
+  .ep{display:flex;align-items:center;gap:var(--sp-3);padding:11px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+  .ep:first-of-type{border-top:0}
+  .ep .who{flex:1 1 210px;min-width:0}
+  .ep .who b{display:block;font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ep .who span{font-size:var(--fs-xs);color:var(--soft2)}
+  .dots{display:flex;gap:7px;flex:0 0 auto}
+  .dots i{width:15px;height:15px;border-radius:50%;display:block}
+  .dots i.owned{background:var(--teal)}
+  .dots i.started{background:transparent;box-shadow:inset 0 0 0 2px var(--gold);position:relative}
+  .dots i.started::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--gold)}
+  .dots i.untouched{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
+  .key{display:flex;flex-wrap:wrap;gap:var(--sp-4);margin-top:var(--sp-5);font-size:var(--fs-xs);color:var(--soft2)}
+  .key span{display:inline-flex;align-items:center;gap:7px;font-family:var(--display);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+
+  /* games */
+  .gt{display:grid;grid-template-columns:minmax(110px,1fr) 2fr auto;align-items:center;gap:var(--sp-3);padding:9px 0}
+  .gt .nm{font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink)}
+  .gt .track{height:9px;border-radius:var(--r-full);background:rgba(255,255,255,.08);overflow:hidden}
+  .gt .track>i{display:block;height:100%;border-radius:var(--r-full);background:var(--purple)}
+  .gt .num{font-family:var(--display);font-weight:700;font-size:var(--fs-sm);color:var(--soft)}
+
+  .go{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:12px 22px;border-radius:var(--r-full);
+    font-family:var(--display);font-weight:700;font-size:var(--fs-md);text-decoration:none;color:#fff;
+    background:linear-gradient(110deg,var(--purple),var(--electric));box-shadow:0 14px 36px -14px rgba(139,108,255,.7)}
+  .empty{text-align:center;padding:var(--sp-8) var(--sp-5)}
+  .empty p{color:var(--soft);font-size:var(--fs-md);line-height:1.6;max-width:34em;margin:0 auto var(--sp-5)}
+  .gate{text-align:center;padding:30px 26px}
+  .gate h2{font-family:var(--display);margin:.5rem 0 .3rem;font-size:var(--fs-xl)}
+  .gate p{color:var(--soft);font-size:var(--fs-md);line-height:1.55;max-width:34em;margin:.4rem auto}
+
+  .foot{margin-top:42px;text-align:center;color:var(--soft2);font-size:11px;line-height:1.7}
+  .tagline{font-family:var(--display);font-weight:600;font-size:var(--fs-sm)}
+  .tagline .p1{color:var(--pink)}.tagline .p2{color:var(--coral)}.tagline .p3{color:var(--purple)}.tagline .p4{color:var(--teal)}
+  .hidden{display:none!important}
+  @media (prefers-reduced-motion:reduce){.blob{animation:none}}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="aurora"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<div class="vignette"></div>
+
+<div class="wrap">
+  <header class="hd">
+    <a class="brand" href="/"><span class="d"></span>English Leap Club</a>
+    <nav class="hd-tabs" aria-label="Sections">
+      <a href="/practice-arcade.html">Arcade</a>
+      <a href="/progress.html" class="active" aria-current="page">Progress</a>
+      <a href="/archive.html">Archive</a>
+    </nav>
+  </header>
+
+  <div id="app" class="hidden">
+    <h1 id="title">Your progress</h1>
+    <p class="lede" id="lede">Everything here comes from your own practice.</p>
+    <div id="body"></div>
+  </div>
+  <div id="gate"></div>
+
+  <footer class="foot">
+    <div class="tagline"><span class="p1">Read it.</span> <span class="p2">Hear it.</span> <span class="p3">Practise it.</span> <span class="p4">Use it.</span></div>
+    <div style="margin-top:8px">&copy; 2024 Leap Labs &middot; A practice community - not a replacement for formal English education.</div>
+  </footer>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+const plural=(n,one,many)=>`${n} ${n===1?one:many}`;
+
+/* One series of monthly totals: a column chart. Bars share one colour — height carries
+   the magnitude, so colour would be decoration. Only the tallest bar and the current
+   month are labelled directly; the rest answer on hover. A table follows for anyone
+   who cannot read the picture. */
+function chart(bars){
+  const W=600,H=150,PAD=26,n=bars.length;
+  const max=Math.max(1,...bars.map(b=>b.minutes));
+  const slot=W/n, bw=Math.min(46,slot-14);
+  const tallest=bars.reduce((m,b,i)=>bars[m].minutes>=b.minutes?m:i,0);
+  const cols=bars.map((b,i)=>{
+    const h=b.minutes?Math.max(4,Math.round((b.minutes/max)*(H-PAD))):0;
+    const x=Math.round(i*slot+(slot-bw)/2), y=H-h;
+    const last=i===n-1;
+    const label=(i===tallest&&b.minutes)||(last&&b.minutes);
+    return `<g>
+      <title>${esc(b.label)}: ${plural(b.minutes,'minute','minutes')}, ${plural(b.sessions,'session','sessions')}</title>
+      ${h?`<rect class="bar${last?' dim':''}" x="${x}" y="${y}" width="${bw}" height="${h}" rx="4"></rect>`:''}
+      ${label?`<text class="val" x="${x+bw/2}" y="${y-7}">${b.minutes}</text>`:''}
+      <text class="lbl" x="${x+bw/2}" y="${H+15}">${esc(b.label)}</text>
+    </g>`;
+  }).join('');
+  return `<svg class="chart" viewBox="0 0 ${W} ${H+22}" role="img"
+     aria-label="Minutes practised each month for the last ${n} months">
+     ${cols}<line class="base" x1="0" y1="${H}" x2="${W}" y2="${H}"></line></svg>
+   <details class="tbl"><summary>See the numbers</summary>
+     <table><thead><tr><th>Month</th><th>Minutes</th><th>Sessions</th></tr></thead><tbody>
+     ${bars.map(b=>`<tr><td>${esc(b.label)}</td><td>${b.minutes}</td><td>${b.sessions}</td></tr>`).join('')}
+     </tbody></table></details>`;
+}
+
+function render(d){
+  const t=d.totals;
+  if(!d.hasAnything){
+    $('#body').innerHTML=`<div class="card empty">
+      <h2>Nothing to show yet — and that is fine</h2>
+      <p>Play a game or record one answer, and this page starts filling in: minutes practised,
+         the phrases you own, and how far through each episode you are.</p>
+      <a class="go" href="/practice-arcade.html">&#127918; Start practising</a></div>`;
+    return;
+  }
+
+  const kpi=[[t.minutes,'minutes practised'],[t.sessions,'recordings'],
+             [t.phrasesOwned,'phrases owned'],[d.streak,d.streak===1?'week streak':'week streak']]
+    .map(k=>`<div><b>${k[0]}</b><span>${esc(k[1])}</span></div>`).join('');
+
+  const eps=d.mastery.map(m=>`<div class="ep">
+      <span class="who"><b>EP${m.n} &middot; ${esc(m.title)}</b>
+        <span>${m.owned} owned &middot; ${m.started} started &middot; ${m.untouched} to go</span></span>
+      <span class="dots" role="img" aria-label="${m.owned} of ${m.words.length} phrases owned">
+        ${m.words.map(w=>`<i class="${w.state}" title="${esc(w.w)} — ${w.state}"></i>`).join('')}</span>
+    </div>`).join('');
+
+  const games=(d.types||[]).map(ty=>{
+    const done=(d.byType||{})[ty.type]||0, total=d.episodesTotal||1;
+    return `<div class="gt"><span class="nm">${esc(ty.name)}</span>
+      <span class="track"><i style="width:${Math.round(done/total*100)}%"></i></span>
+      <span class="num">${done}/${total}</span></div>`;
+  }).join('');
+
+  const n=d.next;
+  $('#body').innerHTML=`
+    <div class="card"><div class="kpi">${kpi}</div></div>
+
+    <div class="card">
+      <h2>Speaking practice</h2>
+      <p class="sub">Minutes analysed each month${d.pace?` &middot; you speak at about ${d.pace} words a minute`:''}</p>
+      ${d.monthsWithData>1 ? chart(d.bars)
+        : `<p class="sub" style="margin:0">This is your first month of recording. Come back next month and
+           this becomes a trend you can watch.</p>`}
+    </div>
+
+    ${d.mastery.length?`<div class="card">
+      <h2>Phrases you are building</h2>
+      <p class="sub">A phrase is yours once you have used it naturally three times</p>
+      ${eps}
+      ${d.untouchedEpisodes?`<p class="sub" style="margin:var(--sp-4) 0 0">
+        ${plural(d.untouchedEpisodes,'episode is','episodes are')} still untouched.</p>`:''}
+      <div class="key">
+        <span><i class="dots"><i class="owned" style="width:13px;height:13px;border-radius:50%;display:block"></i></i> Owned</span>
+        <span><i class="dots"><i class="started" style="width:13px;height:13px;border-radius:50%;display:block"></i></i> Started</span>
+        <span><i class="dots"><i class="untouched" style="width:13px;height:13px;border-radius:50%;display:block"></i></i> Not yet</span>
+      </div>
+    </div>`:''}
+
+    <div class="card">
+      <h2>Games finished</h2>
+      <p class="sub">Across all ${d.episodesTotal} episodes in the Arcade</p>
+      ${games}
+    </div>
+
+    ${n?`<div class="card">
+      <h2>&#127919; What next</h2>
+      <p class="sub" style="margin-bottom:var(--sp-4)">${esc(n.why||'')}</p>
+      <a class="go" href="${esc(n.href||'/practice-arcade.html')}">${esc(n.cta||'Keep going')}</a>
+    </div>`:''}`;
+}
+
+(async()=>{
+  try{
+    const r=await fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'dashboard'})});
+    if(r.status===401){
+      $('#gate').innerHTML=`<div class="card gate"><h2>Your progress lives here</h2>
+        <p>Sign in with Patreon to see your practice minutes, the phrases you own, and what to work on next.</p>
+        <a class="go" style="margin-top:14px" href="/api/auth/login?next=/progress.html">Continue with Patreon</a></div>`;
+      return;
+    }
+    if(!r.ok) throw new Error('load');
+    const d=await r.json();
+    $('#app').classList.remove('hidden');
+    if(d.name) $('#title').textContent=`${d.name}, here is your progress`;
+    render(d);
+  }catch(e){
+    $('#gate').innerHTML=`<div class="card gate"><h2>Just a moment</h2>
+      <p>We could not load your progress right now. Please refresh in a little while.</p></div>`;
+  }
+})();
+</script>
+</body>
+</html>

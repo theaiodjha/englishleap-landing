@@ -89,7 +89,8 @@ use-it-live.html           Use It Live — record & get AI feedback (FLAGGED OFF
 elc-tour.js                guided Oriva tour (home + arcade); auto-runs first visit
 api/auth/{login,callback,signout}.js   Patreon OAuth flow
 api/{games,list,download,unlock}.js    arcade data, archive list/download, code redemption
-api/progress.js            records game completions + returns a member's practice history
+api/progress.js            records game completions + returns practice history / recap / dashboard
+progress.html              the member progress page (KPI row, monthly chart, phrase mastery)
 api/use-it-live.js         Use It Live: usage + audio analysis (Gemini), flag-gated
 lib/session.js             session cookie (HMAC), readSession(), checkMembership() → tier/uid/email,
                            revalidateSession() → shared 24h live Patreon re-check
@@ -97,6 +98,7 @@ lib/quota.js               monthly audio quota (Upstash), keyed to session.uid; 
 lib/history.js             practice history (sessions, aggregates, game completions)
 lib/coach.js               pure logic: due words, ownership, next-best-action, speech metrics
 lib/recap.js               monthly "how your month went" facts (no model call)
+lib/dashboard.js           shapes history for progress.html (streaks, mastery, monthly bars)
 elc.css                    design tokens: colour, type scale, spacing scale, radii
 lib/arcade-store.js        KV read/write for arcade data (static fallback)
 lib/arcade-data.js         static arcade catalogue (short cover titles)
@@ -253,7 +255,12 @@ Failures `console.warn` into the Vercel log.
 account copy is hooked there; `localStorage` stays the device source of truth (anonymous
 players need no account) and a one-time `backfill` migrates it on first signed-in visit.
 
-**The dashboard itself is NOT built** — this is capture only, so history accrues from now.
+**The dashboard is `progress.html`** (`action:'dashboard'`). Pure arithmetic over the
+member's own history — no model call. Forms follow the data's job: a KPI row for headline
+numbers, ONE column chart for minutes per month (a single series, so one colour — height
+carries the magnitude), and shaped dots for phrase mastery so state is never colour-alone.
+Values wear ink tokens, never brand colour, and **the rubric never appears as a number**.
+The chart only renders once there are 2+ months of data; below that it says so.
 
 ### The rubric (what makes growth chartable)
 
