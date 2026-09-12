@@ -64,3 +64,31 @@
 /* Oriva's cheer opener. Was a hard-coded teal that measured 2.1:1 on a light card;
    violet reads as celebratory and works on both grounds (see theme.css for light). */
 .ohi{color:#b9a4ff;font-weight:700}
+
+/* ---- the member header (rendered by elc-nav.js) ---------------------------- */
+.elcnav{display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap;
+  padding:var(--sp-4) 0 var(--sp-3);position:relative;z-index:3}
+.elcnav-brand{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);
+  font-family:var(--display);font-weight:600;font-size:var(--fs-md);white-space:nowrap}
+.elcnav-brand .d{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--cyan)}
+.elcnav-tabs{display:inline-flex;gap:2px;padding:4px;border-radius:var(--r-full);
+  background:var(--glass2);border:1px solid var(--line);margin-left:auto}
+.elcnav-tabs a{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 15px;
+  border-radius:var(--r-full);font-family:var(--display);font-weight:600;font-size:var(--fs-sm);
+  color:var(--soft);text-decoration:none;white-space:nowrap;transition:color .2s,background .2s}
+.elcnav-tabs a svg{width:17px;height:17px;flex:0 0 17px}
+.elcnav-tabs a:hover{color:var(--ink)}
+.elcnav-tabs a.on{background:linear-gradient(100deg,var(--teal),var(--purple));color:#fff}
+.elcnav-acct{display:inline-flex;align-items:center;gap:10px;font-size:var(--fs-sm);color:var(--soft)}
+.elcnav-out,.elcnav-acct a{color:var(--soft);text-decoration:none;font-weight:600;
+  border:1px solid var(--line);background:var(--glass2);border-radius:var(--r-full);
+  padding:8px 14px;min-height:38px;display:inline-flex;align-items:center}
+.elcnav-acct a:hover{color:var(--ink);border-color:rgba(255,255,255,.24)}
+/* phones: brand on its own line, tabs full width and evenly split */
+@media(max-width:720px){
+  .elcnav{gap:var(--sp-3)}
+  .elcnav-tabs{margin-left:0;order:3;width:100%;justify-content:space-between}
+  .elcnav-tabs a{flex:1;justify-content:center;padding:0 8px}
+  .elcnav-acct{margin-left:auto}
+}
+@media(max-width:420px){ .elcnav-tabs a span{display:none} .elcnav-tabs a{min-height:42px} }

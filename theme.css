@@ -417,3 +417,10 @@ html[data-theme="light"] .reviewbar{
 }
 
 html[data-theme="light"] .ohi{color:#5b3fd6}
+
+html[data-theme="light"] .elcnav-tabs{background:rgba(255,255,255,.70) !important;border-color:rgba(60,50,110,.18) !important}
+html[data-theme="light"] .elcnav-tabs a{color:#5b5680}
+html[data-theme="light"] .elcnav-tabs a:hover{color:#241f3a}
+html[data-theme="light"] .elcnav-out,
+html[data-theme="light"] .elcnav-acct a{background:rgba(255,255,255,.72) !important;
+  border-color:rgba(60,50,110,.20) !important;color:#3a3560 !important}

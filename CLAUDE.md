@@ -72,6 +72,13 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   `max-width` decides the height and can overflow short screens (phrase-pairs cut its last
   row in half). Cap such a grid with `width:min(<design>, 100%, <width implied by the
   height left below the header>)` using `svh`.
+- **One member header, defined once** in `elc-nav.js` (Arcade · Progress · Archive, each
+  with an icon; Use It Live appears when `SHOW_UIL` is flipped at launch). Member pages
+  carry `<div id="elcnav"></div><script src="/elc-nav.js"></script>` at the top of `.wrap`
+  and nothing else — the script renders synchronously so page scripts still find `#acct`.
+  Six pages previously had five different headers with drifting labels, and Progress and
+  Use It Live did not link to each other. **The games keep their minimal back-only bar**
+  (a game is a focus task) and `index.html` keeps its marketing nav.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
   (celebrate, exercise, happy, point, read, think). If a PNG is absent, hide it gracefully.
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).
