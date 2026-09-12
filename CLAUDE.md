@@ -237,6 +237,7 @@ tools/{seed-arcade,issue-code}.js      seed arcade to KV; issue member codes
 tools/test-popular.mjs     node tools/test-popular.mjs — asserts the popularity ranking rules
 tools/test-stats.mjs       node tools/test-stats.mjs — asserts the public stats floor + rounding
 tools/test-progress-kpi.js node tools/test-progress-kpi.js — asserts where each KPI tile leads
+tools/test-progress-drawer.js  node … — drives the KPI drawer open/close state machine
 tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
@@ -440,7 +441,10 @@ called and discarded, so a click costs **no extra request**. The drawer is tied 
 that tile (`--cx`, measured from the button rect; opaque on purpose, since a translucent
 caret must match whatever the panel composites to over the card, which differs by theme),
 the tile's **hue** carried in via `--kc` (colour identifying, not decorating), and a
-**header** naming the number in words for anyone who can use neither. A tile whose target
+**header** naming the number in words for anyone who can use neither. The panel closes three ways — a close button in its header, Escape, or the same tile again
+— because a toggle nobody can see is not a control. `wireKpi` tracks WHICH panel is up and
+never the month filter with it: storing `'recent:2026-08'` there left the Recordings tile
+comparing unequal and re-opening instead of closing. A tile whose target
 does not exist for that member renders as a plain `<div>`, not a button: an affordance that opens an
 empty card is worse than none. `node tools/test-progress-kpi.js` guards exactly that.
 A chart column with sessions is a **way in**: clicking it opens the Recordings drawer

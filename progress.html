@@ -124,6 +124,13 @@
     width:3px;height:15px;border-radius:2px;
     background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--kc) 65%,transparent))}
   .kdraw-head{display:flex;align-items:center;gap:9px;margin:0 0 var(--sp-4)}
+  .kdraw-x{margin-left:auto;flex:0 0 30px;width:30px;height:30px;border-radius:50%;
+    display:grid;place-items:center;cursor:pointer;padding:0;
+    background:transparent;border:1px solid transparent;color:var(--soft2);
+    transition:background .15s,color .15s,border-color .15s}
+  .kdraw-x svg{width:15px;height:15px}
+  .kdraw-x:hover{color:var(--ink);background:color-mix(in srgb,var(--kc) 16%,transparent);
+    border-color:color-mix(in srgb,var(--kc) 32%,transparent)}
   .kdraw-head .ic{font-size:17px/* emoji glyph, not type */;line-height:1}
   .kdraw-head b{font-family:var(--display);font-weight:600;font-size:var(--fs-md);color:var(--ink)}
   .slist{display:flex;flex-direction:column;gap:var(--sp-3)}
@@ -454,7 +461,11 @@ function feedbackHTML(r){
 }
 
 function drawerHTML(d,which,tile,ym){
-  const head=(icon,title)=>`<div class="kdraw-head"><span class="ic" aria-hidden="true">${icon}</span><b>${title}</b></div>`;
+  const head=(icon,title)=>`<div class="kdraw-head"><span class="ic" aria-hidden="true">${icon}</span><b>${title}</b>
+    <button type="button" class="kdraw-x" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+        stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button></div>`;
   if(which==='recent'){
     const fmt=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const all=d.recent||[];
@@ -523,10 +534,22 @@ function wireEpisodes(){
 
 function wireKpi(d){
   const draw=$('#kdraw'), inner=$('#kdrawIn');
+  /* WHICH panel is up — never the filter with it. Opening from a chart column used to
+     store 'recent:2026-08' here, so the Recordings tile then compared unequal and
+     re-opened the panel instead of closing it. */
   let open=null;
   // opening the drawer from somewhere other than a tile (the chart) still has to point
   // the connector at the Recordings tile, since that is what the panel belongs to
   const recentBtn=()=>document.querySelector('.kpi button.k[data-go="recent"]');
+
+  const shut=()=>{
+    if(!open) return;
+    draw.style.maxHeight=draw.scrollHeight+'px';   // from a real number, or it cannot animate
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ draw.style.maxHeight='0px'; }));
+    document.querySelectorAll('.kpi button.k[aria-expanded]').forEach(b=>b.setAttribute('aria-expanded','false'));
+    open=null;
+  };
+
   const show=(which,btn,ym)=>{
     inner.innerHTML=drawerHTML(d,which,KPIBY[which],ym);
     inner.style.setProperty('--kc', btn?btn.style.getPropertyValue('--kc'):'var(--coral)');
@@ -537,6 +560,9 @@ function wireKpi(d){
     draw.style.maxHeight=draw.scrollHeight+'px';
     document.querySelectorAll('.kpi button.k[aria-expanded]').forEach(b=>
       b.setAttribute('aria-expanded', b===btn?'true':'false'));
+    const x=inner.querySelector('.kdraw-x');
+    if(x) x.addEventListener('click',shut);
+    open=which;
   };
   /* A <details> inside the drawer changes its height after the drawer measured itself,
      so release the cap once anything opens. */
@@ -545,17 +571,12 @@ function wireKpi(d){
   },true);
 
   window.__openRecent=(ym)=>{
-    const btn=recentBtn();
-    show('recent',btn,ym);
-    open='recent:'+(ym||'');
+    show('recent',recentBtn(),ym);            // show() records which panel is up
     draw.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'nearest'});
   };
-  const shut=()=>{
-    draw.style.maxHeight=draw.scrollHeight+'px';
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{ draw.style.maxHeight='0px'; }));
-    document.querySelectorAll('.kpi button.k[aria-expanded]').forEach(b=>b.setAttribute('aria-expanded','false'));
-    open=null;
-  };
+
+  // Escape closes it, like any other transient panel on the site
+  document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') shut(); });
   document.querySelectorAll('.kpi button.k').forEach(btn=>{
     btn.addEventListener('click',()=>{
       const which=btn.dataset.go, cardId=btn.dataset.card;
@@ -569,9 +590,8 @@ function wireKpi(d){
         if(cardEl) cardEl.scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'center'});
         return;
       }
-      if(open===which){ shut(); return; }
+      if(open===which){ shut(); return; }   // same tile again = put it away
       show(which,btn);
-      open=which;
     });
   });
 }
