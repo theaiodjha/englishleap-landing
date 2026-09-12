@@ -26,7 +26,8 @@ const el = {
   addEventListener() {}, style: { setProperty() {}, getPropertyValue: () => '' },
   scrollHeight: 0, getBoundingClientRect: () => ({ left: 0, width: 0 }),
 };
-global.document = { querySelector: () => el, querySelectorAll: () => [] };
+// wireKpi() binds Escape on the document, so the stub needs a listener sink
+global.document = { querySelector: () => el, querySelectorAll: () => [], addEventListener() {} };
 global.window = { matchMedia: () => ({ matches: false }) };
 global.matchMedia = () => ({ matches: false });
 global.addEventListener = () => {};
