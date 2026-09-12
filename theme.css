@@ -17,14 +17,10 @@ html[data-theme="light"]{
 
 /* vibrant cream → lilac shell (applies to every page's body) */
 html[data-theme="light"] body{
-  /* attachment:fixed sizes the gradient to the VIEWPORT — beyond that it either tiles
-     (a hard seam at every tile edge) or falls back to the flat colour. Size it to the
-     DOCUMENT instead: one wash from top to bottom, no boundary at any scroll position. */
-  background:linear-gradient(160deg,#fff4ec 0%,#f6efff 46%,#ece0ff 100%) !important;
-  background-attachment:scroll;
-  background-repeat:no-repeat;
-  background-size:100% 100%;
-  background-color:#f6efff;
+  /* flat: the canvas background is where seams come from (viewport-sized positioning
+     areas, tiling, propagation). The wash lives on #stagebg instead — one real element,
+     document-tall, so there is exactly one layer and no edge anywhere. */
+  background:#f6efff !important;
 }
 
 /* keep the aurora colourful but gentle, so the glass reads as frosted */
@@ -125,12 +121,16 @@ html[data-theme="light"] .upsell{background:linear-gradient(120deg,rgba(139,108,
 #stagebg{position:absolute !important;inset:0 !important;height:auto !important;
   min-height:100% !important;overflow:visible !important}
 #stagebg::before{inset:0 !important;filter:blur(60px)}
+html[data-theme="light"] #stagebg::before{display:none}   /* its own soft edge is one layer too many */
 
 html[data-theme="light"] #stagebg{
   background:
     radial-gradient(80% 60% at 10% -6%, rgba(139,108,255,.16), transparent 62%),
-    radial-gradient(70% 56% at 96% 4%, rgba(31,196,182,.14), transparent 62%),
-    radial-gradient(62% 52% at 50% 104%, rgba(246,71,154,.10), transparent 62%) !important;
+    radial-gradient(70% 56% at 96% 4%, rgba(31,196,182,.13), transparent 62%),
+    radial-gradient(62% 52% at 50% 104%, rgba(246,71,154,.10), transparent 62%),
+    linear-gradient(160deg,#fff4ec 0%,#f6efff 46%,#ece0ff 100%) !important;
+  background-repeat:no-repeat !important;
+  background-size:100% 100% !important;
 }
 
 /* ---- Clue Room game: full light-theme parity (premium, contrasting) ---- */
