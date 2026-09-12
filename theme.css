@@ -462,7 +462,15 @@ html[data-theme="light"] .pill-eyebrow .dot{
 /* The progress week strip. A filled square must be distinguishable from an empty one at
    3:1 as a non-text mark: --teal (#1fc4b6) manages only 2.12:1 against the light card, so
    the fill steps down to #0f9b90 (3.34:1). Same dark-ground trap as the mastery dots. */
-html[data-theme="light"] .wstrip i.on{background:#0f9b90 !important}
+/* The strip now inherits the tile hue (--kc, gold for the streak) rather than teal, and
+   it is a gradient fill. Gold at full strength is a pale wash on paper — 1.6:1 against the
+   card, so a practised week would be hard to pick out from an empty one. Darken the whole
+   ramp on light; 3:1 is the bar for a non-text mark. */
+html[data-theme="light"] .wstrip i.on{
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--kc) 62%,#6a4a00),
+    color-mix(in srgb,var(--kc) 30%,#4a3300)) !important;
+}
 html[data-theme="light"] .wstrip i{border-color:rgba(60,50,110,.20) !important}
 
 /* Progress mastery dots. --gold is a dark-ground colour: at 15px on a white card the

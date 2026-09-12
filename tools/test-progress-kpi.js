@@ -79,14 +79,22 @@ ok('...and it is recordings', /data-go="recent"/.test(h));
 ok('no dead affordance on the empty tiles',
   !/data-card="cb-phrases"/.test(h) && !/data-card="cb-speaking"/.test(h));
 
-const rec = m.drawerHTML(full, 'recent');
+const rec = m.drawerHTML(full, 'recent', {e:'M'});
 ok('recent drawer names the episode', /EP280/.test(rec));
 ok('recent drawer gives minutes and pace', /2 min/.test(rec) && /110 wpm/.test(rec));
 ok('recent drawer says the audio is not kept', /never the audio/.test(rec));
 
-const wk = m.drawerHTML(full, 'weeks');
+// the panel must say which tile it belongs to, for anyone who cannot use colour or the
+// connector line
+ok('recent drawer is titled', /kdraw-head/.test(rec) && /Your last 1 recording</.test(rec));
+ok('...and says "recording", not "recordings"', !/1 recordings/.test(rec));
+ok('recent drawer repeats the tile emoji', /class="ic" aria-hidden="true">M</.test(rec));
+
+const wk = m.drawerHTML(full, 'weeks', {e:'F'});
 ok('week strip marks a practised week', /class="on/.test(wk));
 ok('week strip rings the current week', /cur/.test(wk));
+ok('week drawer is titled with the count', /kdraw-head/.test(wk) && /1 week of the last 2</.test(wk));
+ok('week drawer labels both ends of the strip', /2w ago/.test(wk) && /now</.test(wk));
 
 console.log(bad ? `\n${bad} FAILED` : '\nall assertions passed');
 process.exit(bad ? 1 : 0);

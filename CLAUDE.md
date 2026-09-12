@@ -384,8 +384,12 @@ is released to `none` once open or the "See the numbers" table would be clipped 
 **The KPI tiles lead somewhere.** Minutes and phrases open+scroll to the card that already
 tells their story (no second copy of it); recordings and streak open a drawer under the row,
 drawn from `recent` and `weeks` in the dashboard payload — `getSessions()` was already being
-called and discarded, so a click costs **no extra request**. A tile whose target does not
-exist for that member renders as a plain `<div>`, not a button: an affordance that opens an
+called and discarded, so a click costs **no extra request**. The drawer is tied to the tile that opened it three ways — a **connector line** under
+that tile (`--cx`, measured from the button rect; opaque on purpose, since a translucent
+caret must match whatever the panel composites to over the card, which differs by theme),
+the tile's **hue** carried in via `--kc` (colour identifying, not decorating), and a
+**header** naming the number in words for anyone who can use neither. A tile whose target
+does not exist for that member renders as a plain `<div>`, not a button: an affordance that opens an
 empty card is worse than none. `node tools/test-progress-kpi.js` guards exactly that.
 The KPI row and "What next" do not fold — one is the headline, the other is a single button.
 The KPI row is a tile per stat: an emoji chip carrying a pillar colour, and the **numeral in

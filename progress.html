@@ -87,14 +87,33 @@
   .kpi button.k{font:inherit;text-align:left;border:1px solid transparent;border-radius:var(--r-md);
     background:transparent;cursor:pointer;padding:var(--sp-2);margin:calc(var(--sp-2) * -1);
     transition:background .15s,border-color .15s,transform .15s}
-  .kpi button.k:hover{background:var(--glass2);border-color:var(--line);transform:translateY(-1px)}
-  .kpi button.k[aria-expanded="true"]{background:var(--glass2);border-color:var(--line)}
-  .kpi button.k .ic{transition:transform .15s}
-  .kpi button.k:hover .ic{transform:scale(1.06)}
+  .kpi button.k:hover{background:color-mix(in srgb,var(--kc) 9%,transparent);
+    border-color:color-mix(in srgb,var(--kc) 26%,transparent);transform:translateY(-1px)}
+  .kpi button.k[aria-expanded="true"]{background:color-mix(in srgb,var(--kc) 13%,transparent);
+    border-color:color-mix(in srgb,var(--kc) 42%,transparent)}
+  .kpi button.k .ic{transition:transform .2s cubic-bezier(.22,1,.36,1),box-shadow .2s}
+  .kpi button.k:hover .ic{transform:scale(1.07) rotate(-4deg)}
+  .kpi button.k[aria-expanded="true"] .ic{transform:scale(1.07);
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--kc) 22%,transparent)}
 
-  /* the drawer under the KPI row */
-  .kdraw{overflow:hidden;transition:max-height .34s cubic-bezier(.22,1,.36,1)}
-  .kdraw-in{padding-top:var(--sp-5);margin-top:var(--sp-5);border-top:1px solid var(--line)}
+  /* the drawer under the KPI row — tinted with the tile that opened it */
+  .kdraw{position:relative;overflow:hidden;transition:max-height .34s cubic-bezier(.22,1,.36,1)}
+  .kdraw-in{position:relative;margin-top:var(--sp-5);padding:var(--sp-5) var(--sp-5) var(--sp-4);
+    border-radius:var(--r-lg);
+    background:color-mix(in srgb,var(--kc) 7%,transparent);
+    border:1px solid color-mix(in srgb,var(--kc) 20%,transparent);
+    border-left:3px solid color-mix(in srgb,var(--kc) 55%,transparent)}
+  /* A connector running from the open tile down into the panel. Chosen over a caret
+     because it is OPAQUE: a translucent arrow has to match whatever the panel composites
+     to over the card, which differs by theme. This just draws a line in the tile hue.
+     It lives inside .kdraw-in margin, so .kdraw overflow:hidden never clips it. --cx is
+     measured from the button rect in wireKpi(). */
+  .kdraw-in::before{content:"";position:absolute;top:-15px;left:calc(var(--cx,50%) - 1.5px);
+    width:3px;height:15px;border-radius:2px;
+    background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--kc) 65%,transparent))}
+  .kdraw-head{display:flex;align-items:center;gap:9px;margin:0 0 var(--sp-4)}
+  .kdraw-head .ic{font-size:17px/* emoji glyph, not type */;line-height:1}
+  .kdraw-head b{font-family:var(--display);font-weight:600;font-size:var(--fs-md);color:var(--ink)}
   .slist{display:flex;flex-direction:column;gap:var(--sp-3)}
   .srow{display:flex;align-items:baseline;gap:var(--sp-3);flex-wrap:wrap;font-size:var(--fs-sm)}
   .srow .when{color:var(--soft2);flex:0 0 84px;font-variant-numeric:tabular-nums}
@@ -102,12 +121,16 @@
   .srow .mins{color:var(--soft);font-variant-numeric:tabular-nums}
   .srow .ws{display:flex;flex-wrap:wrap;gap:5px;flex:1 1 100%}
   .srow .ws i{font-style:normal;font-size:var(--fs-xs);color:var(--soft);
-    background:var(--glass2);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+    background:color-mix(in srgb,var(--kc) 12%,transparent);
+    border:1px solid color-mix(in srgb,var(--kc) 24%,transparent);border-radius:999px;padding:2px 8px}
   .wstrip{display:flex;gap:7px;flex-wrap:wrap}
   .wstrip i{width:26px;height:26px;border-radius:8px;display:block;background:var(--glass2);
     border:1px solid var(--line)}
-  .wstrip i.on{background:var(--teal);border-color:transparent}
-  .wstrip i.cur{box-shadow:0 0 0 2px var(--purple)}
+  .wstrip i.on{background:linear-gradient(180deg,
+    color-mix(in srgb,var(--kc) 78%,white),var(--kc));border-color:transparent}
+  .wstrip i.cur{box-shadow:0 0 0 2px var(--ink)}
+  .wstrip{align-items:center}
+  .wstrip .ago{font-size:var(--fs-xs);color:var(--soft2);margin-right:2px}
   .kdraw .note{color:var(--soft2);font-size:var(--fs-sm);margin:var(--sp-3) 0 0}
 
   /* entrance, played once after the first render: cards rise in with a small stagger,
@@ -307,26 +330,37 @@ function animateIn(){
 
 /* What each drawer shows. Built from the dashboard payload that is already in hand —
    clicking a number must not cost another request. */
-function drawerHTML(d,which){
+function drawerHTML(d,which,tile){
+  const head=(icon,title)=>`<div class="kdraw-head"><span class="ic" aria-hidden="true">${icon}</span><b>${title}</b></div>`;
   if(which==='recent'){
     const fmt=t=>new Date(t).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    return `<div class="slist">${(d.recent||[]).map(r=>`<div class="srow">
+    const n=(d.recent||[]).length;
+    return head(tile?tile.e:'',`Your last ${plural(n,'recording','recordings')}`)+
+      `<div class="slist">${(d.recent||[]).map(r=>`<div class="srow">
         <span class="when">${esc(fmt(r.t))}</span>
         <span class="what">${r.n?`EP${r.n} &middot; `:''}${esc(r.title||'Practice')}</span>
         <span class="mins">${r.minutes} min${r.wpm?` &middot; ${r.wpm} wpm`:''}</span>
         ${r.words.length?`<span class="ws">${r.words.map(w=>`<i>${esc(w)}</i>`).join('')}</span>`:''}
       </div>`).join('')}</div>
-      <p class="note">Your last ${(d.recent||[]).length} recordings. We keep the details, never the audio.</p>`;
+      <p class="note">We keep the details, never the audio.</p>`;
   }
   // the streak as a shape: eight weeks, oldest left, this week ringed
-  return `<div class="wstrip" role="img" aria-label="Weeks practised in the last 8 weeks">
-      ${(d.weeks||[]).map(w=>`<i class="${w.active?'on':''}${w.current?' cur':''}" title="${esc(w.week)}${w.active?' — practised':''}"></i>`).join('')}
+  const wks=d.weeks||[];
+  const done=wks.filter(w=>w.active).length;
+  return head(tile?tile.e:'',`${plural(done,'week','weeks')} of the last ${wks.length}`)+
+    `<div class="wstrip" role="img" aria-label="${done} of the last ${wks.length} weeks practised">
+      <span class="ago">${wks.length}w ago</span>
+      ${wks.map(w=>`<i class="${w.active?'on':''}${w.current?' cur':''}" title="${esc(w.week)}${w.active?' \u2014 practised':' \u2014 no practice'}"></i>`).join('')}
+      <span class="ago">now</span>
     </div>
-    <p class="note">The last 8 weeks. A week counts once you practise in it &mdash; missing one is fine.</p>`;
+    <p class="note">A week counts once you practise in it &mdash; missing one is fine.</p>`;
 }
 
 /* Tiles that point at a card open it and scroll to it; tiles that own a drawer toggle it.
    Only one drawer is open at a time, and re-clicking the same tile closes it. */
+// emoji + hue per drawer, so the panel can repeat the tile it belongs to
+const KPIBY={recent:{e:'&#127897;&#65039;',c:'var(--coral)'},weeks:{e:'&#128293;',c:'var(--gold)'}};
+
 function wireKpi(d){
   const draw=$('#kdraw'), inner=$('#kdrawIn');
   let open=null;
@@ -350,7 +384,11 @@ function wireKpi(d){
         return;
       }
       if(open===which){ shut(); return; }
-      inner.innerHTML=drawerHTML(d,which);
+      inner.innerHTML=drawerHTML(d,which,KPIBY[which]);
+      // carry the tile's hue into the panel, and point the caret at the tile itself
+      inner.style.setProperty('--kc', btn.style.getPropertyValue('--kc'));
+      const br=btn.getBoundingClientRect(), dr=inner.getBoundingClientRect();
+      inner.style.setProperty('--cx', Math.round(br.left + br.width/2 - dr.left)+'px');
       draw.style.maxHeight=draw.scrollHeight+'px';
       document.querySelectorAll('.kpi button.k[aria-expanded]').forEach(b=>
         b.setAttribute('aria-expanded', b===btn?'true':'false'));
