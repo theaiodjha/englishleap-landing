@@ -49,7 +49,7 @@
   h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,6vw,40px);margin:var(--sp-1) 0 8px;line-height:1.04}
   .sub{color:var(--soft);font-size:var(--fs-md);max-width:34em;margin:0 auto;line-height:1.5}
 
-  .prog{display:flex;gap:10px;justify-content:center;align-items:center;margin:14px 0 18px;flex-wrap:wrap}
+  .prog{display:flex;align-items:center;justify-content:center;gap:var(--sp-3);flex-wrap:wrap;margin:0 0 var(--sp-3)}
   .pill{background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:var(--sp-2) 15px;font-weight:600;font-size:var(--fs-md);color:var(--soft)}
   .pill b{color:var(--ink);font-family:var(--display)}
 
@@ -66,9 +66,10 @@
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,205,70,.35)}50%{box-shadow:0 0 0 6px rgba(255,205,70,0)}}
 
   .hintline{margin:var(--sp-4) auto 0;max-width:680px;text-align:center;color:var(--soft);font-size:var(--fs-sm)}
-  .bank{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);justify-content:center;margin:var(--sp-3) auto 0;max-width:680px;
-    position:sticky;bottom:0;z-index:5;padding:var(--sp-3) var(--sp-3) var(--sp-4);
-    background:linear-gradient(180deg,transparent,var(--space) 42%);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .bank{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-3);justify-content:center;align-items:center;
+    position:sticky;bottom:0;z-index:5;margin:var(--sp-3) calc(50% - 50vw) 0;padding:var(--sp-4) var(--sp-5) var(--sp-4);
+    background:linear-gradient(180deg,transparent,var(--space) 58%,var(--space));
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
   .chip{appearance:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:clamp(15px,3.6vw,18px);
     padding:13px 20px;border-radius:16px;color:#fff;background:rgba(139,108,255,.28);border:1px solid rgba(255,255,255,.3);border:1px solid color-mix(in srgb,var(--c,#8b6cff) 62%, transparent);
     background:linear-gradient(160deg,color-mix(in srgb,var(--c,#8b6cff) 46%, transparent),color-mix(in srgb,var(--c,#8b6cff) 16%, transparent));
@@ -116,7 +117,11 @@
   @media(prefers-reduced-motion:reduce){.chip.wrong{animation:none}.gap.target{animation:none}#stagebg::before{animation:none}}
   .gatehow{margin-top:14px;align-items:center;gap:var(--sp-2);cursor:pointer;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-weight:700;font-size:var(--fs-md);padding:11px 18px;border-radius:999px}
   .gatehow:hover{border-color:rgba(255,255,255,.32)}
-  .howbtn{align-items:center;justify-content:center;gap:var(--sp-2);margin:14px auto 0;cursor:pointer;border:0;font:inherit;font-weight:700;font-size:var(--fs-md);padding:10px 18px;border-radius:999px;color:#10121c;background:#fff;box-shadow:0 10px 26px -10px rgba(0,0,0,.55)}
+  /* sits on the tracker row and matches the pill exactly, so the two read as a pair */
+  .howbtn{display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);cursor:pointer;
+    border:1px solid var(--line);background:var(--glass);color:var(--soft);font:inherit;font-weight:600;
+    font-size:var(--fs-md);padding:var(--sp-2) 15px;border-radius:999px;margin:0}
+  .howbtn:hover{color:var(--ink);border-color:rgba(255,255,255,.26)}
   .howbtn:hover{transform:translateY(-1px)}
   @media(max-width:380px){.wrap{padding:var(--sp-3) 12px 52px}.card{padding:22px 16px}.bonus{padding:18px 16px}.prog{gap:7px}}
   #unlockArea{position:relative;z-index:60}
@@ -168,13 +173,14 @@
   <div class="head">
     <div class="ep" id="epLabel">EP232</div>
     <h1>Story Unlock</h1>
-  <button id="howBtn" class="howbtn" style="display:none">&#9654; How to play</button>
+  
     <p class="sub" id="sub">Fill each gap with the right phrase to unlock the story.</p>
   </div>
 
   <div class="prog">
-    <div class="pill">Words placed <b id="pPlaced">0/6</b></div>
-  </div>
+      <div class="pill">Words placed <b id="pPlaced">0/6</b></div>
+      <button id="howBtn" class="howbtn" style="display:none">&#9654; How to play</button>
+    </div>
 
   <div id="game">
     <div class="card" id="storyCard"><div class="story" id="story"></div></div>
