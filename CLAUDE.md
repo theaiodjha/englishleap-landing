@@ -68,6 +68,10 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   indistinguishable. If you change one, re-run the dataviz skill's
   `validate_palette.js "<hexes>" --mode dark --pairs all`: all-pairs, because every card
   is on screen at once. Keep the normal-vision floor at ΔE >= 15.
+- **A board whose cards use `aspect-ratio` is sized by its WIDTH**, so a fixed
+  `max-width` decides the height and can overflow short screens (phrase-pairs cut its last
+  row in half). Cap such a grid with `width:min(<design>, 100%, <width implied by the
+  height left below the header>)` using `svh`.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
   (celebrate, exercise, happy, point, read, think). If a PNG is absent, hide it gracefully.
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).
