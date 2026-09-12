@@ -35,6 +35,53 @@
            'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON[name] + '</svg>';
   }
 
+  // ---- the smart back link ------------------------------------------------
+  // Most back links name a fixed PARENT, which is right when a page sits in a hierarchy
+  // (a game type belongs under "browse all games" however you got there). Progress is
+  // not like that: it is a top-level tab reachable from every page and from the account
+  // card, so a fixed parent is a guess that is wrong more often than it is right. For
+  // those, `data-smart` rewrites the link from document.referrer — but only for a page
+  // on this site that we can NAME, so the label is never a bare URL. Anything else
+  // (typed in, reloaded, arrived from outside, referrer suppressed) keeps the markup's
+  // own href, which is why it is written as a real link and not built here.
+  var PAGE = {
+    '/practice-arcade.html': 'Practice Arcade',
+    '/arcade-browse.html': 'Browse the arcade',
+    '/use-it-live.html': 'Use It Live',
+    '/archive.html': 'Member Archive'
+  };
+
+  function titleCase(t) {
+    return String(t || '').split('-').filter(Boolean).map(function (w) {
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(' ');
+  }
+
+  function nameFor(u) {
+    var path = u.pathname.replace(/index\.html$/, '') || '/';
+    if (path === '/arcade-type.html') {
+      // the game's own name reads better than "the game type page"
+      var t = titleCase(u.searchParams.get('type'));
+      return t || 'Browse the arcade';
+    }
+    if (path === '/') return 'Home';
+    return PAGE[path] || null;
+  }
+
+  function smartBack() {
+    var link = document.querySelector('a.elcback[data-smart]');
+    if (!link || !document.referrer) return;
+    var u;
+    try { u = new URL(document.referrer); } catch (e) { return; }
+    if (u.origin !== location.origin) return;                    // came from off-site
+    if (u.pathname === location.pathname) return;                // a reload, not a journey
+    var name = nameFor(u);
+    if (!name) return;                                           // unnamed page: keep the fallback
+    link.href = u.pathname + u.search;
+    var label = link.querySelector('span');
+    if (label) label.textContent = name;
+  }
+
   // ---- the account control -------------------------------------------------
   // An avatar with the member's initials; clicking it opens a card with their name,
   // plan and sign-out. Six pages previously printed "Signed in as Fahad" plus a bare
@@ -198,4 +245,6 @@
   }
 
   render();
+  // outside render(): the back link does not depend on the header slot existing
+  smartBack();
 })();

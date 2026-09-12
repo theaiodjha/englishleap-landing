@@ -99,8 +99,13 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   marketing nav. The two pages a level below the Arcade (`arcade-browse.html`,
   `arcade-type.html`) carry a `.elcback` link naming their PARENT ("Practice Arcade",
   "Browse all games"): a breadcrumb step, so it lands in the same place however the
-  member arrived — not browser history. `progress.html` carries one to the Arcade too:
-  it is a tab, but the Arcade is where a member acts on what they read there.
+  member arrived — not browser history. **`progress.html` is the exception**: it is a
+  top-level tab reachable from every page and from the account card, so a fixed parent is
+  wrong more often than right. Its link carries `data-smart`, and `smartBack()` in
+  `elc-nav.js` rewrites it from `document.referrer` — but only for a same-origin page it
+  can NAME (see the PAGE map; `arcade-type.html` is named by its `?type=`), so the label
+  is never a bare URL. Reload, off-site, no referrer, unnamed page → the markup's own href
+  stands, which is why it is a real `<a>` and not built in JS.
 - **The Member Archive is hidden from the whole site** until it actually works: no nav
   tab, and every link commented with "Member Archive hidden until it is a working
   feature" (`index.html` x2, `games/clue-room`). `archive.html` still exists at its URL.
