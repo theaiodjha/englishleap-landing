@@ -52,6 +52,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   which measures ~1.2:1 once the page ground is light — `theme.css` swaps the ink to
   `#241f3a` and leaves the accent to do the identifying. `#stagebg` is hidden on light
   for the same reason as the aurora.
+- **Small letterspaced caps need MORE contrast, not less.** `.eyebrow` exists in two
+  forms: `index.html`'s **pill** (`.pill-eyebrow`, neutral `#3a3560` ink on light, its
+  `.dot` carrying the colour at `#0b6f68` with the glow dropped — a box-shadow halo reads
+  as light at night and as a smudge on paper) and the plain **teal label** on
+  `practice-arcade.html`/`use-it-live.html` (`var(--teal)` = 1.9:1 on light, now `#0b6f68`).
+  Neither had a rule in `theme.css` until now.
 - **`color-scheme` drives native controls.** `elc.css` sets `dark`, `theme.css` sets
   `light` — without it a `<select>` renders in the OS's scheme, so voice pickers appeared
   dark navy on a light page. Applies to scrollbars too.

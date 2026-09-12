@@ -443,6 +443,21 @@ html[data-theme="light"] .elcnav-tabs a:hover{color:#241f3a}
 html[data-theme="light"] .elcnav-login{background:rgba(255,255,255,.72) !important;
   border-color:rgba(60,50,110,.20) !important;color:#3a3560 !important}
 
+/* Eyebrows on light. Small letterspaced caps need MORE contrast than body text, not
+   less — thin strokes with wide gaps give the eye little to hold on to. The teal LABEL
+   form keeps its hue at the legible step (#1fc4b6 is 2.0:1 on white); the PILL form takes
+   neutral ink and lets its dot carry the colour, with the glow dropped: a box-shadow halo
+   reads as light on a dark ground and as a smudge on paper. */
+html[data-theme="light"] .eyebrow{color:#0b6f68}
+html[data-theme="light"] .pill-eyebrow{
+  color:#3a3560 !important; font-weight:700;
+  background:rgba(255,255,255,.80) !important;
+  border-color:rgba(60,50,110,.22) !important;
+}
+html[data-theme="light"] .pill-eyebrow .dot{
+  background:#0b6f68 !important; box-shadow:none !important;
+}
+
 /* account card: paper, not glass — and the plan line needs the light teal ink */
 /* Progress mastery dots. --gold is a dark-ground colour: at 15px on a white card the
    "started" ring and the "not yet" ring were both pale grey-yellow and read as the same
