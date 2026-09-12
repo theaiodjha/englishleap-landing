@@ -121,6 +121,7 @@ const GRADS=[['#8b6cff','#1fc4b6'],['#f6479a','#8b6cff'],['#ff8a63','#f6479a'],[
 function gradFor(ep){const n=parseInt(String(ep||'').replace(/\D/g,''),10)||0;return GRADS[n%GRADS.length];}
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 let EPISODES=[], GAMES=[], view='episode';
+try{ const saved=localStorage.getItem('elc:browse-view'); if(saved==='game'||saved==='episode') view=saved; }catch(e){}
 
 function gamePill(g, epId){
   const label=esc(g.name||g.type);
@@ -168,8 +169,11 @@ function applySearch(){
   $('#count').textContent = q ? (shown+' of '+total+' '+(view==='episode'?'episodes':'games')+' match “'+$('#q').value.trim()+'”')
     : (view==='episode'?(total+' episodes'):(total+' game types'));
 }
-function setView(v){
+const VIEW_KEY='elc:browse-view';
+function setView(v,remember){
   view=v;
+  // the choice sticks until it is changed — browsing is a habit, not a per-visit decision
+  if(remember!==false){ try{ localStorage.setItem(VIEW_KEY,v); }catch(e){} }
   $('#episodeView').classList.toggle('hidden',v!=='episode');
   $('#gameView').classList.toggle('hidden',v!=='game');
   document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
@@ -193,7 +197,7 @@ async function load(){
   EPISODES=[...map.values()];
   $('#episodeView').innerHTML = EPISODES.map(epCard).join('') || '<div class="note">No episodes yet.</div>';
   $('#gameView').innerHTML = GAMES.map(gameCard).join('') || '<div class="note">No games yet.</div>';
-  setView('episode');
+  setView(view, false);   // apply the remembered choice without re-saving it
 }
 $('#q').addEventListener('input',applySearch);
 document.querySelectorAll('#seg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));

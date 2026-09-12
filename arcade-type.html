@@ -41,6 +41,10 @@
     border-radius:20px;overflow:hidden;backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,.4);transition:transform .15s,border-color .15s}
   .tile:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.24)}
   .cover{position:relative;aspect-ratio:16/9;background:linear-gradient(120deg,#1a1430,#241a3e);overflow:hidden}
+  /* Story Unlock: a wider banner so the tile leads with words, not artwork */
+  .tile.story .cover{aspect-ratio:21/9}
+  .tile.story .body{padding-top:var(--sp-3)}
+  .statusrow{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin-bottom:var(--sp-3)}
   .cover img{width:100%;height:100%;object-fit:cover;display:block}
   .cover .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:var(--sp-4);text-align:center;
     font-family:var(--display);font-weight:700;font-size:var(--fs-xl);color:#fff;background:linear-gradient(120deg,var(--purple),var(--teal))}
@@ -99,9 +103,13 @@ function tile(type,ep,locked,access){
       <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.fullTitle||ep.title)}</div>${wordsHtml(ep)}</div>
         <div class="unlock">${label}</div></div></a>`;
   }
-  return `<a class="tile" href="/games/${esc(type)}/?ep=${esc(ep.id)}">
-    <div class="cover">${cover}<div class="status">${ep.current?'<span class="now">THIS WEEK</span>':''}${done?'<span class="donebadge"><i>&#10003;</i> Completed</span>':''}</div></div>
-    <div class="body"><div><div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.fullTitle||ep.title)}</div>${wordsHtml(ep)}</div>
+  const badges = `${ep.current?'<span class="now">THIS WEEK</span>':''}${done?'<span class="donebadge"><i>&#10003;</i> Completed</span>':''}`;
+  // Story Unlock is a reading game: a banner cover, and the badges sit in their own row
+  // rather than over the artwork, so neither has to fight the other.
+  const story = type==='story-unlock';
+  return `<a class="tile${story?' story':''}" href="/games/${esc(type)}/?ep=${esc(ep.id)}">
+    <div class="cover">${cover}${story?'':`<div class="status">${badges}</div>`}</div>
+    <div class="body"><div>${story&&badges?`<div class="statusrow">${badges}</div>`:''}<div class="ep">${esc(ep.ep)}</div><div class="ttl">${esc(ep.fullTitle||ep.title)}</div>${wordsHtml(ep)}</div>
       <div class="play">&#9654;</div></div></a>`;
 }
 async function load(){
