@@ -420,6 +420,13 @@ html[data-theme="light"] .ohi{color:#5b3fd6}
 
 html[data-theme="light"] .elcnav-tabs{background:rgba(255,255,255,.70) !important;border-color:rgba(60,50,110,.18) !important}
 html[data-theme="light"] .elcnav-tabs a{color:#5b5680}
+/* Daylight wears gold: the teal-to-violet gradient belongs to the night sky, and the
+   same gold gradient already marks the primary buttons elsewhere on the site. */
+html[data-theme="light"] .elcnav-tabs a.on{
+  background:linear-gradient(110deg,var(--gold),#ffae42) !important;
+  color:#241a04 !important;
+  box-shadow:0 6px 18px -8px rgba(255,178,66,.75);
+}
 html[data-theme="light"] .elcnav-tabs a:hover{color:#241f3a}
 html[data-theme="light"] .elcnav-out,
 html[data-theme="light"] .elcnav-acct a{background:rgba(255,255,255,.72) !important;
