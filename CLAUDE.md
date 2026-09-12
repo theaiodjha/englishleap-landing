@@ -184,7 +184,12 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   control: they load `elc-nav.js` for `ELCAccount` alone (no `#elcnav` slot, so no header is
   rendered) and show the logo + "English Leap" like every other page. **Clue Room is the
   exception**: a 3D scene with a kebab HUD rather than a page with a header, and its menu
-  already reaches the Arcade and sign-out. Removing each game's `.out` pill rule was part of
+  reaches the Arcade, sign-out and — since it has no account card to hold it — **the
+  theme**, in a segment mirroring `.elcnav-card-theme`. So no page on the site shows the
+  floating toggle to someone who has a better place to change it: wherever a card or menu
+  owns the theme, that surface calls `ELCTheme.hide()`, which suppresses the element by a
+  class on `<html>` and never re-parents it.
+  Removing each game's `.out` pill rule was part of
   this — the card's Sign out ROW is also `.out`, so leaving it would have painted the old
   pill around it, the same collision as `.ep.go` and `.elcnav-acct a`. **No game uses
   `history.back()`**: the href already names the parent, and history sends a member arriving
