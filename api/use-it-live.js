@@ -281,7 +281,7 @@ export default async function handler(req, res) {
       episode: ep.number,
       durationSec,
       wordsUsed: feedback && feedback.words_used,
-      wins: feedback && Array.isArray(feedback.wins) ? feedback.wins.length : 0,
+      wins: feedback && Array.isArray(feedback.wins) ? feedback.wins : [],   // the words, not the count
       tweak: feedback && feedback.tweak,
       rubric: [rb.fluency, rb.clarity, rb.vocabulary, rb.task],
       metrics: speechMetrics(feedback && feedback.transcript, durationSec),

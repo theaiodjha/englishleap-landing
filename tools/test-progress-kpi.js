@@ -22,6 +22,9 @@ global.localStorage = { getItem: (k) => store[k] || null, setItem: (k, v) => { s
 const el = {
   set innerHTML(v) { out.html = v; }, get innerHTML() { return out.html || ''; },
   classList: { add() {}, remove() {} }, querySelectorAll: () => [], textContent: '',
+  // wireKpi() listens on the drawer and measures it; give the stub just enough to survive
+  addEventListener() {}, style: { setProperty() {}, getPropertyValue: () => '' },
+  scrollHeight: 0, getBoundingClientRect: () => ({ left: 0, width: 0 }),
 };
 global.document = { querySelector: () => el, querySelectorAll: () => [] };
 global.window = { matchMedia: () => ({ matches: false }) };
@@ -51,7 +54,9 @@ const full = {
   types: [{ type: 'clue-room', name: 'Clue Room', icon: '\u{1F50D}', accent: '#8b6cff' }],
   usedMin: 2, limitMin: 100,
   recent: [{ t: Date.parse('2026-09-12'), episodeId: 'ep280', n: 280, title: 'Listen & Speak',
-             minutes: 2, words: ['retrieve'], wpm: 110 }],
+             minutes: 2, words: ['retrieve'], wpm: 110,
+             wins: ['You kept going when you paused.', 'Nice use of "retrieve".'],
+             tweak: 'Try slowing down on the last sentence.' }],
   weeks: [{ week: '2026-W30', active: false, current: false },
           { week: '2026-W37', active: true, current: true }],
   next: { why: 'x', cta: 'Go', href: '/', words: ['put off', 'slip away'] },
@@ -126,6 +131,27 @@ ok('recent drawer says the audio is not kept', /never the audio/.test(rec));
 ok('recent drawer is titled', /kdraw-head/.test(rec) && /Your last 1 recording</.test(rec));
 ok('...and says "recording", not "recordings"', !/1 recordings/.test(rec));
 ok('recent drawer repeats the tile emoji', /class="ic" aria-hidden="true">M</.test(rec));
+
+// the feedback, read back in the order it was given
+ok('feedback is shown for a recording', /class="fb"/.test(rec) && /Oriva&rsquo;s feedback/.test(rec));
+ok('both wins appear', /You kept going when you paused\./.test(rec)
+  && /Nice use of &quot;retrieve&quot;\./.test(rec));
+ok('the tweak appears too', /Try slowing down on the last sentence\./.test(rec));
+ok('wins come BEFORE the tweak — that order is the format',
+  rec.indexOf('You kept going') < rec.indexOf('Try slowing down'));
+ok('it is collapsed by default', !/<details class="fb" open/.test(rec));
+
+// a recording made before wins were stored as text
+const old = m.drawerHTML({ ...full, recent: [{ ...full.recent[0], wins: [], tweak: 'Try a slower pace.' }] },
+  'recent', { e: 'M' });
+ok('an older recording shows its note without pretending to have wins',
+  /Oriva&rsquo;s note/.test(old) && !/Oriva&rsquo;s feedback/.test(old));
+ok('...and still shows the tweak', /Try a slower pace\./.test(old));
+
+// nothing stored at all -> no empty disclosure widget
+const none = m.drawerHTML({ ...full, recent: [{ ...full.recent[0], wins: [], tweak: '' }] },
+  'recent', { e: 'M' });
+ok('a recording with no feedback shows no toggle', !/class="fb"/.test(none));
 
 const wk = m.drawerHTML(full, 'weeks', {e:'F'});
 ok('week strip marks a practised week', /class="on/.test(wk));

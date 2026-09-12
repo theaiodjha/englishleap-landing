@@ -365,7 +365,9 @@ UIL_PREVIEW_UIDS         comma-separated uids that bypass the flag
 500K commands/month) can't run away:
 
 ```
-uil:log:{uid}    list  last 100 sessions, newest first (~110-250B each, hard cap)
+uil:log:{uid}    list  last 100 sessions, newest first (~580B each, hard cap)
+                       metadata + the coach's TWO WINS and one tweak, so a member can
+                       read their feedback back on the progress page. Never a transcript.
 uil:agg:{uid}    hash  NEVER trimmed: {YYYY-MM}:sec, {YYYY-MM}:n, w:{word} counts
 elc:games:{uid}  hash  `{type}:{ep}` → ts, bounded by the catalogue (5 types x episodes)
 ```
@@ -399,8 +401,11 @@ finishes, so one member replaying hard can skew a quiet week — add a per-membe
 dedupe key with a TTL if that ever shows up.
 
 The aggregates are the point: trimming old detail never destroys the long-term growth
-story. Ceiling is **~40KB per member, forever**; measured cost is ~9 KV commands per
-practice session. **Metadata only — no transcript is stored** (5x the size, and it means
+story. Ceiling is **~65KB per member, forever**; measured cost is ~9 KV commands per
+practice session. **No transcript is stored** (5x the size, and it means holding members' speech); the
+wins and tweak that ARE stored are the coach's prose about the session, not the member's
+words. Wins were once kept as a COUNT — recordings from before that show only their tweak,
+under a neutral heading rather than an empty "what went well". **Metadata only** (5x the size, and it means
 holding members' speech); revisit only as an explicit opt-in.
 
 Writes **fail open and never throw** — history must never break a practice session.

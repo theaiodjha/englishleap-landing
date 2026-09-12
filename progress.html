@@ -141,6 +141,23 @@
   .wstrip .ago{font-size:var(--fs-xs);color:var(--soft2);margin-right:2px}
   .kdraw .note{color:var(--soft2);font-size:var(--fs-sm);margin:var(--sp-3) 0 0}
 
+  /* the coach's own words, read back. Wins first, then the one tweak — the order is the
+     point of the format, so the markup never shows the tweak without them. */
+  .fb{flex:1 1 100%;margin-top:2px}
+  .fb>summary{display:inline-flex;align-items:center;gap:6px;cursor:pointer;list-style:none;
+    font-family:var(--display);font-weight:600;font-size:var(--fs-xs);color:var(--soft2);
+    padding:3px 0}
+  .fb>summary::-webkit-details-marker{display:none}
+  .fb>summary::before{content:"\25B8";transition:transform .2s;display:inline-block}
+  .fb[open]>summary::before{transform:rotate(90deg)}
+  .fb>summary:hover{color:var(--ink)}
+  .fbin{display:grid;gap:7px;padding:var(--sp-2) 0 var(--sp-1)}
+  .fbin p{margin:0;display:flex;gap:8px;font-size:var(--fs-sm);line-height:1.5;color:var(--soft)}
+  .fbin p b{flex:0 0 auto;font-weight:700;font-style:normal}
+  .fbin .win b{color:var(--teal)}
+  .fbin .twk b{color:var(--gold)}
+  .fbin .twk{color:var(--ink)}
+
   /* entrance, played once after the first render: cards rise in with a small stagger,
      chart columns grow from the baseline, game tracks fill. A fold never replays it. */
   @keyframes cardin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -417,6 +434,20 @@ function animateIn(){
    clicking a number must not cost another request. */
 const RECENT_AT_ONCE=8;
 
+/* One recording's feedback, in the order it was given: the wins, then the tweak. A session
+   recorded before the wins were kept as text has only the tweak — it gets a neutral
+   heading rather than a "what went well" section with nothing under it. */
+function feedbackHTML(r){
+  const wins=(r.wins||[]).filter(Boolean), tweak=(r.tweak||'').trim();
+  if(!wins.length && !tweak) return '';
+  const label=wins.length?'Oriva&rsquo;s feedback':'Oriva&rsquo;s note';
+  return `<details class="fb"><summary>${label}</summary>
+    <div class="fbin">
+      ${wins.map(w=>`<p class="win"><b>&#10003;</b><span>${esc(w)}</span></p>`).join('')}
+      ${tweak?`<p class="twk"><b>&rarr;</b><span>${esc(tweak)}</span></p>`:''}
+    </div></details>`;
+}
+
 function drawerHTML(d,which,tile,ym){
   const head=(icon,title)=>`<div class="kdraw-head"><span class="ic" aria-hidden="true">${icon}</span><b>${title}</b></div>`;
   if(which==='recent'){
@@ -438,6 +469,7 @@ function drawerHTML(d,which,tile,ym){
         <span class="what">${r.n?`EP${r.n} &middot; `:''}${esc(r.title||'Practice')}</span>
         <span class="mins">${r.minutes} min${r.wpm?` &middot; ${r.wpm} wpm`:''}</span>
         ${r.words.length?`<span class="ws">${r.words.map(w=>`<i>${esc(w)}</i>`).join('')}</span>`:''}
+        ${feedbackHTML(r)}
       </div>`).join('')}</div>
       <p class="note">${trimmed?'Older details for this month have been trimmed. ':''}We keep the details, never the audio.</p>`;
   }
@@ -501,6 +533,12 @@ function wireKpi(d){
     document.querySelectorAll('.kpi button.k[aria-expanded]').forEach(b=>
       b.setAttribute('aria-expanded', b===btn?'true':'false'));
   };
+  /* A <details> inside the drawer changes its height after the drawer measured itself,
+     so release the cap once anything opens. */
+  draw.addEventListener('toggle',(e)=>{
+    if(e.target && e.target.classList && e.target.classList.contains('fb')) draw.style.maxHeight='none';
+  },true);
+
   window.__openRecent=(ym)=>{
     const btn=recentBtn();
     show('recent',btn,ym);
