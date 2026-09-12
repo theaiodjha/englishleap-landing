@@ -149,6 +149,19 @@
   .gameicon:empty{display:none}
   .gameicon{font-size:.86em/* emoji glyph, not type */;margin-right:.3em;
     line-height:1;vertical-align:baseline}
+  /* move to the next/previous episode of THIS game without going back out */
+  .eppager{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+    margin:0 auto var(--sp-4);max-width:760px}
+  .eppager a,.eppager span{display:inline-flex;align-items:center;gap:7px;min-width:0;
+    font-family:var(--display);font-weight:600;font-size:var(--fs-sm);text-decoration:none;
+    color:var(--soft);padding:7px 12px;border-radius:var(--r-full);
+    border:1px solid var(--line);background:var(--glass);transition:color .15s,border-color .15s}
+  .eppager a:hover{color:var(--ink);border-color:color-mix(in srgb,var(--teal) 45%,transparent)}
+  .eppager span{opacity:.45}                    /* the end of the run, kept in place */
+  .eppager svg{width:14px;height:14px;flex:0 0 14px}
+  .eppager b{font-weight:700;color:inherit}
+  .eppager .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:22ch}
+  @media(max-width:560px){.eppager .t{display:none}}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -168,6 +181,8 @@
     <h1><span class="gameicon" id="gameIcon" aria-hidden="true"></span>Phrase Pairs</h1>
     <p class="sub" id="sub">Match each phrase to its meaning. Every match speaks the phrase aloud.</p>
   </div>
+
+  <nav class="eppager" id="epPager" aria-label="Episodes" hidden></nav>
 
   <div class="stats">
     <div class="stat">Matches <b id="mMatches">0/6</b></div>
@@ -336,6 +351,22 @@ function gate(title,msg,cta,how){
   const hb=$('#gateHow'); if(hb){ if(how&&how.src){ hb.style.display='inline-flex'; hb.onclick=function(){ if(window.ELC) ELC.playVideo(how.src,how.title||'How to play',how.poster); }; } else hb.style.display='none'; }
   $('#gateview').classList.add('show');
 }
+/* The episode pager. Ends stay in place as disabled text rather than disappearing, so the
+   two controls do not shuffle position as you move along the run. */
+function epPager(d){
+  const el=$('#epPager'); if(!el) return;
+  const L='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
+  const R='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  const side=(epi,dir)=>{
+    if(!epi) return `<span>${dir<0?L:''}${dir<0?'Newest episode':'Oldest episode'}${dir>0?R:''}</span>`;
+    const t=`<span class="t">${esc(epi.title)}</span>`;
+    return `<a href="?ep=${encodeURIComponent(epi.id)}" rel="${dir<0?'prev':'next'}">`+
+      (dir<0?L:'')+`<b>${esc(epi.ep)}</b>${t}`+(dir>0?R:'')+`</a>`;
+  };
+  el.innerHTML=side(d.prev,-1)+side(d.next,1);
+  el.hidden=false;
+}
+
 function acctBar(name, plan){
   /* the same avatar + card as every other page, not a bare Sign out button */
   ELCAccount(name ? { name: name, plan: plan } : null, { next: location.pathname + location.search });
@@ -356,6 +387,7 @@ async function load(){
   $('#epLabel').textContent=d.ep||EP.toUpperCase();
   /* the catalogue's glyph and accent, so the page wears the same identity as its tile */
   if(d.icon) $('#gameIcon').textContent=d.icon;
+  epPager(d);
   acctBar(d.user, d.plan);
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}
   try{ window.ELC&&d.walkthrough&&ELC.howToPlay(d.walkthrough,(d.name||"")+" \u2014 how to play",(d.walkthroughPoster||("/covers/"+TYPE+".png"))); }catch(e){}

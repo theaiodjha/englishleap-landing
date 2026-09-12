@@ -184,7 +184,13 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   control: they load `elc-nav.js` for `ELCAccount` alone (no `#elcnav` slot, so no header is
   rendered). **The game bar carries no brand**: the way out on the left, the account on the
   right, nothing else. A logo inside a game names something the member already knows, and
-  the vertical space belongs to the puzzle. **Clue Room is the
+  the vertical space belongs to the puzzle. **Each game pages between EPISODES of itself** —
+  that is the list a member arrives from ("All episodes"). `api/games` returns `prev`/`next`
+  with the content, computed from the ordered episode array it already holds, so this costs
+  no extra request. The catalogue is newest-first, so `prev` is the NEWER episode. The ends
+  of the run render as disabled text in place, never hidden: dropping a control makes the
+  other one jump sideways as you move along. Clue Room puts its neighbours in the HUD menu,
+  having no room for a strip. **Clue Room is the
   exception**: a 3D scene with a kebab HUD rather than a page with a header, and its menu
   reaches the Arcade, sign-out and — since it has no account card to hold it — **the
   theme**, in a segment mirroring `.elcnav-card-theme`. So no page on the site shows the
@@ -303,6 +309,7 @@ tools/test-progress-kpi.js node tools/test-progress-kpi.js — asserts where eac
 tools/test-progress-drawer.js  node … — drives the KPI drawer open/close state machine
 tools/test-notice.js       node tools/test-notice.js — notice dismissal + quota thresholds
 tools/test-back-link.js    node tools/test-back-link.js — every arrival route for the back link
+tools/test-episode-pager.js node … — episode neighbours and the ends of the run
 tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)

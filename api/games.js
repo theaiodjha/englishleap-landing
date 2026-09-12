@@ -56,7 +56,12 @@ export default async function handler(req, res) {
   // --- one game's content ---
   const gi = ARCADE.findIndex((g) => g.type === type);
   const gt = gi >= 0 ? ARCADE[gi] : null;
-  const e = gt ? gt.episodes.find((x) => x.id === ep) : null;
+  const eIdx = gt ? gt.episodes.findIndex((x) => x.id === ep) : -1;
+  const e = eIdx >= 0 ? gt.episodes[eIdx] : null;
+  // neighbours in catalogue order (newest first), so a member can keep going without
+  // leaving the game. The ordered array is already in hand; this costs nothing.
+  const near = (i) => (gt && gt.episodes[i]
+    ? { id: gt.episodes[i].id, ep: gt.episodes[i].ep, title: gt.episodes[i].title } : null);
   if (!gt || !e) return res.status(404).json({ ok: false, error: "Game not found." });
 
   if (!unlocked(gt)) {
@@ -66,5 +71,7 @@ export default async function handler(req, res) {
   }
   // icon + accent so a game page can wear the same identity as its tile in the Arcade,
   // rather than each page hardcoding its own
-  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, icon: gt.icon || "", accent: gt.accent || "", walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "", user: s ? s.name : null, plan: planOf(s), content: e.content });
+  return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, icon: gt.icon || "", accent: gt.accent || "", walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "", user: s ? s.name : null, plan: planOf(s),
+    prev: near(eIdx - 1), next: near(eIdx + 1),
+    content: e.content });
 }

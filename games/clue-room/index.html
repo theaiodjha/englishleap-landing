@@ -199,6 +199,8 @@
     <button class="menubtn card-glass" id="menuBtn" aria-label="Menu">&#8942;</button>
     <div class="menu card-glass" id="menu">
       <a href="/practice-arcade.html">&#127918; Practice Arcade</a>
+      <a id="epPrev" hidden></a>
+      <a id="epNext" hidden></a>
       <!-- Member Archive hidden until it is a working feature -->
       <div class="sep"></div>
       <!-- the theme lives here, as it lives in the account card on every other page -->
@@ -300,6 +302,13 @@ const TYPE='clue-room';
   $('#epLabel').textContent=data.ep||EP.toUpperCase();
   /* the catalogue's glyph and accent, so the page wears the same identity as its tile */
   if(data.icon) $('#gameIcon').textContent=data.icon;
+  /* neighbouring episodes, in the menu rather than on the scene */
+  [['#epPrev', data.prev, '‹ '], ['#epNext', data.next, '› ']].forEach(function(x){
+    var a=$(x[0]); if(!a||!x[1]) return;
+    a.href='?ep='+encodeURIComponent(x[1].id);
+    a.textContent=x[2]+x[1].ep+' · '+x[1].title;
+    a.hidden=false;
+  });
   $('#introEyebrow').textContent=(data.ep||EP.toUpperCase())+' \u00b7 '+(data.title||'Clue Room');
   try{ window.ELC&&ELC.recordPlay(); }catch(e){}
   try{ window.ELC&&data.walkthrough&&ELC.howToPlay(data.walkthrough,(data.name||"")+" \u2014 how to play",(data.walkthroughPoster||("/covers/"+TYPE+".png"))); }catch(e){}
