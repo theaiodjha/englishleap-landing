@@ -350,3 +350,20 @@ html[data-theme="light"] .back:hover,
 html[data-theme="light"] #acct a:hover,
 html[data-theme="light"] .acct a:hover{border-color:rgba(60,50,110,.38) !important}
 html[data-theme="light"] .pill b{color:#241f3a !important}
+
+/* ---- story-unlock on light --------------------------------------------------
+   The story text is a hardcoded near-white (#efeaff), which disappears on the light
+   card, and #stagebg::before carries a second, much stronger set of radials that the
+   #stagebg override above does not reach — together they gave a heavy lavender page
+   with an invisible story on it. */
+html[data-theme="light"] .story{color:#2b2545 !important}
+html[data-theme="light"] #stagebg::before{
+  background:
+    radial-gradient(38% 38% at 30% 32%, rgba(139,108,255,.10), transparent 62%),
+    radial-gradient(34% 34% at 72% 60%, rgba(31,196,182,.09), transparent 62%) !important;
+}
+/* an unfilled gap needs an edge to read as a slot on a pale card */
+html[data-theme="light"] .gap{
+  background:rgba(60,50,110,.07) !important;
+  border-bottom:2px solid rgba(60,50,110,.35) !important;
+}
