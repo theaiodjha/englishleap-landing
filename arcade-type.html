@@ -23,9 +23,6 @@
     linear-gradient(180deg,#0b1020,#0e1626) fixed;min-height:100vh;-webkit-tap-highlight-color:transparent}
   .wrap{max-width:1040px;margin:0 auto;padding:var(--sp-4) 20px 70px}
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 0 18px}
-  .back{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--soft);font-weight:600;font-size:var(--fs-md);
-    background:var(--glass);border:1px solid var(--line);padding:9px 15px;border-radius:999px}
-  .back:hover{color:var(--ink)}
   .head{display:flex;align-items:center;gap:var(--sp-4);margin:6px 0 30px}
   .gicon{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:26px/* icon glyph, not type */;flex:0 0 auto;
     background:var(--glass);border:1px solid var(--line)}
@@ -75,6 +72,8 @@
 <div class="wrap">
   <div id="elcnav"></div>
   <script src="/elc-nav.js"></script>
+
+  <a class="elcback" href="/arcade-browse.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>Browse all games</span></a>
 
   <div class="head" id="head"></div>
   <div class="deck" id="deck"></div>

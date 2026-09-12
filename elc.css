@@ -92,6 +92,18 @@
   border:1px solid var(--line);background:var(--glass2);border-radius:var(--r-full);
   padding:8px 14px;min-height:38px;display:inline-flex;align-items:center}
 .elcnav-acct a:hover{color:var(--ink);border-color:rgba(255,255,255,.24)}
+/* Contextual back link: sits under the header, above the page title, and names its
+   PARENT — it is a breadcrumb step, not browser history, so it goes to the same place
+   however the member arrived. The member header has no global back button on purpose;
+   only the two pages one level below the Arcade need this. */
+.elcback{display:inline-flex;align-items:center;gap:6px;margin:var(--sp-4) 0 var(--sp-2);
+  color:var(--soft);text-decoration:none;
+  font-family:var(--display);font-weight:600;font-size:var(--fs-sm);
+  transition:color .15s}
+.elcback svg{width:15px;height:15px;flex:0 0 15px;transition:transform .15s}
+.elcback:hover{color:var(--ink)}
+.elcback:hover svg{transform:translateX(-3px)}
+
 /* the account control: an initials avatar that opens a card (see ELCAccount in elc-nav.js) */
 .elcnav-acct{position:relative}
 .elcnav-av{width:38px;height:38px;flex:0 0 38px;border-radius:var(--r-full);cursor:pointer;
