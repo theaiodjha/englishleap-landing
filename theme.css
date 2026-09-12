@@ -431,3 +431,8 @@ html[data-theme="light"] .elcnav-tabs a:hover{color:#241f3a}
 html[data-theme="light"] .elcnav-out,
 html[data-theme="light"] .elcnav-acct a{background:rgba(255,255,255,.72) !important;
   border-color:rgba(60,50,110,.20) !important;color:#3a3560 !important}
+
+html[data-theme="light"] .elcnav.scrolled{
+  background:rgba(255,255,255,.80) !important; border-color:rgba(60,50,110,.16) !important;
+  box-shadow:0 14px 34px -22px rgba(80,60,150,.6) !important;
+}

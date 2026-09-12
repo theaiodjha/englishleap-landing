@@ -76,6 +76,8 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   icon; Use It Live appears when `SHOW_UIL` is flipped at launch). The brand is the real
   logo — `/assets/brand/elc-icon-64.png` + "English Leap" — matching `index.html`. Member pages
   carry `<div id="elcnav"></div><script src="/elc-nav.js"></script>` at the top of `.wrap`
+  (it is `position:sticky` and frosts once scrolled, matching `index.html`; never put
+  `overflow-x:hidden` on an ancestor — use `clip`, or sticky stops working)
   and nothing else — the script renders synchronously so page scripts still find `#acct`.
   Six pages previously had five different headers with drifting labels, and Progress and
   Use It Live did not link to each other. **The games keep their minimal back-only bar**

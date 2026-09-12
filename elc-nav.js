@@ -54,6 +54,14 @@
         '<div class="elcnav-acct" id="acct"></div>' +
       '</header>';
 
+    // frost the bar once the page has moved, exactly as index.html does
+    var bar = document.querySelector('.elcnav');
+    if (bar) {
+      var onScroll = function () { bar.classList.toggle('scrolled', window.scrollY > 12); };
+      addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+
     // Pages fill #acct themselves once they know who is signed in. If a page has nothing
     // to say, fall back to a sign-out link so the slot is never just empty.
     document.addEventListener('DOMContentLoaded', function () {
