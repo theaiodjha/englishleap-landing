@@ -4,6 +4,7 @@
    dark :root tokens; these only apply when <html data-theme="light"> is set. */
 
 html[data-theme="light"]{
+  color-scheme:light;             /* selects and scrollbars follow the light theme */
   /* index.html token names */
   --bg:#f4eeff; --bg-2:#ece2ff;
   --panel:rgba(255,255,255,.58); --panel-2:rgba(255,255,255,.74);
@@ -371,4 +372,13 @@ html[data-theme="light"] .gap{
 /* the sticky word bank fades into the page rather than ending in a hard edge */
 html[data-theme="light"] .bank{
   background:linear-gradient(180deg,transparent,rgba(246,239,255,.90) 58%,rgba(246,239,255,.97)) !important;
+}
+
+/* the bonus ending body is the same hardcoded #efeaff as .story */
+html[data-theme="light"] .bonus p{color:#2b2545 !important}
+
+/* read-along highlight: clear enough to follow at a glance in both themes */
+html[data-theme="light"] .kw.on{
+  background:rgba(255,205,70,.42) !important; color:#4a3100 !important;
+  box-shadow:0 0 0 2px rgba(154,95,6,.28) !important;
 }

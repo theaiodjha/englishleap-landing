@@ -8,6 +8,8 @@
    violet). Those overrides stay in the page. Only genuine duplicates were removed. */
 
 :root{
+  color-scheme:dark;              /* native controls (select, scrollbars) match the theme */
+
   /* ---- ground + text ---- */
   --space:#06060f;                    /* page ground */
   --bg2:#0a0918;                      /* raised ground */
