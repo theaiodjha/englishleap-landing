@@ -320,6 +320,12 @@ numbers, ONE column chart for minutes per month (a single series, so one colour 
 carries the magnitude), and shaped dots for phrase mastery so state is never colour-alone.
 Values wear ink tokens, never brand colour, and **the rubric never appears as a number**.
 The chart only renders once there are 2+ months of data; below that it says so.
+**Layout is two columns** (`.pgrid` + two `.pcol` stacks, one column under 900px) inside a
+1100px wrap — real columns rather than grid auto-placement, so a card that is absent for a
+member never reshuffles the other side. **Each card folds** from its heading: the state is
+remembered per device in `elc-progress-shut`, and the body animates on `max-height`, which
+is released to `none` once open or the "See the numbers" table would be clipped inside it.
+The KPI row and "What next" do not fold — one is the headline, the other is a single button.
 
 ### The rubric (what makes growth chartable)
 
