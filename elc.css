@@ -60,3 +60,7 @@
   /* ---- radii ---- */
   --r-sm:13px; --r-md:18px; --r-lg:24px; --r-full:999px;
 }
+
+/* Oriva's cheer opener. Was a hard-coded teal that measured 2.1:1 on a light card;
+   violet reads as celebratory and works on both grounds (see theme.css for light). */
+.ohi{color:#b9a4ff;font-weight:700}

@@ -379,7 +379,7 @@ function revealResult(){
   bindReadButton($('#readBonus'), function(){return BONUS;}, function(){ return $('#bonusText'); });
   mountVoiceControls($('#voiceControls'));
   $('#againBtn').onclick=()=>resetGame();
-  try{ if(window.ELC){ const host=$('#winExtras'); if(host) ELC.orivaCheer(host,'<b style="color:#8b6cff">Oriva loved your story!</b>'); } }catch(e){}
+  try{ if(window.ELC){ const host=$('#winExtras'); if(host) ELC.orivaCheer(host,'<b class="ohi">Oriva loved your story!</b>'); } }catch(e){}
   try{ $('#unlockArea').scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
   if(!reduced) fireworks(1600);                 // a small burst as the cards appear
 }

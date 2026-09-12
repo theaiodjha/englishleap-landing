@@ -307,7 +307,7 @@ function win(){
     if(window.ELC){
       ELC.markComplete(TYPE, EP);
       const host=document.getElementById('orivaHost');
-      if(host) ELC.orivaCheer(host,'<b style="color:#1fc4b6">Oriva is proud of you!</b> Every phrase matched.');
+      if(host) ELC.orivaCheer(host,'<b class="ohi">Oriva is proud of you!</b> Every phrase matched.');
     }
   }catch(e){}
   const ab=$('#againBtn'); if(ab) ab.onclick=()=>location.reload();

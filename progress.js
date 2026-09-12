@@ -82,7 +82,7 @@
       img.src = "/assets/oriva/celebrate.png"; img.alt = "Oriva celebrating";
       img.style.cssText = "width:60px;height:60px;object-fit:contain;flex:0 0 auto";
       img.onerror = function () { var s = document.createElement("span"); s.textContent = "\uD83C\uDF89"; s.style.fontSize = "30px"; this.replaceWith(s); };
-      var t = document.createElement("div"); t.style.cssText = "font-size:14px;line-height:1.45;color:#fff";
+      var t = document.createElement("div"); t.style.cssText = "font-size:14px;line-height:1.45;color:var(--ink)";
       t.innerHTML = msg || "<b>Oriva is cheering for you!</b>";
       row.appendChild(img); row.appendChild(t); host.appendChild(row);
     },
