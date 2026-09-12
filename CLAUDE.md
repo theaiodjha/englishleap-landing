@@ -51,6 +51,11 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **`color-scheme` drives native controls.** `elc.css` sets `dark`, `theme.css` sets
   `light` — without it a `<select>` renders in the OS's scheme, so voice pickers appeared
   dark navy on a light page. Applies to scrollbars too.
+- **Never pin a scrolling page's body to `height:100%`.** Four games had
+  `html,body{height:100%}`, which fixes the body box at one viewport height however long
+  the page is — so `#stagebg` (absolute, `inset:0`) could only paint one screen and left a
+  hard horizontal seam at the fold. Use `html{height:100%}` + `body{min-height:100%}`.
+  clue-room is the exception: it is a non-scrolling 3D scene with `overflow:hidden`.
 - **Light theme is daylight, not an inverted night.** The aurora is `display:none` on
   `html[data-theme="light"]` — by day the page is paper. Do not reintroduce blobs there.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit

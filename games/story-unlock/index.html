@@ -18,7 +18,8 @@
     --space:#150b2e; --ink:#f3efff; --soft:#b3a9d8; --electric:#4d8bff; --glass:rgba(255,255,255,.06); --line:rgba(255,255,255,.14);
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
+  html{margin:0;height:100%}
+  body{margin:0;min-height:100%}   /* min-, not fixed: the body box must grow with the page */
   body{font-family:var(--body);color:var(--ink);background:var(--space);overflow-x:hidden;-webkit-tap-highlight-color:transparent;position:relative}
   #stagebg{position:absolute;inset:0;height:100%;z-index:-1;overflow:hidden;background:
     radial-gradient(78% 60% at 10% -6%, rgba(139,108,255,.20), transparent 60%),
