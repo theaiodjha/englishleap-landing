@@ -38,10 +38,8 @@
      that is entirely about them; "Your progress" could be anyone's. */
   /* The heading gets the full column so it stays on ONE line; only the lede is held to a
      comfortable measure. Capping the whole block at 34em wrapped the title in two. */
-  .phead{text-align:center;margin:var(--sp-6) auto var(--sp-2)}
+  .phead{text-align:center;margin:var(--sp-5) auto var(--sp-2)}
   .phead .lede{max-width:34em;margin-left:auto;margin-right:auto}
-  .phead .hi{display:block;font-family:var(--display);font-weight:700;font-size:var(--fs-sm);
-    letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:9px}
   h1{font-family:var(--display);font-weight:700;font-size:clamp(24px,4.4vw,36px);line-height:1.12;
     margin:0;text-wrap:balance}
   .lede{color:var(--soft);font-size:var(--fs-md);line-height:1.55;margin:10px 0 0}
@@ -318,7 +316,6 @@
 
   <div id="app" class="hidden">
     <div class="phead">
-      <span class="hi" id="hi" hidden></span>
       <h1 id="title">How your English is coming along</h1>
       <p class="lede" id="lede">Everything on this page comes from your own practice.</p>
     </div>
@@ -777,11 +774,6 @@ function render(d){
     if(!r.ok) throw new Error('load');
     const d=await r.json();
     $('#app').classList.remove('hidden');
-    // first name only: "Fahad preview, here is your progress" is a database row talking
-    if(d.name){
-      const first=String(d.name).trim().split(/\s+/)[0];
-      const hi=$('#hi'); hi.textContent=`Hi ${first}`; hi.hidden=false;
-    }
     ELCAccount(d.name?{name:d.name, plan:d.plan}:null,{next:'/progress.html'});
     render(d);
   }catch(e){

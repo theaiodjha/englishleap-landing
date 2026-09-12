@@ -105,8 +105,8 @@ ok('...and do NOT reuse .go, which is the page gradient CTA class',
   !/class="ep go"/.test(hFull));
 ok('row highlights are inset, not bled past a clipping card body',
   !/margin:0 calc\(var\(--sp-2\) \* -1\)/.test(page));
-ok('the header greets by first name only',
-  /id="hi"/.test(page) && page.includes('String(d.name).trim().split('));
+// the account avatar already names who is signed in; the page header does not repeat it
+ok('the header carries no greeting', !/id="hi"/.test(page));
 ok('...and each phrase carries its own state', /<i class="owned">a<\/i>/.test(hFull));
 ok('game rows are links into that game',
   /<a class="gt" href="\/arcade-type.html\?type=clue-room"/.test(hFull));
