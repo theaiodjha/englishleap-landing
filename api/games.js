@@ -60,8 +60,15 @@ export default async function handler(req, res) {
   const e = eIdx >= 0 ? gt.episodes[eIdx] : null;
   // neighbours in catalogue order (newest first), so a member can keep going without
   // leaving the game. The ordered array is already in hand; this costs nothing.
-  const near = (i) => (gt && gt.episodes[i]
-    ? { id: gt.episodes[i].id, ep: gt.episodes[i].ep, title: gt.episodes[i].title } : null);
+  // WRAPS: past the oldest is the newest again, so the run has no ends to disable. A game
+  // with a single episode gets null both ways rather than a link back to itself.
+  const near = (off) => {
+    if (!gt || eIdx < 0) return null;
+    const n = gt.episodes.length;
+    if (n < 2) return null;
+    const x = gt.episodes[(eIdx + off + n) % n];
+    return { id: x.id, ep: x.ep, title: x.title };
+  };
   if (!gt || !e) return res.status(404).json({ ok: false, error: "Game not found." });
 
   if (!unlocked(gt)) {
@@ -72,6 +79,6 @@ export default async function handler(req, res) {
   // icon + accent so a game page can wear the same identity as its tile in the Arcade,
   // rather than each page hardcoding its own
   return res.json({ ok: true, ep: e.ep, title: e.title, type: gt.type, name: gt.name, icon: gt.icon || "", accent: gt.accent || "", walkthrough: gt.walkthrough || "", walkthroughPoster: gt.walkthroughPoster || "", user: s ? s.name : null, plan: planOf(s),
-    prev: near(eIdx - 1), next: near(eIdx + 1),
+    prev: near(-1), next: near(1),
     content: e.content });
 }

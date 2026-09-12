@@ -187,10 +187,14 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   the vertical space belongs to the puzzle. **Each game pages between EPISODES of itself** —
   that is the list a member arrives from ("All episodes"). `api/games` returns `prev`/`next`
   with the content, computed from the ordered episode array it already holds, so this costs
-  no extra request. The catalogue is newest-first, so `prev` is the NEWER episode. The ends
-  of the run render as disabled text in place, never hidden: dropping a control makes the
-  other one jump sideways as you move along. Clue Room puts its neighbours in the HUD menu,
-  having no room for a strip. **Clue Room is the
+  no extra request. The catalogue is newest-first, so `prev` is the NEWER episode, and the
+  neighbours **WRAP** — past the oldest is the newest — so no episode is a dead end and
+  nothing is ever rendered disabled. A game with a single episode gets `null` both ways
+  rather than a link back to itself, and shows no arrows at all. They are carousel arrows,
+  `position:fixed` beside the content column at `calc(50vw - 570px)`, falling to the
+  viewport edge on a phone where they also shed their label: anchoring to a board instead
+  would need five different hooks, one per game. Clue Room puts its neighbours in the HUD
+  menu, having no room for arrows. **Clue Room is the
   exception**: a 3D scene with a kebab HUD rather than a page with a header, and its menu
   reaches the Arcade, sign-out and — since it has no account card to hold it — **the
   theme**, in a segment mirroring `.elcnav-card-theme`. So no page on the site shows the

@@ -149,19 +149,25 @@
   .gameicon:empty{display:none}
   .gameicon{font-size:.86em/* emoji glyph, not type */;margin-right:.3em;
     line-height:1;vertical-align:baseline}
-  /* move to the next/previous episode of THIS game without going back out */
-  .eppager{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
-    margin:0 auto var(--sp-4);max-width:760px}
-  .eppager a,.eppager span{display:inline-flex;align-items:center;gap:7px;min-width:0;
-    font-family:var(--display);font-weight:600;font-size:var(--fs-sm);text-decoration:none;
-    color:var(--soft);padding:7px 12px;border-radius:var(--r-full);
-    border:1px solid var(--line);background:var(--glass);transition:color .15s,border-color .15s}
-  .eppager a:hover{color:var(--ink);border-color:color-mix(in srgb,var(--teal) 45%,transparent)}
-  .eppager span{opacity:.45}                    /* the end of the run, kept in place */
+  /* Episode arrows, carousel style: fixed beside the content column, wrapping, so there
+     is never a disabled end. Vertically centred, clear of the bottom-right controls. */
+  .eppager a{position:fixed;top:50%;transform:translateY(-50%);z-index:30;
+    display:inline-flex;align-items:center;gap:5px;
+    font-family:var(--display);font-weight:700;font-size:var(--fs-sm);letter-spacing:.02em;
+    text-decoration:none;color:var(--soft);padding:10px 13px;border-radius:var(--r-full);
+    background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(10px);
+    transition:color .15s,border-color .15s,transform .15s}
+  .eppager a:hover{color:var(--ink);border-color:color-mix(in srgb,var(--teal) 50%,transparent)}
+  .eppager .p{left:max(10px,calc(50vw - 570px))}
+  .eppager .n{right:max(10px,calc(50vw - 570px))}
+  .eppager .p:hover{transform:translateY(-50%) translateX(-2px)}
+  .eppager .n:hover{transform:translateY(-50%) translateX(2px)}
   .eppager svg{width:14px;height:14px;flex:0 0 14px}
-  .eppager b{font-weight:700;color:inherit}
-  .eppager .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:22ch}
-  @media(max-width:560px){.eppager .t{display:none}}
+  /* on a phone they sit on the very edge and shed the label, as carousel arrows do */
+  @media(max-width:720px){
+    .eppager a{padding:9px;gap:0}
+    .eppager b{display:none}
+  }
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -351,19 +357,17 @@ function gate(title,msg,cta,how){
   const hb=$('#gateHow'); if(hb){ if(how&&how.src){ hb.style.display='inline-flex'; hb.onclick=function(){ if(window.ELC) ELC.playVideo(how.src,how.title||'How to play',how.poster); }; } else hb.style.display='none'; }
   $('#gateview').classList.add('show');
 }
-/* The episode pager. Ends stay in place as disabled text rather than disappearing, so the
-   two controls do not shuffle position as you move along the run. */
+/* The episode arrows. Neighbours WRAP (see api/games.js), so there is no end state to
+   render — either both arrows exist or, for a one-episode game, neither does. */
 function epPager(d){
   const el=$('#epPager'); if(!el) return;
-  const L='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
-  const R='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
-  const side=(epi,dir)=>{
-    if(!epi) return `<span>${dir<0?L:''}${dir<0?'Newest episode':'Oldest episode'}${dir>0?R:''}</span>`;
-    const t=`<span class="t">${esc(epi.title)}</span>`;
-    return `<a href="?ep=${encodeURIComponent(epi.id)}" rel="${dir<0?'prev':'next'}">`+
-      (dir<0?L:'')+`<b>${esc(epi.ep)}</b>${t}`+(dir>0?R:'')+`</a>`;
-  };
-  el.innerHTML=side(d.prev,-1)+side(d.next,1);
+  if(!d.prev && !d.next) return;
+  const L='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
+  const R='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  const arrow=(epi,dir)=>epi?`<a class="${dir<0?'p':'n'}" href="?ep=${encodeURIComponent(epi.id)}"`+
+    ` rel="${dir<0?'prev':'next'}" aria-label="${dir<0?'Previous':'Next'} episode, ${esc(epi.ep)}">`+
+    (dir<0?L:'')+`<b>${esc(epi.ep)}</b>`+(dir>0?R:'')+`</a>`:'';
+  el.innerHTML=arrow(d.prev,-1)+arrow(d.next,1);
   el.hidden=false;
 }
 

@@ -1,8 +1,8 @@
 /* node tools/test-episode-pager.js
  *
- * The in-game episode pager: the neighbours the API hands back, and how the control
- * renders at the ENDS of the run — where an off-by-one silently offers a link to an
- * episode that does not exist, or drops a control and makes the other one jump sideways.
+ * The in-game episode arrows: the neighbours the API hands back, and what the control
+ * renders. Neighbours WRAP, so the interesting cases are the seams — past the oldest is
+ * the newest — and the one-episode game, which must link nowhere rather than to itself.
  */
 const fs = require('fs');
 const path = require('path');
@@ -18,27 +18,32 @@ const ok = (label, cond, extra = '') => {
 // ---------------------------------------------------------------- the server's neighbours
 // Mirrors api/games.js: episodes are newest-first, prev is newer, next is older.
 const api = fs.readFileSync(path.join(ROOT, 'api', 'games.js'), 'utf8');
-ok('the route computes neighbours from the ordered array',
-  /const near = \(i\) =>/.test(api) && /prev: near\(eIdx - 1\), next: near\(eIdx \+ 1\)/.test(api));
+ok('the route wraps rather than stopping', /\(eIdx \+ off \+ n\) % n/.test(api));
 ok('...and finds the episode by index, not just by value',
   /findIndex\(\(x\) => x\.id === ep\)/.test(api));
+ok('a single-episode game gets no neighbours at all', /if \(n < 2\) return null/.test(api));
 
 const episodes = [
   { id: 'ep280', ep: 'EP280', title: 'Speak Like a Native' },
   { id: 'ep279', ep: 'EP279', title: 'Everyday Expressions' },
   { id: 'ep278', ep: 'EP278', title: 'Listen Every Day' },
 ];
-const near = (i) => (episodes[i] ? episodes[i] : null);
-const at = (id) => {
-  const i = episodes.findIndex((x) => x.id === id);
-  return { prev: near(i - 1), next: near(i + 1) };
+// mirrors near() in api/games.js
+const at = (id, list = episodes) => {
+  const i = list.findIndex((x) => x.id === id);
+  const n = list.length;
+  const near = (off) => (n < 2 ? null : list[(i + off + n) % n]);
+  return { prev: near(-1), next: near(1) };
 };
 
 ok('the middle episode has both neighbours',
   at('ep279').prev.id === 'ep280' && at('ep279').next.id === 'ep278');
-ok('the newest has no previous', at('ep280').prev === null && at('ep280').next.id === 'ep279');
-ok('the oldest has no next', at('ep278').next === null && at('ep278').prev.id === 'ep279');
-ok('a negative index never wraps to the end of the array', near(-1) === null);
+ok('past the oldest comes the newest', at('ep278').next.id === 'ep280');
+ok('before the newest comes the oldest', at('ep280').prev.id === 'ep278');
+ok('so no episode is ever a dead end',
+  episodes.every((e) => at(e.id).prev && at(e.id).next));
+ok('a one-episode game links nowhere, not to itself',
+  at('ep280', [episodes[0]]).prev === null && at('ep280', [episodes[0]]).next === null);
 
 // ---------------------------------------------------------------- the rendered control
 const page = fs.readFileSync(path.join(ROOT, 'games', 'phrase-pairs', 'index.html'), 'utf8');
@@ -61,27 +66,28 @@ function render(d) {
 }
 
 let el = render(at('ep279'));
-ok('both neighbours render as links', (el.innerHTML.match(/<a href="\?ep=/g) || []).length === 2);
+ok('both arrows render as links', (el.innerHTML.match(/<a class="[pn]" href="\?ep=/g) || []).length === 2);
 ok('...pointing at the right episodes',
   /\?ep=ep280/.test(el.innerHTML) && /\?ep=ep278/.test(el.innerHTML));
-ok('...and carry rel=prev / rel=next for the browser',
+ok('...one on each side', /class="p"/.test(el.innerHTML) && /class="n"/.test(el.innerHTML));
+ok('...carrying rel=prev / rel=next for the browser',
   /rel="prev"/.test(el.innerHTML) && /rel="next"/.test(el.innerHTML));
 ok('the control is revealed once filled', el.hidden === false);
 
-el = render(at('ep280'));
-ok('at the newest, the end is shown in place rather than dropped',
-  /<span>/.test(el.innerHTML) && /Newest episode/.test(el.innerHTML));
-ok('...and offers no link backwards', !/rel="prev"/.test(el.innerHTML));
-ok('...while the forward link still works', /rel="next"/.test(el.innerHTML));
+ok('the label is the episode number and nothing else',
+  /<b>EP280<\/b>/.test(el.innerHTML) && !/Everyday Expressions/.test(el.innerHTML));
+ok('each arrow still says where it goes, for a screen reader',
+  /aria-label="Previous episode, EP280"/.test(el.innerHTML)
+  && /aria-label="Next episode, EP278"/.test(el.innerHTML));
 
+// the ends of the run no longer exist
 el = render(at('ep278'));
-ok('at the oldest, the far end is shown in place', /Oldest episode/.test(el.innerHTML));
-ok('...and offers no link forwards', !/rel="next"/.test(el.innerHTML));
+ok('the oldest episode still offers a way forward', /rel="next"/.test(el.innerHTML));
+ok('...and nothing is rendered as disabled', !/<span>/.test(el.innerHTML));
 
-// a single-episode game must not offer either
+// one lonely episode: no arrows at all
 el = render({ prev: null, next: null });
-ok('one lonely episode: two ends, no links',
-  (el.innerHTML.match(/<span>/g) || []).length === 2 && !/<a /.test(el.innerHTML));
+ok('a single-episode game shows no arrows', el.innerHTML === '' && el.hidden === true);
 
 // titles are escaped, since they come from the catalogue
 el = render({ prev: { id: 'x', ep: 'EP1', title: '<img src=x>' }, next: null });

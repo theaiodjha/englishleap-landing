@@ -306,7 +306,7 @@ const TYPE='clue-room';
   [['#epPrev', data.prev, '‹ '], ['#epNext', data.next, '› ']].forEach(function(x){
     var a=$(x[0]); if(!a||!x[1]) return;
     a.href='?ep='+encodeURIComponent(x[1].id);
-    a.textContent=x[2]+x[1].ep+' · '+x[1].title;
+    a.textContent=x[2]+x[1].ep;            // number only, as on the other games
     a.hidden=false;
   });
   $('#introEyebrow').textContent=(data.ep||EP.toUpperCase())+' \u00b7 '+(data.title||'Clue Room');
