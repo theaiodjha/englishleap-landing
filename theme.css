@@ -116,10 +116,12 @@ html[data-theme="light"] .acct .out:hover{color:#06121f}
 html[data-theme="light"] .upsell{background:linear-gradient(120deg,rgba(139,108,255,.14),rgba(31,196,182,.12)) !important}
 
 /* clue-room: calm the background glow on light so relics read crisply */
-/* the backdrop must span the document and never clip: overflow:hidden on a
-   viewport-height box is what drew the original seam. */
+/* The backdrop must span the DOCUMENT. That was the original bug: it was a
+   viewport-height box, so its bottom edge drew a line across the page at the fold.
+   overflow:hidden stays — the @keyframes aurora layer inside is scaled to 1.14 and
+   rotated, so without the clip it extends the scrollable area past the footer. */
 #stagebg{position:absolute !important;inset:0 !important;height:auto !important;
-  min-height:100% !important;overflow:visible !important}
+  min-height:100% !important;overflow:hidden !important}
 #stagebg::before{inset:0 !important;filter:blur(60px)}
 html[data-theme="light"] #stagebg::before{display:none}   /* its own soft edge is one layer too many */
 
