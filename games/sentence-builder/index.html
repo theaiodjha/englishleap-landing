@@ -177,7 +177,23 @@ let voices=[];
 function loadVoices(){try{voices=speechSynthesis.getVoices()||[];}catch(e){voices=[];}}
 loadVoices(); if(typeof speechSynthesis!=='undefined'&&speechSynthesis.onvoiceschanged!==undefined) speechSynthesis.onvoiceschanged=loadVoices;
 function pickVoice(){return voices.find(v=>/en-GB/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang))||voices[0];}
-function speak(t){try{if(typeof speechSynthesis==='undefined')return;const u=new SpeechSynthesisUtterance(t);const v=pickVoice();if(v)u.voice=v;u.lang=(v&&v.lang)||'en-GB';u.rate=.92;speechSynthesis.cancel();speechSynthesis.resume();speechSynthesis.speak(u);}catch(e){}}
+/* Speaks `t` and calls onDone when the audio has actually finished. The old version
+   fired and forgot, and the caller advanced on a fixed 1150ms timer — so the next
+   jumbled sentence appeared while the previous one was still being read out.
+   onend is not reliable on every engine, so a length-based cap also releases it. */
+function speak(t,onDone){
+  let done=false;
+  const finish=()=>{ if(done)return; done=true; if(onDone) onDone(); };
+  try{
+    if(typeof speechSynthesis==='undefined'){ setTimeout(finish,500); return; }
+    const u=new SpeechSynthesisUtterance(t);
+    const v=pickVoice(); if(v)u.voice=v;
+    u.lang=(v&&v.lang)||'en-GB'; u.rate=.92;
+    u.onend=finish; u.onerror=finish;
+    speechSynthesis.cancel(); speechSynthesis.resume(); speechSynthesis.speak(u);
+    setTimeout(finish, Math.min(12000, 1200 + String(t).length*90));   // safety net
+  }catch(e){ setTimeout(finish,500); }
+}
 
 let DATA=null, sentences=[], idx=0, score=0, keeper='';
 let orig=[], bank=[], tray=[], roundColor='#1fc4b6', perfect=true;
@@ -243,9 +259,17 @@ function check(){
     const s=sentences[idx];
     $('#checkBtn').disabled=true; $('#clearBtn').disabled=true;
     $('#tray').querySelectorAll('.chip').forEach(c=>c.onclick=null);
-    speak(s.text);
     if(perfect) { score++; $('#pScore').textContent=score; }
-    setTimeout(()=>{ idx++; if(idx>=sentences.length) win(); else renderRound(); }, reduced?550:1150);
+    // Wait for the sentence to finish being read, then cue the next round by its target
+    // word — never by its sentence, which would hand over the answer before they build it.
+    speak(s.text, ()=>{
+      const nxt=sentences[idx+1];
+      const go=()=>{ idx++; if(idx>=sentences.length) win(); else renderRound(); };
+      const cue=nxt && nxt.phrase;                 // the catalogue calls it `phrase`
+      if(!cue){ setTimeout(go, reduced?250:500); return; }
+      setTimeout(()=>speak(`Next: build a sentence using ${cue}`, ()=>setTimeout(go, reduced?200:350)),
+                 reduced?200:420);
+    });
   } else {
     perfect=false;
     const tr=$('#tray'); tr.classList.add('flash-bad'); setTimeout(()=>tr.classList.remove('flash-bad'),420);
