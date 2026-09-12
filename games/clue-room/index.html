@@ -126,6 +126,16 @@
     font-family:var(--body);font-size:var(--fs-md);font-weight:500;padding:11px 12px;border-radius:10px;cursor:pointer;text-decoration:none}
   .menu a:hover,.menu button:hover{background:rgba(255,255,255,.10)}
   .menu .sep{height:1px;background:var(--line);margin:var(--sp-1) 6px}
+  /* mirrors the account card's theme row (see .elcnav-card-theme in elc.css) */
+  .mtheme{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-2);padding:6px 11px}
+  .mtheme-lbl{font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--soft)}
+  .mseg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;
+    background:rgba(255,255,255,.06);border:1px solid var(--line)}
+  .mseg button{min-width:32px;height:26px;padding:0 9px;border:0;border-radius:999px;width:auto;
+    background:transparent;cursor:pointer;color:var(--soft);
+    font-family:var(--display);font-weight:600;font-size:var(--fs-xs);line-height:1}
+  .mseg button:hover{color:var(--ink);background:none}
+  .mseg button.on{background:linear-gradient(100deg,var(--teal),var(--purple));color:#fff}
   .menu .out{color:var(--coral)}
 
   /* intro / instructions — lives outside the reveal card */
@@ -186,6 +196,16 @@
     <div class="menu card-glass" id="menu">
       <a href="/practice-arcade.html">&#127918; Practice Arcade</a>
       <!-- Member Archive hidden until it is a working feature -->
+      <div class="sep"></div>
+      <!-- the theme lives here, as it lives in the account card on every other page -->
+      <div class="mtheme" role="group" aria-label="Theme">
+        <span class="mtheme-lbl">Theme</span>
+        <span class="mseg" id="mseg">
+          <button type="button" data-mode="auto" title="Match local sunrise and sunset">Auto</button>
+          <button type="button" data-mode="light" aria-label="Light" title="Light">&#9728;</button>
+          <button type="button" data-mode="dark" aria-label="Dark" title="Dark">&#9790;</button>
+        </span>
+      </div>
       <div class="sep"></div>
       <button class="out" id="signoutMenu">&#9211; Sign out</button>
     </div>
@@ -481,6 +501,20 @@ function boot(data){
   const menu=$('#menu');
   $('#menuBtn').onclick=e=>{ e.stopPropagation(); menu.classList.toggle('show'); };
   document.addEventListener('click',e=>{ if(!e.target.closest('.menu-wrap')) menu.classList.remove('show'); });
+  /* The menu owns the theme here, so the floating toggle comes off the scene — hidden by
+     a class on <html>, never re-parented. */
+  (function(){
+    var seg=$('#mseg'); if(!seg||!window.ELCTheme) return;
+    var paint=function(m){ seg.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('on', b.dataset.mode===m); }); };
+    paint(ELCTheme.mode());
+    seg.addEventListener('click',function(e){
+      var b=e.target.closest('button'); if(!b) return;
+      ELCTheme.set(b.dataset.mode); paint(b.dataset.mode);
+    });
+    ELCTheme.hide();
+  })();
+
   $('#signoutMenu').onclick=async()=>{ try{await fetch('/api/auth/signout',{method:'POST'});}catch{} location.href='/practice-arcade.html'; };
 
   // ---- friendly progress hint ----
