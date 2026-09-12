@@ -93,8 +93,13 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   has a tour (`ELCTour.pageTour()`), a "Take the tour" row. The plan comes from **`planOf(s)` in `lib/session.js`** —
   derived from `cents`, not `s.tier`, which is `'fluency'` for ANY paid pledge and so
   labels a $1 Transcript backer a Fluency member. `api/games.js` ships it as `level`;
-  `api/list.js`, `api/progress.js` and `api/use-it-live.js` ship it as `plan`. **The games keep their minimal back-only bar**
-  (a game is a focus task) and `index.html` keeps its marketing nav.
+  `api/list.js`, `api/progress.js` and `api/use-it-live.js` ship it as `plan`.
+- **There is no global back button** — the tabs are the way around, and **the games keep
+  their minimal back-only bar** (a game is a focus task) while `index.html` keeps its
+  marketing nav. The two pages a level below the Arcade (`arcade-browse.html`,
+  `arcade-type.html`) carry a `.elcback` link naming their PARENT ("Practice Arcade",
+  "Browse all games"): a breadcrumb step, so it lands in the same place however the
+  member arrived — not browser history.
 - **The Member Archive is hidden from the whole site** until it actually works: no nav
   tab, and every link commented with "Member Archive hidden until it is a working
   feature" (`index.html` x2, `games/clue-room`). `archive.html` still exists at its URL.
