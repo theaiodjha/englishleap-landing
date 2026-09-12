@@ -249,6 +249,11 @@
   window.ELCAccount = function (user, opts) {
     var slot = document.getElementById('acct');
     if (!slot) return;
+    /* The card is absolutely positioned and anchors to .elcnav-acct{position:relative}.
+       Without the class it resolves against whatever ancestor happens to be positioned and
+       hangs off the edge of the screen — which is what the game bars did. Add it here so a
+       page cannot get this wrong by omission. */
+    slot.classList.add('elcnav-acct');
     var next = (opts && opts.next) || location.pathname;
 
     if (!user || !user.name) {

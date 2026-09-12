@@ -188,7 +188,13 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   theme**, in a segment mirroring `.elcnav-card-theme`. So no page on the site shows the
   floating toggle to someone who has a better place to change it: wherever a card or menu
   owns the theme, that surface calls `ELCTheme.hide()`, which suppresses the element by a
-  class on `<html>` and never re-parents it.
+  class on `<html>` and never re-parents it. **Clue Room declares that class in its HEAD**,
+  not from its boot block: hiding the toggle after the 3D scene is built means it is
+  created, painted and only then removed — a blink on every load.
+- **`ELCAccount` adds `.elcnav-acct` to the slot itself.** The card is absolutely
+  positioned against that class; a slot without it anchors to whatever ancestor happens
+  to be positioned, and the card hangs off the right edge of the screen. The game bars
+  did exactly that with a bare `<div id="acct">`.
   Removing each game's `.out` pill rule was part of
   this — the card's Sign out ROW is also `.out`, so leaving it would have painted the old
   pill around it, the same collision as `.ep.go` and `.elcnav-acct a`. **No game uses

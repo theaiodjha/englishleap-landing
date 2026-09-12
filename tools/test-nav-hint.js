@@ -16,7 +16,10 @@ function boot({ hint = null, pathname = '/progress.html' } = {}) {
   const store = {};
   if (hint) store['elc-acct'] = JSON.stringify(hint);
   const htmlClasses = new Set();
-  const slot = { id: 'acct', innerHTML: '' };
+  const slotCls = new Set();
+  const slot = { id: 'acct', innerHTML: '',
+    classList: { add: (c) => slotCls.add(c), remove: (c) => slotCls.delete(c),
+                 contains: (c) => slotCls.has(c) } };
   const timers = [];
 
   const node = (id) => (id === 'acct' ? slot : {
@@ -55,7 +58,7 @@ function boot({ hint = null, pathname = '/progress.html' } = {}) {
   global.ELCTour = undefined;
 
   new Function(SRC)();
-  return { store, htmlClasses, slot, timers, ELCAccount: global.ELCAccount };
+  return { store, htmlClasses, slot, slotCls, timers, ELCAccount: global.ELCAccount };
 }
 
 let bad = 0;
@@ -73,6 +76,12 @@ ok('theme toggle is suppressed before theme.js builds it',
   back.htmlClasses.has('elc-nofloat-theme'));
 ok('tour pill is suppressed before elc-tour.js mounts it',
   back.htmlClasses.has('elc-nolaunch'));
+
+// The card is absolutely positioned against .elcnav-acct{position:relative}. Without
+// that class it anchors to some far ancestor and hangs off the edge of the screen — which
+// is exactly what the game bars did, because their slot was a bare <div id="acct">.
+ok('the slot is given its positioning class, whatever the page forgot',
+  back.slotCls.has('elcnav-acct'));
 
 // --- a first-time or signed-out visitor ---------------------------------------
 const cold = boot({ hint: null });

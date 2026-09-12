@@ -7,6 +7,10 @@
 <title>Clue Room &middot; English Leap</title>
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <script src="/theme.js"></script>
+<!-- The HUD menu owns the theme here (there is no account card), so the floating toggle is
+     declared away BEFORE anything paints. Doing it from the game's boot block meant the
+     toggle was created, painted, and only then hidden — a visible blink on every load. -->
+<script>document.documentElement.classList.add('elc-nofloat-theme');</script>
 <link rel="stylesheet" href="/elc.css" />
 <link rel="stylesheet" href="/theme.css" />
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
@@ -512,6 +516,7 @@ function boot(data){
       var b=e.target.closest('button'); if(!b) return;
       ELCTheme.set(b.dataset.mode); paint(b.dataset.mode);
     });
+    // the class is already set in the head; this only matters if that ever changes
     ELCTheme.hide();
   })();
 
