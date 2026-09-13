@@ -681,7 +681,9 @@ error is logged, never forwarded — Resend's error text can name the recipient.
 
 Screenshots are resized in the browser (longest edge 1600px, JPEG 0.82, white behind
 transparency) because a phone PNG is often 3-8MB and Vercel's request body limit is 4.5MB;
-the server still enforces 3 files, PNG/JPEG/WebP, 1.5MB each. Abuse controls: a honeypot
+the server still enforces 3 files, PNG/JPEG/WebP, 1.5MB each. The page always draws
+**exactly three slots** — filled ones show the image with a remove button, the rest are "+"
+boxes that open the picker — so the limit is visible before anyone reaches it. Abuse controls: a honeypot
 (a bot that fills it is told "sent" and nothing is mailed), and 5 sends per IP per hour in
 KV (`support:ip:{ip}`), which **fails open** — blocking a member trying to report a problem
 is the worse failure. Every visitor field is escaped before it enters the email HTML.

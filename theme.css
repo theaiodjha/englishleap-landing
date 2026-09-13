@@ -467,6 +467,12 @@ html[data-theme="light"] .elcnotice{background:color-mix(in srgb,var(--nc) 16%,#
 html[data-theme="light"] .elcnotice.warn{background:rgba(255,203,84,.26) !important;
   border-color:rgba(154,106,0,.42) !important}
 
+/* help.html screenshot slots: a dashed 16% line all but disappears on paper, and an
+   empty "+" box that cannot be seen is a limit nobody can see either */
+html[data-theme="light"] .slot.empty{border-color:rgba(60,50,110,.32) !important;
+  background:rgba(255,255,255,.6) !important;color:#5b5680 !important}
+html[data-theme="light"] .slot.full{border-color:rgba(60,50,110,.22) !important}
+
 /* Eyebrows on light. Small letterspaced caps need MORE contrast than body text, not
    less — thin strokes with wide gaps give the eye little to hold on to. The teal LABEL
    form keeps its hue at the legible step (#1fc4b6 is 2.0:1 on white); the PILL form takes

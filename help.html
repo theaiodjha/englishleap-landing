@@ -40,7 +40,9 @@
 
   /* the form */
   .f{display:grid;gap:var(--sp-4)}
-  label.l{display:block;font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink);margin-bottom:6px}
+  /* any element, not just <label>: the Screenshots heading is a span, and as an inline
+     element it let the box beside it overlap the fields above */
+  .l{display:block;font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink);margin-bottom:6px}
   .l small{font-family:var(--body);font-weight:400;color:var(--soft2)}
   select,input[type=email],input[type=text],textarea{width:100%;font:inherit;font-size:var(--fs-md);color:var(--ink);
     background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 13px;outline:none;
@@ -53,20 +55,27 @@
   .count{display:block;text-align:right;font-size:var(--fs-xs);color:var(--soft2);margin-top:4px}
   .err{display:none;color:#ff8f8f;font-size:var(--fs-xs);margin-top:5px}
   .bad .err{display:block}
-  .bad select,.bad input,.bad textarea,.bad .drop{border-color:#ff8f8f}
+  .bad select,.bad input,.bad textarea{border-color:#ff8f8f}
 
-  /* screenshots: drop, pick or paste */
-  .drop{border:1.5px dashed var(--line);border-radius:var(--r-md);padding:var(--sp-5);text-align:center;cursor:pointer;
-    color:var(--soft);font-size:var(--fs-sm);transition:border-color .15s,background .15s}
-  .drop:hover,.drop.over{border-color:color-mix(in srgb,var(--teal) 55%,transparent);
+  /* screenshots: exactly three slots, so the limit is visible before it is reached */
+  .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3);max-width:420px}
+  .slots.over .slot.empty{border-color:color-mix(in srgb,var(--teal) 60%,transparent);
+    background:color-mix(in srgb,var(--teal) 8%,transparent)}
+  .slot{position:relative;aspect-ratio:4/3;border-radius:var(--r-md);overflow:hidden}
+  .slot.empty{display:grid;place-items:center;cursor:pointer;padding:0;font:inherit;
+    border:1.5px dashed var(--line);background:rgba(255,255,255,.04);color:var(--soft2);
+    transition:border-color .15s,background .15s,color .15s}
+  .slot.empty:hover,.slot.empty:focus-visible{color:var(--ink);
+    border-color:color-mix(in srgb,var(--teal) 55%,transparent);
     background:color-mix(in srgb,var(--teal) 7%,transparent)}
-  .drop b{color:var(--ink)}
-  .drop input{display:none}
-  .thumbs{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-  .thumb{position:relative;width:96px;height:72px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
-  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .thumb button{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:0;cursor:pointer;
-    background:rgba(8,8,18,.72);color:#fff;font-size:13px;line-height:1;display:grid;place-items:center}
+  .slot.empty svg{width:26px;height:26px}
+  .slot.full{border:1px solid var(--line)}
+  .slot.full img{width:100%;height:100%;object-fit:cover;display:block}
+  .slot .rm{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;border:0;cursor:pointer;
+    background:rgba(8,8,18,.72);color:#fff;font-size:14px;line-height:1;display:grid;place-items:center}
+  .shots-note{display:block;margin-top:8px;color:var(--soft2);font-size:var(--fs-xs)}
+  #files{display:none}
+  .bad .slots .slot.empty{border-color:#ff8f8f}
 
   .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}   /* honeypot */
 
@@ -176,12 +185,10 @@
       </div>
 
       <div id="f-files">
-        <span class="l">Screenshots <small>(optional, up to 3)</small></span>
-        <label class="drop" id="drop">
-          <input type="file" id="files" accept="image/png,image/jpeg,image/webp" multiple>
-          <b>Choose images</b> or drag them here &mdash; you can also paste a screenshot
-        </label>
-        <div class="thumbs" id="thumbs"></div>
+        <span class="l">Screenshots <small>(optional)</small></span>
+        <input type="file" id="files" accept="image/png,image/jpeg,image/webp" multiple>
+        <div class="slots" id="slots"></div>
+        <span class="shots-note">Tap a box to add an image, drag images onto them, or paste a screenshot.</span>
         <span class="err"></span>
       </div>
 
@@ -235,27 +242,41 @@ function fieldError(id,msg){
   const e=box.querySelector('.err'); if(e) e.textContent=msg||'';
 }
 
+const PLUS='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+
+/* Always exactly MAX_FILES boxes: filled ones show the image, the rest are "+" buttons.
+   The limit is therefore visible up front rather than discovered as an error. */
 function drawThumbs(){
-  $('#thumbs').innerHTML=shots.map((s,i)=>
-    `<div class="thumb"><img src="${s.url}" alt="Screenshot ${i+1}"><button type="button" data-i="${i}" aria-label="Remove screenshot ${i+1}">&times;</button></div>`).join('');
-  $('#thumbs').querySelectorAll('button').forEach(b=>b.onclick=()=>{ shots.splice(+b.dataset.i,1); drawThumbs(); });
+  let html='';
+  for(let i=0;i<MAX_FILES;i++){
+    const s=shots[i];
+    html+= s
+      ? `<div class="slot full"><img src="${s.url}" alt="Screenshot ${i+1}">`+
+        `<button type="button" class="rm" data-i="${i}" aria-label="Remove screenshot ${i+1}">&times;</button></div>`
+      : `<button type="button" class="slot empty" aria-label="Add screenshot ${i+1} of ${MAX_FILES}">${PLUS}</button>`;
+  }
+  const box=$('#slots');
+  box.innerHTML=html;
+  box.querySelectorAll('.rm').forEach(b=>b.onclick=()=>{ shots.splice(+b.dataset.i,1); fieldError('files',''); drawThumbs(); });
+  box.querySelectorAll('.slot.empty').forEach(b=>b.onclick=()=>$('#files').click());
 }
 
 async function addFiles(list){
   fieldError('files','');
   for(const f of Array.from(list||[])){
     if(!/^image\//.test(f.type)) { fieldError('files','Screenshots need to be images.'); continue; }
-    if(shots.length>=MAX_FILES){ fieldError('files',`Up to ${MAX_FILES} screenshots, please.`); break; }
+    if(shots.length>=MAX_FILES){ fieldError('files',`All ${MAX_FILES} boxes are full — remove one to add another.`); break; }
     try{ shots.push(await shrink(f)); }catch(e){ fieldError('files','One of those images could not be read.'); }
   }
   drawThumbs();
 }
 
 $('#files').addEventListener('change',e=>{ addFiles(e.target.files); e.target.value=''; });
-const drop=$('#drop');
+const drop=$('#slots');
 ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.add('over'); }));
 ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); drop.classList.remove('over'); }));
 drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+drawThumbs();                                   // the three empty boxes on load
 // paste a screenshot straight from the clipboard, anywhere on the page
 document.addEventListener('paste',e=>{
   const imgs=Array.from((e.clipboardData&&e.clipboardData.files)||[]).filter(f=>/^image\//.test(f.type));
