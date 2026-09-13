@@ -40,6 +40,9 @@
 
   /* the form */
   .f{display:grid;gap:var(--sp-4)}
+  /* `.f{display:grid}` would otherwise beat the browser's own [hidden] rule, so setting
+     form.hidden after a send would leave the form showing under the thank-you */
+  [hidden]{display:none !important}
   /* any element, not just <label>: the Screenshots heading is a span, and as an inline
      element it let the box beside it overlap the fields above */
   .l{display:block;font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink);margin-bottom:6px}
@@ -91,6 +94,10 @@
   .done .big{font-size:40px/* emoji glyph, not type */}
   .done h2{margin:10px 0 6px}
   .done p{color:var(--soft);font-size:var(--fs-md);line-height:1.55;margin:0 auto;max-width:30em}
+  .again{margin-top:var(--sp-5);display:inline-flex;align-items:center;min-height:42px;padding:10px 20px;
+    border-radius:var(--r-full);cursor:pointer;font-family:var(--display);font-weight:600;font-size:var(--fs-sm);
+    color:var(--ink);background:var(--glass2);border:1px solid var(--line);transition:border-color .15s}
+  .again:hover{border-color:color-mix(in srgb,var(--teal) 55%,transparent)}
 
   .foot{margin-top:42px;text-align:center;color:var(--soft2);font-size:11px;line-height:1.7}
   .tagline{font-family:var(--display);font-weight:600;font-size:var(--fs-sm)}
@@ -149,6 +156,14 @@
   <section class="card" id="formCard">
     <h2>Send us a message</h2>
     <p class="sub">We read every one, and we&rsquo;ll reply by email</p>
+
+    <!-- shown in place of the form after a send; the form is hidden, never destroyed -->
+    <div class="done" id="doneBox" hidden>
+      <div class="big" aria-hidden="true">&#128140;</div>
+      <h2>Thanks &mdash; we&rsquo;ve got it</h2>
+      <p>We&rsquo;ll reply to <b id="doneTo"></b>. Keep an eye on your spam folder, just in case.</p>
+      <button type="button" class="again" id="againBtn">Send another message</button>
+    </div>
 
     <form class="f" id="helpForm" novalidate>
       <div id="f-category">
@@ -301,6 +316,20 @@ ELCFetch('/api/me',{credentials:'same-origin'},6000).then(r=>r.json()).then(d=>{
   } else ELCAccount(null,{next:'/help.html'});
 }).catch(()=>{});
 
+/* A second message is usually a second problem, so the topic, the message and the
+   screenshots are cleared — but their email and name are kept, because they have not
+   changed and retyping them is the kind of friction that stops people reporting at all. */
+$('#againBtn').addEventListener('click',()=>{
+  $('#category').value='';
+  msg.value=''; $('#count').textContent='0 / 4000';
+  shots=[]; drawThumbs();
+  ['category','message','email','files'].forEach(id=>fieldError(id,''));
+  $('#formErr').classList.remove('on');
+  $('#doneBox').hidden=true;
+  $('#helpForm').hidden=false;
+  $('#category').focus();
+});
+
 $('#helpForm').addEventListener('submit',async e=>{
   e.preventDefault();
   ['category','message','email','files'].forEach(id=>fieldError(id,''));
@@ -327,13 +356,11 @@ $('#helpForm').addEventListener('submit',async e=>{
     },30000);
     const d=await r.json().catch(()=>({}));
     if(r.ok && d.ok){
-      const to=$('#email').value.trim();
-      $('#formCard').innerHTML=`<div class="done">
-        <div class="big" aria-hidden="true">&#128140;</div>
-        <h2>Thanks &mdash; we&rsquo;ve got it</h2>
-        <p>We&rsquo;ll reply to <b>${to.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</b>. Keep an eye on your spam folder, just in case.</p>
-      </div>`;
+      $('#doneTo').textContent=$('#email').value.trim();     // textContent: nothing to escape
+      $('#helpForm').hidden=true;
+      $('#doneBox').hidden=false;
       $('#formCard').scrollIntoView({behavior:'smooth',block:'center'});
+      btn.disabled=false; btn.textContent='Send message';
       return;
     }
     if(d.field){ fieldError(d.field,d.error); }
