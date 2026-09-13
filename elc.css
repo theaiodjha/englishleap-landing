@@ -148,6 +148,7 @@ html.elc-nolaunch .elct-launch{display:none !important}
 .elcnav-av.lg.anon svg{width:22px;height:22px}
 .elcnav-card-sub{font-size:var(--fs-xs);color:var(--soft2)}
 .elcnav-card-row.r-signin{--rc:var(--teal);color:var(--ink)}
+.elcnav-card-row.r-help{--rc:var(--coral)}
 .elcnav-av.lg{width:44px;height:44px;flex:0 0 44px;font-size:var(--fs-md);cursor:default;transform:none}
 .elcnav-card{position:absolute;top:calc(100% + 10px);right:0;z-index:60;width:246px;
   padding:var(--sp-2);border-radius:var(--r-lg);border:1px solid var(--line);

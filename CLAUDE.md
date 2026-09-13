@@ -322,6 +322,8 @@ elc-tour.js                guided Oriva tour (home + arcade); auto-runs first vi
 api/auth/{login,callback,signout}.js   Patreon OAuth flow
 api/{games,list,download,unlock}.js    arcade data, archive list/download, code redemption
 api/me.js                  who is signed in + their plan, from the cookie alone (header labels)
+api/support.js             help form -> email via Resend; the mailbox never reaches the page
+help.html                  quick answers + a message form with screenshots (linked from the account card)
 api/progress.js            records game completions + returns practice history / recap / dashboard
 progress.html              the member progress page (KPI row, monthly chart, phrase mastery)
 api/use-it-live.js         Use It Live: usage + audio analysis (Gemini), flag-gated
@@ -348,6 +350,7 @@ tools/test-back-link.js    node tools/test-back-link.js — every arrival route 
 tools/test-episode-pager.js node … — episode neighbours and the ends of the run
 tools/test-sentence-builder.js node … — the tile label: no giveaway, meaningful case kept
 tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
+tools/test-support.mjs     node tools/test-support.mjs — mailbox never leaks, escaping, abuse limits
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
 games/*                    5 game types (clue-room, phrase-pairs, listening-gap,
@@ -463,6 +466,10 @@ GEMINI_MODEL             optional, default gemini-3.6-flash (2.5-flash is retire
 UIL_ENABLED              'true' to open the feature to everyone (default: off)
 UIL_PREVIEW_TOKEN        secret for owner ?preview= access while off
 UIL_PREVIEW_UIDS         comma-separated uids that bypass the flag
+# Help form
+RESEND_API_KEY           resend.com API key (the form says "not switched on yet" without it)
+SUPPORT_TO               where messages go; comma-separated allowed. NEVER sent to the page
+SUPPORT_FROM             sender on a Resend-VERIFIED domain, e.g. English Leap <noreply@englishleap.app>
 ```
 
 ## Next up / launch checklist
@@ -659,6 +666,25 @@ the response says `show`. No skeleton, no zeros.
 `node tools/test-stats.mjs` asserts the floor, the rounding direction, the omissions and
 the KV-down path. Note it sets `KV_REST_API_*` **before** a dynamic import: `lib/history.js`
 reads them at module load and ESM hoists static imports above every statement.
+
+## Help form
+
+`help.html` answers the four most common questions first (wrong Patreon account, locked
+games by tier, where the downloads are, where progress is), then takes a message. It is
+linked from **Help & feedback** in the account card, for signed-in and signed-out visitors
+alike — someone who cannot sign in is exactly who needs it.
+
+`api/support.js` mails it through Resend. **The mailbox address lives only in
+`SUPPORT_TO`** and is never echoed: the email goes out from `SUPPORT_FROM` with the visitor's
+own address as **Reply-To**, so replying from the inbox answers them directly. A provider
+error is logged, never forwarded — Resend's error text can name the recipient.
+
+Screenshots are resized in the browser (longest edge 1600px, JPEG 0.82, white behind
+transparency) because a phone PNG is often 3-8MB and Vercel's request body limit is 4.5MB;
+the server still enforces 3 files, PNG/JPEG/WebP, 1.5MB each. Abuse controls: a honeypot
+(a bot that fills it is told "sent" and nothing is mailed), and 5 sends per IP per hour in
+KV (`support:ip:{ip}`), which **fails open** — blocking a member trying to report a problem
+is the worse failure. Every visitor field is escaped before it enters the email HTML.
 
 ## Open decisions
 

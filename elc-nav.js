@@ -50,6 +50,7 @@
     '/practice-arcade.html': 'Practice Arcade',
     '/arcade-browse.html': 'Browse the arcade',
     '/use-it-live.html': 'Use It Live',
+    '/help.html': 'Help',
     '/archive.html': 'Member Archive'
   };
 
@@ -307,6 +308,15 @@
       : '<a class="elcnav-card-row r-tour" role="menuitem" href="' + TOURHREF + '">' + TOURICON +
           '<span>Take the tour</span></a>';
 
+    // help is for everyone, and most useful to someone who cannot sign in
+    var helpRow =
+      '<a class="elcnav-card-row r-help" role="menuitem" href="/help.html">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+          'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+          '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>' +
+          '<path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg>' +
+        '<span>Help &amp; feedback</span></a>';
+
     var themeRow =
       '<div class="elcnav-card-theme" role="group" aria-label="Theme">' +
         '<span class="elcnav-card-theme-lbl">Theme</span>' +
@@ -335,7 +345,7 @@
 
     slot.innerHTML = avatar +
       '<div class="elcnav-card" id="acctCard" role="menu" hidden>' +
-        idBlock + memberRows + tourRow + themeRow + signOut +
+        idBlock + memberRows + tourRow + helpRow + themeRow + signOut +
       '</div>';
 
     var btn = document.getElementById('acctBtn');
