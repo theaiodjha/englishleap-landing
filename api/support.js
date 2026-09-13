@@ -9,7 +9,9 @@
 // Delivery is Resend's REST API (no SDK — the stack is buildless). Needs, in Vercel:
 //   RESEND_API_KEY   the key from resend.com
 //   SUPPORT_TO       where complaints go            e.g. help@englishleap.app
-//   SUPPORT_FROM     a sender on a VERIFIED domain  e.g. "English Leap <noreply@englishleap.app>"
+//   SUPPORT_FROM     a sender on the VERIFIED domain — the subdomain help.englishleap.app,
+//                    e.g. "English Leap <noreply@help.englishleap.app>". The part after @ must
+//                    match the verified domain exactly, or Resend answers 403.
 //
 // Abuse controls, in order of cheapness:
 //   * a honeypot field a person never fills — a bot that fills it is told "sent" and nothing

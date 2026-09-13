@@ -469,7 +469,10 @@ UIL_PREVIEW_UIDS         comma-separated uids that bypass the flag
 # Help form
 RESEND_API_KEY           resend.com API key (the form says "not switched on yet" without it)
 SUPPORT_TO               where messages go; comma-separated allowed. NEVER sent to the page
-SUPPORT_FROM             sender on a Resend-VERIFIED domain, e.g. English Leap <noreply@englishleap.app>
+SUPPORT_FROM             sender on the Resend-VERIFIED domain, which is the SUBDOMAIN
+                         help.englishleap.app — e.g. English Leap <noreply@help.englishleap.app>.
+                         The domain after @ must match it exactly: using @englishleap.app gave
+                         Resend 403 "This API key is not authorized to send emails from ..."
 ```
 
 ## Next up / launch checklist
@@ -674,7 +677,8 @@ games by tier, where the downloads are, where progress is), then takes a message
 linked from **Help & feedback** in the account card, for signed-in and signed-out visitors
 alike — someone who cannot sign in is exactly who needs it.
 
-`api/support.js` mails it through Resend. **The mailbox address lives only in
+`api/support.js` mails it through Resend (**live** — sending from the verified subdomain
+`help.englishleap.app`). **The mailbox address lives only in
 `SUPPORT_TO`** and is never echoed: the email goes out from `SUPPORT_FROM` with the visitor's
 own address as **Reply-To**, so replying from the inbox answers them directly. A provider
 error is logged, never forwarded — Resend's error text can name the recipient.
