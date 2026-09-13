@@ -142,6 +142,12 @@ html.elc-nolaunch .elct-launch{display:none !important}
   box-shadow:0 6px 18px -10px rgba(0,0,0,.9);transition:transform .15s,box-shadow .15s}
 .elcnav-av:hover,.elcnav-av.on{transform:translateY(-1px);box-shadow:0 10px 22px -10px rgba(31,196,182,.55)}
 .elcnav-av.on{outline:2px solid color-mix(in srgb,var(--teal) 60%,transparent);outline-offset:2px}
+/* signed out: the same circle, quieter, carrying a person glyph instead of initials */
+.elcnav-av.anon{background:var(--glass2);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.elcnav-av.anon svg{width:18px;height:18px}
+.elcnav-av.lg.anon svg{width:22px;height:22px}
+.elcnav-card-sub{font-size:var(--fs-xs);color:var(--soft2)}
+.elcnav-card-row.r-signin{--rc:var(--teal);color:var(--ink)}
 .elcnav-av.lg{width:44px;height:44px;flex:0 0 44px;font-size:var(--fs-md);cursor:default;transform:none}
 .elcnav-card{position:absolute;top:calc(100% + 10px);right:0;z-index:60;width:246px;
   padding:var(--sp-2);border-radius:var(--r-lg);border:1px solid var(--line);

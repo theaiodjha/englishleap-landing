@@ -525,6 +525,8 @@ html[data-theme="light"] .elcnav-card-row{--rc:#0b6f68}
 html[data-theme="light"] .elcnav-card-row.r-progress{--rc:#6b46e5}
 html[data-theme="light"] .elcnav-card-row.r-tour{--rc:#0b6f68}
 html[data-theme="light"] .elcnav-card-row.out{--rc:#b02a2a}
+html[data-theme="light"] .elcnav-card-row.r-signin{--rc:#0b6f68}
+html[data-theme="light"] .elcnav-av.anon{background:rgba(255,255,255,.8) !important;border-color:rgba(60,50,110,.2) !important;color:#3a3560 !important}
 html[data-theme="light"] .elcnav-card-row:hover{background:color-mix(in srgb,var(--rc) 12%,transparent) !important}
 html[data-theme="light"] .elcnav-card-theme{
   border-top-color:rgba(60,50,110,.14) !important; border-bottom-color:rgba(60,50,110,.14) !important;

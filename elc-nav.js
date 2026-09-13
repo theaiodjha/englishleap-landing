@@ -250,6 +250,12 @@
       '<path d="M12 17h.01"/></svg>';
 
   // ELCAccount({name, plan}) signed in, or ELCAccount(null, {next}) signed out.
+  var PERSON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+    '<path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6Z"/></svg>';
+
+  /* ELCAccount({name, plan}) for a member, ELCAccount(null, {next}) for anyone signed out.
+     BOTH get the avatar and the card — the card is the only home of the theme choice and
+     the tour, so a signed-out visitor needs it as much as a member does. */
   window.ELCAccount = function (user, opts) {
     var slot = document.getElementById('acct');
     if (!slot) return;
@@ -258,72 +264,79 @@
        hangs off the edge of the screen — which is what the game bars did. Add it here so a
        page cannot get this wrong by omission. */
     slot.classList.add('elcnav-acct');
-    var next = (opts && opts.next) || location.pathname;
+    var next = (opts && opts.next) || (location.pathname + (location.search || ''));
+    var provisional = !!(opts && opts.hint === true);   // drawn from cache or as a default
+    var signedIn = !!(user && user.name);
 
-    if (!user || !user.name) {
-      if (!opts || opts.hint !== true) { writeHint(null); setFloating(false); }
-      slot.innerHTML = '<a class="elcnav-login" href="/api/auth/login?next=' + encodeURIComponent(next) + '">' +
-        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
-        '<path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.7-8 6v1h16v-1c0-3.3-3.6-6-8-6Z"/></svg>' +
-        '<span>Member Login</span></a>';
-      // No card to hold it, so the floating theme toggle stays where it is.
-      if (window.ELCTheme) window.ELCTheme.show();
-      return;
-    }
+    // the floating corner controls are retired everywhere; the classes stay as a guard in
+    // case a cached old theme.js / elc-tour.js still creates them for one more load
+    setFloating(true);
+    if (!provisional) writeHint(signedIn ? user : null);
 
-    var ini = initials(user.name);
-    var plan = PLAN[user.plan] || '';
     var mode = (window.ELCTheme && window.ELCTheme.mode()) || 'auto';
     var tour = (window.ELCTour && window.ELCTour.pageTour && window.ELCTour.pageTour()) || null;
+    var ini = signedIn ? initials(user.name) : '';
+    var plan = signedIn ? (PLAN[user.plan] || '') : '';
 
-    slot.innerHTML =
-      '<button class="elcnav-av" id="acctBtn" type="button" aria-haspopup="true" aria-expanded="false" ' +
-        'aria-label="Account: ' + esc(user.name) + '"><span aria-hidden="true">' + esc(ini) + '</span></button>' +
-      '<div class="elcnav-card" id="acctCard" role="menu" hidden>' +
-        '<div class="elcnav-card-id">' +
+    var avatar = signedIn
+      ? '<button class="elcnav-av" id="acctBtn" type="button" aria-haspopup="true" aria-expanded="false" ' +
+          'aria-label="Account: ' + esc(user.name) + '"><span aria-hidden="true">' + esc(ini) + '</span></button>'
+      : '<button class="elcnav-av anon" id="acctBtn" type="button" aria-haspopup="true" aria-expanded="false" ' +
+          'aria-label="Account: sign in">' + PERSON + '</button>';
+
+    var idBlock = signedIn
+      ? '<div class="elcnav-card-id">' +
           '<span class="elcnav-av lg" aria-hidden="true"><span>' + esc(ini) + '</span></span>' +
           '<span class="elcnav-card-who"><b>' + esc(user.name) + '</b>' +
-            (plan ? '<span class="elcnav-card-plan plan-' + esc(user.plan) + '">' +
-              esc(plan) + '</span>' : '') + '</span>' +
-        '</div>' +
-        '<a class="elcnav-card-row r-progress" role="menuitem" href="/progress.html">' +
-          svg('progress') + '<span>Your progress</span></a>' +
-        // a button where the tour can run here, a link to the Arcade tour where it cannot
-        (tour
-          ? '<button class="elcnav-card-row r-tour" role="menuitem" type="button" id="acctTour">' + TOURICON +
-            '<span>Take the tour</span></button>'
-          : '<a class="elcnav-card-row r-tour" role="menuitem" href="' + TOURHREF + '">' + TOURICON +
-            '<span>Take the tour</span></a>') +
-        '<div class="elcnav-card-theme" role="group" aria-label="Theme">' +
-          '<span class="elcnav-card-theme-lbl">Theme</span>' +
-          '<span class="elcnav-seg">' +
-            '<button type="button" data-mode="auto"' + (mode === 'auto' ? ' class="on"' : '') +
-              ' aria-pressed="' + (mode === 'auto') + '" title="Match local sunrise and sunset">Auto</button>' +
-            '<button type="button" data-mode="light"' + (mode === 'light' ? ' class="on"' : '') +
-              ' aria-pressed="' + (mode === 'light') + '" aria-label="Light" title="Light">\u2600</button>' +
-            '<button type="button" data-mode="dark"' + (mode === 'dark' ? ' class="on"' : '') +
-              ' aria-pressed="' + (mode === 'dark') + '" aria-label="Dark" title="Dark">\u263E</button>' +
-          '</span>' +
-        '</div>' +
-        '<button class="elcnav-card-row out" role="menuitem" type="button" id="acctOut">' +
+            (plan ? '<span class="elcnav-card-plan plan-' + esc(user.plan) + '">' + esc(plan) + '</span>' : '') +
+          '</span></div>'
+      : '<div class="elcnav-card-id">' +
+          '<span class="elcnav-av lg anon" aria-hidden="true">' + PERSON + '</span>' +
+          '<span class="elcnav-card-who"><b>Welcome</b>' +
+            '<span class="elcnav-card-sub">Sign in with your Patreon account</span></span></div>' +
+        '<a class="elcnav-card-row r-signin" role="menuitem" href="/api/auth/login?next=' +
+          encodeURIComponent(next) + '">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+            'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M10 17l5-5-5-5M15 12H3M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7"/></svg>' +
+          '<span>Sign in</span></a>';
+
+    var tourRow = tour
+      ? '<button class="elcnav-card-row r-tour" role="menuitem" type="button" id="acctTour">' + TOURICON +
+          '<span>Take the tour</span></button>'
+      : '<a class="elcnav-card-row r-tour" role="menuitem" href="' + TOURHREF + '">' + TOURICON +
+          '<span>Take the tour</span></a>';
+
+    var themeRow =
+      '<div class="elcnav-card-theme" role="group" aria-label="Theme">' +
+        '<span class="elcnav-card-theme-lbl">Theme</span>' +
+        '<span class="elcnav-seg">' +
+          '<button type="button" data-mode="auto"' + (mode === 'auto' ? ' class="on"' : '') +
+            ' aria-pressed="' + (mode === 'auto') + '" title="Match local sunrise and sunset">Auto</button>' +
+          '<button type="button" data-mode="light"' + (mode === 'light' ? ' class="on"' : '') +
+            ' aria-pressed="' + (mode === 'light') + '" aria-label="Light" title="Light">☀</button>' +
+          '<button type="button" data-mode="dark"' + (mode === 'dark' ? ' class="on"' : '') +
+            ' aria-pressed="' + (mode === 'dark') + '" aria-label="Dark" title="Dark">☾</button>' +
+        '</span>' +
+      '</div>';
+
+    var memberRows = signedIn
+      ? '<a class="elcnav-card-row r-progress" role="menuitem" href="/progress.html">' +
+          svg('progress') + '<span>Your progress</span></a>'
+      : '';
+
+    var signOut = signedIn
+      ? '<button class="elcnav-card-row out" role="menuitem" type="button" id="acctOut">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
             'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
             '<path d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/></svg>' +
-          '<span>Sign out</span></button>' +
-      '</div>';
+          '<span>Sign out</span></button>'
+      : '';
 
-    // The card now owns both: take the floating controls off this page. Neither element
-    // is moved — they are hidden by a class on <html> and, where the tour script is already
-    // loaded, the pill is removed outright — because re-parenting them broke clicks
-    // site-wide when it was tried.
-    setFloating(true);
-    if (opts && opts.hint === true) {
-      // drawn from cache; the caller will follow up with the truth
-    } else {
-      writeHint(user);
-    }
-    if (window.ELCTheme) window.ELCTheme.hide();
-    if (tour && window.ELCTour && window.ELCTour.hideLauncher) window.ELCTour.hideLauncher();
+    slot.innerHTML = avatar +
+      '<div class="elcnav-card" id="acctCard" role="menu" hidden>' +
+        idBlock + memberRows + tourRow + themeRow + signOut +
+      '</div>';
 
     var btn = document.getElementById('acctBtn');
     var card = document.getElementById('acctCard');
@@ -334,10 +347,21 @@
     };
     btn.addEventListener('click', function (e) { e.stopPropagation(); open(card.hidden); });
     card.addEventListener('click', function (e) { e.stopPropagation(); });
-    document.addEventListener('click', function () { if (!card.hidden) open(false); });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !card.hidden) { open(false); btn.focus(); }
-    });
+    // bound once per page, however many times the control re-renders
+    if (!window.__elcAcctBound) {
+      window.__elcAcctBound = true;
+      document.addEventListener('click', function () {
+        var c = document.getElementById('acctCard'), b = document.getElementById('acctBtn');
+        if (c && !c.hidden) { c.hidden = true; if (b) { b.setAttribute('aria-expanded', 'false'); b.classList.remove('on'); } }
+      });
+      document.addEventListener('keydown', function (e) {
+        var c = document.getElementById('acctCard'), b = document.getElementById('acctBtn');
+        if (e.key === 'Escape' && c && !c.hidden) {
+          c.hidden = true;
+          if (b) { b.setAttribute('aria-expanded', 'false'); b.classList.remove('on'); b.focus(); }
+        }
+      });
+    }
 
     var seg = card.querySelector('.elcnav-seg');
     seg.addEventListener('click', function (e) {
@@ -356,9 +380,9 @@
       window.ELCTour.start(tour);
     });
 
-    document.getElementById('acctOut').addEventListener('click', function () {
+    var outBtn = document.getElementById('acctOut');
+    if (outBtn) outBtn.addEventListener('click', function () {
       writeHint(null);          // so the next page does not paint a stale avatar
-      setFloating(false);
       fetch('/api/auth/signout', { method: 'POST' })
         .catch(function () {})
         .then(function () { location.href = '/'; });
@@ -402,28 +426,16 @@
      own marketing nav), and render() returns early without that slot — so putting this
      there silently skipped the busiest page on the site. */
   function bootAccount() {
+    /* Draw the control on the FIRST frame: the remembered account if there is one, the
+       signed-out card if not. Both are the same circle in the same place, so when the
+       page's own fetch answers, a correction is a glyph change inside the circle rather
+       than a layout jump. The floating corner controls are retired, so this is also the
+       only theme control the page has — it must not wait on a round trip. */
+    setFloating(true);
     var hint = readHint();
-    if (hint) {
-      /* Do this FIRST and unconditionally: whether the floating controls belong on this
-         page does not depend on the DOM, and ELCAccount returns early when #acct is not
-         parsed yet — which is the case on the game pages, where the script sits above the
-         bar. That early return was leaving the class unset until the fetch came back, so
-         the toggle painted and then vanished. */
-      setFloating(true);
-      if (document.getElementById('acct')) window.ELCAccount(hint, { hint: true });
-      else document.addEventListener('DOMContentLoaded', function () {
-        window.ELCAccount(hint, { hint: true });
-      });
-    }
-
-    /* Safety net only. It used to fire at 600ms, which is INSIDE a normal round trip — so
-       a signed-in member on a slow connection was shown "Member Login" and then had it
-       swapped for their avatar. Now it waits longer, and never overrides a hint: an empty
-       slot for a moment beats the wrong answer twice. */
-    setTimeout(function () {
-      var a = document.getElementById('acct');
-      if (a && !a.innerHTML.trim() && !readHint()) window.ELCAccount(null);
-    }, 2500);
+    var draw = function () { window.ELCAccount(hint, { hint: true }); };
+    if (document.getElementById('acct')) draw();
+    else document.addEventListener('DOMContentLoaded', draw);
   }
 
   render();

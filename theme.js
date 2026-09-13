@@ -155,7 +155,10 @@
     show: function () { document.documentElement.classList.remove('elc-nofloat-theme'); }
   };
 
-  function init() { build(); start(getMode()); }
+  /* The floating toggle is retired: the theme lives in the account card, which every
+     visitor has. build() is kept but not called, and ELCToggleClearance() reports 0
+     because the element never exists. */
+  function init() { start(getMode()); }
   if (document.readyState !== "loading") init();
   else document.addEventListener("DOMContentLoaded", init);
 })();

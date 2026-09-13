@@ -385,7 +385,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
     <div class="nav-cta">
       <a href="#watch" class="btn btn-ghost">Watch free</a>
       <a href="#club" class="btn btn-primary">Join the Club</a>
-      <!-- Signed in: the initials avatar + account card. Signed out: Member Login.
+      <!-- Signed in: the initials avatar + account card. Signed out: a person avatar whose card leads with Sign in.
            Rendered by ELCAccount() in elc-nav.js, the same control the member pages use. -->
       <div class="elcnav-acct" id="acct"></div>
       <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false"><span></span></button>
@@ -412,7 +412,6 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px;position:relative;z-
     <a href="#watch" class="btn btn-ghost">Watch free</a>
     <a href="https://www.patreon.com/c/englishleappracticeclub/membership" target="_blank" rel="noopener" class="btn btn-primary">Join the Club</a>
   </div>
-  <div class="m-theme" id="mThemeSlot"><span class="m-theme-lbl">Appearance</span></div>
 </nav>
 
 <span id="top"></span>
@@ -754,7 +753,7 @@ onScroll();window.addEventListener('scroll',onScroll,{passive:true});
 
 /* Who is signed in? /api/me reads the cookie only — no catalogue, no Patreon call —
    because this decides what the header says, not what anyone may open. Signed out (or
-   if the call fails) the visitor gets Member Login, pointed at the Arcade rather than
+   if the call fails) the visitor gets the signed-out card, whose Sign in points at the Arcade rather than
    back here: a member signing in wants to land somewhere they can practise. */
 ELCFetch('/api/me',{credentials:'same-origin'},6000)
   .then(r=>r.json())
@@ -787,25 +786,7 @@ const setMenu=(open)=>{
 };
 menuBtn.addEventListener('click',()=>setMenu(!mobileMenu.classList.contains('open')));
 
-/* Theme toggle lives in the menu on mobile (≤1080px), floats bottom-right on desktop */
-(function(){
-  var mq=matchMedia('(max-width:1080px)');
-  function place(){
-    var t=document.getElementById('elc-theme-toggle'), slot=document.getElementById('mThemeSlot');
-    if(!t||!slot) return false;
-    if(mq.matches){ if(t.parentNode!==slot) slot.appendChild(t); t.classList.add('in-menu'); }
-    else { if(t.parentNode!==document.body) document.body.appendChild(t); t.classList.remove('in-menu'); }
-    return true;
-  }
-  document.documentElement.classList.add('has-menu');   // scopes the mobile hide rule
-  if(!place()){                                   // toggle injected later by theme.js
-    var obs=new MutationObserver(function(){ if(place()) obs.disconnect(); });
-    obs.observe(document.documentElement,{childList:true,subtree:true});
-    document.addEventListener('DOMContentLoaded',place);
-    window.addEventListener('load',place);
-  }
-  mq.addEventListener ? mq.addEventListener('change',place) : mq.addListener(place);
-})();
+/* (the theme lives in the account card now; the mobile menu no longer hosts a toggle) */
 mobileMenu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
 window.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false);});
 

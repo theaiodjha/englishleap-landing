@@ -33,6 +33,17 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **Validate before packaging:** `node --check` every changed JS; extract and
   `node --check` inline `<script>` blocks in changed HTML; then run `python3 tools/audit.py`
   (wired into the pre-push hook). Fix HIGH/MED; LOW at discretion.
+- **The theme choice and the tour live ONLY in the account card — for everyone.** The
+  floating theme toggle and the floating "Take the tour" pill are retired site-wide:
+  `theme.js` no longer builds `#elc-theme-toggle` (the `ELCTheme` API is unchanged and
+  `ELCToggleClearance()` reports 0), `elc-tour.js` defaults `showLauncher:false` (first-visit
+  auto-run still works), and `index.html`'s mobile-menu "Appearance" slot is gone. Signed-out
+  visitors get the same avatar in the same place — a person glyph (`.elcnav-av.anon`) whose
+  card leads with **Sign in** (`/api/auth/login?next=…`) and carries the tour and theme rows;
+  "Member Login" no longer exists. Clue Room, which has no account card, keeps the theme in
+  its HUD menu. The `elc-nofloat-theme`/`elc-nolaunch` classes are still set on every load as
+  a guard against a cached old script. The history below describes how the floating controls
+  used to be handled and is kept for context.
 - **Floating bottom-right buttons measure, they don't re-parent.** `window.ELCToggleClearance()`
   (in `theme.js`, on every page) returns the offset needed to clear the theme toggle; the tour
   launcher and the game "How to play" pill each set their own `bottom` from it. Do **not** test
@@ -113,8 +124,10 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   confirms or corrects it. Suppression is **classes on `<html>`**
   (`elc-nofloat-theme`, `elc-nolaunch`), never touching the elements, so an element created
   later by another script is simply born hidden and script order stops mattering. The
-  safety-net fallback fires at **2500ms and never overrides a hint** — at 600ms it was
-  inside a normal round trip. `bootAccount()` runs OUTSIDE `render()`: `index.html` has
+  signed-out case no longer waits either: with no hint, `bootAccount()` draws the signed-out
+  card on the first frame (it is the same circle as a member's avatar, so a later correction
+  is a glyph change, not a layout jump) — the old 600ms and then 2500ms "Member Login"
+  fallbacks are gone. `bootAccount()` runs OUTSIDE `render()`: `index.html` has
   `#acct` but no `#elcnav`, and `render()` returns early without that slot.
   **A page must not call `ELCAccount(null)` speculatively** — that clears the hint and
   un-hides the floating controls, recreating the very flash the hint prevents. Let the
@@ -170,7 +183,7 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   initials avatar that opens a card with the member's name, plan and sign-out, replacing
   six copies of "Signed in as … [Sign out]" (which ate the header on phones). Pass
   `{name, plan}` where plan is `fluency|transcript|trial|none`; pass `null` for the
-  signed-out Member Login link. The card also carries the theme choice and, where the page
+  signed-out card (person avatar, Sign in, tour, theme — no progress or sign-out rows). The card also carries the theme choice and, where the page
   has a tour (`ELCTour.pageTour()`), a "Take the tour" row — **on every page**: where the
   tour can run in place it is a button, everywhere else a link to
   `/practice-arcade.html?elctour=arcade` (elc-tour.js honours that param), so the menu never

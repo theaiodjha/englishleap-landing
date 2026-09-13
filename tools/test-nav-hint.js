@@ -84,16 +84,24 @@ ok('the slot is given its positioning class, whatever the page forgot',
   back.slotCls.has('elcnav-acct'));
 
 // --- a first-time or signed-out visitor ---------------------------------------
+// The card is now the ONLY home of the theme and the tour, so a signed-out visitor gets it
+// on the first frame too — the same circle as a member's avatar, carrying a person glyph.
 const cold = boot({ hint: null });
-ok('no hint -> nothing is guessed, the slot stays empty', cold.slot.innerHTML === '');
-ok('...and the floating controls are left alone',
-  !cold.htmlClasses.has('elc-nofloat-theme') && !cold.htmlClasses.has('elc-nolaunch'));
-
-// --- the safety net -----------------------------------------------------------
-const net = cold.timers.filter((t) => t.ms >= 2000);
-ok('the fallback waits longer than a round trip', net.length === 1, `at ${net[0] && net[0].ms}ms`);
-ok('...and 600ms, which used to flash "Member Login", is gone',
-  !cold.timers.some((t) => t.ms === 600));
+ok('no hint -> the signed-out control is drawn straight away',
+  /elcnav-av anon/.test(cold.slot.innerHTML));
+ok('...leading with Sign in', /Sign in<\/span>/.test(cold.slot.innerHTML)
+  && /\/api\/auth\/login\?next=/.test(cold.slot.innerHTML));
+ok('...carrying the theme and the tour', /elcnav-card-theme/.test(cold.slot.innerHTML)
+  && /Take the tour/.test(cold.slot.innerHTML));
+ok('...and no member-only rows', !/Sign out/.test(cold.slot.innerHTML)
+  && !/Your progress/.test(cold.slot.innerHTML));
+ok('"Member Login" is gone for good', !/Member Login/.test(cold.slot.innerHTML));
+ok('the floating corner controls are suppressed for everyone',
+  cold.htmlClasses.has('elc-nofloat-theme') && cold.htmlClasses.has('elc-nolaunch'));
+ok('a provisional signed-out draw does not wipe anything from storage',
+  !('elc-acct' in cold.store));
+ok('no timer is needed: the slot is never left empty',
+  !cold.timers.some((t) => t.ms === 600 || t.ms === 2500));
 
 // --- the truth arrives --------------------------------------------------------
 const live = boot({ hint: null });
@@ -106,8 +114,10 @@ ok('...and suppresses the floating controls', live.htmlClasses.has('elc-nolaunch
 const out = boot({ hint: { name: 'Fahad preview', plan: 'fluency' } });
 out.ELCAccount(null);
 ok('a signed-out answer clears the stale hint', !('elc-acct' in out.store));
-ok('...and gives the floating controls back',
-  !out.htmlClasses.has('elc-nofloat-theme') && !out.htmlClasses.has('elc-nolaunch'));
+ok('...swaps the initials for the signed-out card in the same slot',
+  /elcnav-av anon/.test(out.slot.innerHTML) && !/FP/.test(out.slot.innerHTML));
+ok('...and the floating controls stay retired',
+  out.htmlClasses.has('elc-nofloat-theme') && out.htmlClasses.has('elc-nolaunch'));
 
 // --- drawing from cache must not overwrite the cache with itself --------------
 const h = boot({ hint: { name: 'Fahad preview', plan: 'fluency' } });

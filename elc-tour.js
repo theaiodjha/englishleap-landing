@@ -14,7 +14,8 @@
 
   var CFG = {
     orivaSrc: function (pose) { return '/assets/oriva/' + pose + '.png'; },
-    showLauncher: true,           // floating "Take the tour" button
+    showLauncher: false,          // retired: "Take the tour" lives in the account card;
+                                  // first-visit auto-run is unaffected
     launcherLabel: 'Take the tour',
     storageKey: 'elc_tour_seen_', // + tour id
   };
