@@ -65,13 +65,25 @@
 
   .bank{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px auto 0;max-width:none;min-height:50px}
 
+  /* The BANK is raw material: quiet. A word takes the round's colour only once it is in
+     the TRAY, so the sentence lights up as it is built and the loudest thing on screen is
+     the member's own work rather than the pieces. */
   .chip{appearance:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:clamp(15px,3.6vw,18px);
-    padding:11px 16px;border-radius:14px;color:#fff;background:rgba(31,196,182,.26);border:1.5px solid rgba(255,255,255,.28);border:1.5px solid color-mix(in srgb,var(--accent,#1fc4b6) 55%, transparent);
-    background:linear-gradient(160deg,color-mix(in srgb,var(--accent,#1fc4b6) 34%, transparent),color-mix(in srgb,var(--accent,#1fc4b6) 12%, transparent));
-    box-shadow:0 10px 22px -14px color-mix(in srgb,var(--accent,#1fc4b6) 75%, transparent),inset 0 1px 0 rgba(255,255,255,.22);transition:transform .12s,background .15s,border-color .15s,opacity .12s}
-  .chip:hover{transform:translateY(-2px);background:linear-gradient(160deg,color-mix(in srgb,var(--accent,#1fc4b6) 48%, transparent),color-mix(in srgb,var(--accent,#1fc4b6) 20%, transparent))}
+    padding:11px 16px;border-radius:14px;color:var(--ink);
+    background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.16);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+    transition:transform .12s,background .15s,border-color .15s,color .15s,opacity .12s}
+  .chip:hover{transform:translateY(-2px);background:rgba(255,255,255,.13);
+    border-color:color-mix(in srgb,var(--accent,#1fc4b6) 50%, transparent)}
   .chip:active{transform:translateY(0)}
-  .tray .chip{border-color:color-mix(in srgb,var(--accent,#1fc4b6) 70%, transparent)}
+  .tray .chip{color:#fff;
+    border-color:color-mix(in srgb,var(--accent,#1fc4b6) 62%, transparent);
+    background:linear-gradient(160deg,color-mix(in srgb,var(--accent,#1fc4b6) 38%, transparent),color-mix(in srgb,var(--accent,#1fc4b6) 14%, transparent));
+    box-shadow:0 10px 22px -14px color-mix(in srgb,var(--accent,#1fc4b6) 75%, transparent),inset 0 1px 0 rgba(255,255,255,.22)}
+  .tray .chip:hover{background:linear-gradient(160deg,color-mix(in srgb,var(--accent,#1fc4b6) 50%, transparent),color-mix(in srgb,var(--accent,#1fc4b6) 22%, transparent))}
+  /* one faint slot per word still to place, so the puzzle has a shape before it is filled */
+  .slotghost{display:inline-block;height:44px;border-radius:14px;
+    border:1.5px dashed color-mix(in srgb,var(--accent,#1fc4b6) 26%, rgba(255,255,255,.14))}
   .chip.right{color:#06201b;border-color:transparent}
   .chip.wrong{animation:shake .4s;border-color:#ff6b6b}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
@@ -79,7 +91,9 @@
   .actions{display:flex;gap:var(--sp-3);justify-content:center;margin-top:22px}
   .check{appearance:none;border:0;cursor:pointer;font-family:var(--display);font-weight:700;font-size:var(--fs-lg);color:#06201b;
     padding:13px 28px;border-radius:999px;background:linear-gradient(135deg,var(--teal),var(--mint));box-shadow:0 16px 34px -14px rgba(31,196,182,.7)}
-  .check:disabled{opacity:.45;cursor:default;box-shadow:none}
+  /* not-yet-ready, rather than dead: an outline that says it is waiting for you */
+  .check:disabled{cursor:default;box-shadow:none;background:transparent;color:var(--soft);
+    border:1.5px solid var(--line);opacity:1}
   .check:not(:disabled):active{transform:translateY(1px)}
   .clear{appearance:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:var(--fs-md);color:var(--ink);
     padding:13px 20px;border-radius:999px;background:var(--glass);border:1px solid var(--line)}
@@ -225,6 +239,18 @@ let uid=0;
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function tokenize(t){return (t||'').trim().split(/\s+/);}
 
+/* What a tile SHOWS. Rendering the token verbatim handed over two of the positions for
+   free: the only capitalised word is obviously first, the one with the full stop obviously
+   last. The token itself is untouched — comparison still uses it, and a correct sentence
+   is re-rendered in its proper form.
+   `I` and mid-sentence capitals (proper nouns) keep their case: only a leading Capital-then-
+   lowercase word is folded down. */
+function label(tok, isFirst){
+  let t=String(tok).replace(/[.!?,;:…]+$/,'');
+  if(isFirst && t!=='I' && !/^I['’]/.test(t) && /^[A-Z][a-z'’]/.test(t)) t=t[0].toLowerCase()+t.slice(1);
+  return t;
+}
+
 function renderRound(){
   const s=sentences[idx]; perfect=true; roundColor=s.color||'#1fc4b6';
   orig=tokenize(s.text);
@@ -251,10 +277,17 @@ function renderRound(){
 function paint(){
   const tEl=$('#tray'), bEl=$('#bank');
   tEl.classList.toggle('has',tray.length>0);
-  tEl.innerHTML = tray.length
-    ? tray.map(t=>`<button class="chip" data-id="${t.id}" data-where="tray">${esc(t.tok)}</button>`).join('')
-    : '<span class="ph">Tap the words below in order&hellip;</span>';
-  bEl.innerHTML = bank.map(t=>`<button class="chip" data-id="${t.id}" data-where="bank">${esc(t.tok)}</button>`).join('');
+  // a chip shows its LABEL; `tok` stays canonical for the comparison in check()
+  const slots=Math.max(0,orig.length-tray.length);
+  const ghosts=Array.from({length:slots},(_,i)=>
+    `<span class="slotghost" style="width:${Math.max(52,Math.min(120,(orig[tray.length+i]||'').length*13+26))}px"></span>`).join('');
+  // The slots carry the instruction once a member has seen it: the prompt only shows on
+  // the first sentence, and never alongside the slots it would be competing with.
+  const chips = tray.map(t=>`<button class="chip" data-id="${t.id}" data-where="tray">${esc(label(t.tok,orig[0]===t.tok))}</button>`).join('');
+  tEl.innerHTML = (!tray.length && idx===0)
+    ? '<span class="ph">Tap the words below in order&hellip;</span>'
+    : chips + ghosts;
+  bEl.innerHTML = bank.map(t=>`<button class="chip" data-id="${t.id}" data-where="bank">${esc(label(t.tok,orig[0]===t.tok))}</button>`).join('');
   tEl.querySelectorAll('.chip').forEach(c=>c.onclick=()=>fromTray(+c.dataset.id));
   bEl.querySelectorAll('.chip').forEach(c=>c.onclick=()=>fromBank(+c.dataset.id));
   const cb=$('#checkBtn'); if(cb) cb.disabled = tray.length!==orig.length;
@@ -281,6 +314,8 @@ function check(){
   });
   if(allRight){
     const s=sentences[idx];
+    // the sentence resolves: capital and full stop restored now that they give nothing away
+    $('#tray').querySelectorAll('.chip').forEach((el,i)=>{ el.textContent=orig[i]; });
     $('#checkBtn').disabled=true; $('#clearBtn').disabled=true;
     $('#tray').querySelectorAll('.chip').forEach(c=>c.onclick=null);
     if(perfect) { score++; $('#pScore').textContent=score; }

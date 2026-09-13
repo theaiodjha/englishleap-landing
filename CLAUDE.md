@@ -68,6 +68,20 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   clue-room is the exception: it is a non-scrolling 3D scene with `overflow:hidden`.
 - **Light theme is daylight, not an inverted night.** The aurora is `display:none` on
   `html[data-theme="light"]` — by day the page is paper. Do not reintroduce blobs there.
+- **A puzzle must not hand over its own answer.** Sentence Builder rendered tokens
+  verbatim, so the only capitalised word was obviously first and the only one with a full
+  stop obviously last — two of seven positions free before reading anything. Tiles now show
+  a `label()`: trailing sentence punctuation dropped, a leading Capital-then-lowercase word
+  folded down. `I`, `I've`, acronyms and mid-sentence capitals are untouched, because that
+  case carries meaning. **The token behind the label is unchanged** — `check()` still
+  compares against the real sentence, and a correct answer is re-rendered in its proper form
+  so the capital and full stop come back at the moment they cost nothing.
+- **In a build-it game the accent belongs to the WORK, not the material.** Every bank chip
+  used to be accent-filled while the tray sat empty and grey, so the loudest thing on screen
+  was the pieces. The bank is now neutral and a word takes the colour when it lands in the
+  tray: the sentence lights up as it is built, which is hierarchy and feedback at once.
+  `theme.css` needs the light half of this — the blanket 56% white wash on `.chip` would
+  otherwise flatten both halves to the same tint.
 - **The five games share a layout.** One 1100px column; "How to play" is a `.howbtn`
   styled exactly like the counter `.pill` and sits on the tracker row (never its own row);
   the phrase bank spans the full column so six long phrases stay on one line; primary
@@ -319,6 +333,7 @@ tools/test-progress-drawer.js  node … — drives the KPI drawer open/close sta
 tools/test-notice.js       node tools/test-notice.js — notice dismissal + quota thresholds
 tools/test-back-link.js    node tools/test-back-link.js — every arrival route for the back link
 tools/test-episode-pager.js node … — episode neighbours and the ends of the run
+tools/test-sentence-builder.js node … — the tile label: no giveaway, meaningful case kept
 tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
