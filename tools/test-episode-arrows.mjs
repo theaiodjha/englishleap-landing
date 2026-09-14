@@ -9,6 +9,12 @@
  * from the window edge — which is INSIDE the board. Two things fix it, and both are checked
  * here: the arrow drops its label when the gutter is tight, and the page reserves a wider
  * side padding in the band where the column would otherwise fill the window.
+ *
+ * Below 720px there is no gutter at ANY board size, so the pager stops being an overlay and
+ * becomes a footer pager in the flow. The check there is different in kind: placeArrows must
+ * leave no inline geometry and no .compact class behind — a rotation from landscape would
+ * otherwise strand the phone pager wearing the desktop layout's position, and .compact would
+ * hide the episode label, the only reason the footer pager beats the arrow it replaced.
  */
 import fs from 'fs';
 import path from 'path';
@@ -42,6 +48,11 @@ function run({ viewport, boardLeft, boardWidth }) {
     { querySelector: () => ({ getBoundingClientRect: () => ({ top: 200, height: 400, left: boardLeft, right: boardRight }) }) },
     viewport, 900, '#board',
   )();
+  if (viewport <= 720) {
+    const stuck = [['top/left/right on the previous arrow', p], ['… on the next arrow', n]]
+      .filter(([, b]) => b.style.top || b.style.left || b.style.right || b.compact());
+    return { phone: true, stuck: stuck.map(([side]) => side) };
+  }
   const pLeft = parseInt(p.style.left, 10);
   const pRight = pLeft + p.offsetWidth;
   const nRight = parseInt(n.style.right, 10);
@@ -59,14 +70,20 @@ const boardFor = (viewport) => {
   const width = Math.min(1100 - 2 * pad, viewport - 2 * pad);
   return { viewport, boardLeft: Math.round((viewport - width) / 2), boardWidth: width };
 };
-const CASES = [1440, 1366, 1280, 1240, 1180, 1100, 1024, 900, 800, 721, 390]
+const CASES = [1440, 1366, 1280, 1240, 1180, 1100, 1024, 900, 800, 721, 720, 430, 390, 360]
   .map((v) => [`viewport ${v}`, boardFor(v)]);
 
 let bad = 0;
 for (const [label, geo] of CASES) {
   const r = run(geo);
-  const phone = geo.viewport <= 720;
-  const clash = !phone && (r.left.overlaps || r.right.overlaps);
+  if (r.phone) {
+    const clash = r.stuck.length > 0;
+    if (clash) bad++;
+    console.log(`${clash ? 'FAIL ' : 'ok   '}${label.padEnd(32)} footer pager in the flow — `
+      + (clash ? 'STALE overlay geometry: ' + r.stuck.join('; ') : 'no inline geometry, label kept'));
+    continue;
+  }
+  const clash = r.left.overlaps || r.right.overlaps;
   if (clash) bad++;
   const mode = (s) => (s.compact ? 'icon' : 'pill');
   console.log(
@@ -75,5 +92,7 @@ for (const [label, geo] of CASES) {
     `right ${mode(r.right)} starts ${r.right.from}, board ends ${geo.boardLeft + geo.boardWidth}`,
   );
 }
-console.log(bad ? `\n${bad} geometry FAILED` : '\nno arrow sits on the board at any tested width');
+console.log(bad
+  ? `\n${bad} geometry FAILED`
+  : '\nno arrow sits on the board at any tested width, and the phone pager stays in the flow');
 process.exit(bad ? 1 : 0);

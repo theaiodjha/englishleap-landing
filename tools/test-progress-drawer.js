@@ -47,19 +47,26 @@ function boot() {
   tiles.weeks.setAttribute('aria-expanded', 'false');
   const tileList = [tiles.recent, tiles.weeks];
 
-  const keydown = [];
+  const keydown = [], resize = [];
   // the page defines its own `$` over document.querySelector, so the stub has to answer
   // the drawer ids too — not just the tiles
   global.document = {
     querySelector: (sel) => {
       if (sel === '#kdraw') return draw;
       if (sel === '#kdrawIn') return inner;
+      // the resize handler asks for whichever tile is currently expanded, to re-aim the
+      // connector after the KPI grid reflows
+      if (sel.includes('aria-expanded="true"')) {
+        return tileList.find((t) => t.getAttribute('aria-expanded') === 'true') || null;
+      }
       return sel.includes('recent') ? tiles.recent : null;
     },
     querySelectorAll: (sel) => (sel.startsWith('.kpi button.k') ? tileList : []),
     getElementById: () => null,
     addEventListener: (ev, fn) => { if (ev === 'keydown') keydown.push(fn); },
   };
+  // the page listens on the window for resize, exactly as wireFolds and placeArrows do
+  global.addEventListener = (ev, fn) => { if (ev === 'resize') resize.push(fn); };
   global.REDUCED = true;
   global.esc = (x) => String(x == null ? '' : x);
   global.plural = (n, a, b) => `${n} ${n === 1 ? a : b}`;
@@ -69,7 +76,7 @@ function boot() {
   global.drawerHTML = () => '<div class="kdraw-head"><button class="kdraw-x"></button></div>';
 
   new Function(block.split('(async()=>{')[0] + '\nreturn { wireKpi };')().wireKpi({ recent: [], weeks: [], bars: [] });
-  return { draw, inner, tiles, closeBtn, keydown };
+  return { draw, inner, tiles, closeBtn, keydown, resize };
 }
 
 const isOpen = (b) => b.draw.style.maxHeight !== '0px';
@@ -117,6 +124,23 @@ ok('a chart column opens the recordings panel', isOpen(b));
 b.tiles.recent.fire('click');
 ok('...and the Recordings tile can then close it', !isOpen(b),
   'this failed before: open held "recent:2026-08", the tile reported "recent"');
+
+// --- rotation ------------------------------------------------------------------
+// Both of the panel's numbers are measured once, when it opens. A rotation rewraps the
+// content inside the old max-height (clipping it) and reflows the KPI grid from four
+// columns to two, which moves the tile the connector points at.
+b = boot();
+b.tiles.recent.fire('click');
+b.inner.style.setProperty('--cx', '999px');       // a stale value from before the rotation
+b.resize.forEach((f) => f());
+ok('a rotation releases the drawer height', b.draw.style.maxHeight === 'none',
+  'a measured max-height clips the rewrapped panel');
+ok('...and re-aims the connector at the open tile', b.inner.style.getPropertyValue('--cx') === '50px',
+  'the KPI grid reflows 4 -> 2 columns at 760px');
+
+b = boot();
+b.resize.forEach((f) => f());
+ok('a rotation with nothing open leaves the drawer shut', !isOpen(b));
 
 // --- closing twice must not reopen or throw -----------------------------------
 b = boot();

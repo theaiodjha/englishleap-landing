@@ -151,6 +151,10 @@ html.elc-nolaunch .elct-launch{display:none !important}
 .elcnav-card-row.r-help{--rc:var(--coral)}
 .elcnav-av.lg{width:44px;height:44px;flex:0 0 44px;font-size:var(--fs-md);cursor:default;transform:none}
 .elcnav-card{position:absolute;top:calc(100% + 10px);right:0;z-index:60;width:246px;
+  /* The card hangs off a FIXED/STICKY header, so page scroll cannot bring its bottom into
+     view. At ~290px it overran a landscape phone and Sign out became unreachable. */
+  max-height:calc(100vh - 96px);max-height:calc(100dvh - 96px);
+  overflow-y:auto;overscroll-behavior:contain;
   padding:var(--sp-2);border-radius:var(--r-lg);border:1px solid var(--line);
   background:rgba(14,13,28,.94);backdrop-filter:blur(18px) saturate(140%);
   -webkit-backdrop-filter:blur(18px) saturate(140%);

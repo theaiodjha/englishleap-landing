@@ -591,6 +591,20 @@ function wireKpi(d){
       show(which,btn);
     });
   });
+
+  /* Both numbers in the panel are measured once, at the moment it opens: max-height from
+     scrollHeight, and --cx from the tile's rect. Rotating a phone or tablet invalidates
+     both — the content rewraps taller inside the old cap, and the KPI grid reflows from
+     four columns to two at 760px, so the connector ends up under a different tile. */
+  addEventListener('resize',()=>{
+    if(!open) return;
+    draw.style.maxHeight='none';
+    const btn=document.querySelector('.kpi button.k[aria-expanded="true"]');
+    if(btn){
+      const br=btn.getBoundingClientRect(), dr=inner.getBoundingClientRect();
+      inner.style.setProperty('--cx', Math.round(br.left + br.width/2 - dr.left)+'px');
+    }
+  },{passive:true});
 }
 
 function wireFolds(){

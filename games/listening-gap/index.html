@@ -125,12 +125,19 @@
     .wrap{padding-left:64px;padding-right:64px}
   }
   /* dropped to the icon when the gutter beside the board is too tight for the pill
-     (set by placeArrows), and always on a phone */
+     (set by placeArrows) */
   .eppager a.compact{padding:9px;gap:0}
   .eppager a.compact b{display:none}
+  /* PHONE: there is no gutter to sit in — the board reaches both screen edges — so the
+     pager leaves the overlay entirely and becomes a footer pager below the board: two
+     full-width 48px targets that NAME the episode they lead to. The fixed arrow could not,
+     having shed its label to fit, and it covered a card besides. */
   @media(max-width:720px){
-    .eppager a{padding:9px;gap:0}
-    .eppager b{display:none}
+    .eppager{display:flex;gap:10px;max-width:520px;margin:26px auto 0}
+    .eppager a{position:static;transform:none;flex:1 1 0;min-width:0;
+      justify-content:center;min-height:48px;padding:10px 14px}
+    .eppager a:hover,.eppager .p:hover,.eppager .n:hover{transform:none}
+    .eppager b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   }
 </style>
 <script src="/progress.js"></script>
@@ -152,8 +159,6 @@
     <p class="sub" id="sub">Press play, listen, then tap the phrase that fits the gap.</p>
   </div>
 
-  <nav class="eppager" id="epPager" aria-label="Episodes" hidden></nav>
-
   <div class="prog">
     <div class="pill">Round <b id="pRound">1/6</b></div>
     <div class="dots" id="dots"></div>
@@ -162,6 +167,8 @@
   </div>
 
   <div id="game"></div>
+
+  <nav class="eppager" id="epPager" aria-label="Episodes" hidden></nav>
 
   <div class="footer">A practice community - not a replacement for formal English education.</div>
 </div>
@@ -301,14 +308,28 @@ function epPager(d){
    is played. Below 720px the board is as wide as the screen, so they return to the edges. */
 function placeArrows(){
   const el=$('#epPager'); if(!el||el.hidden) return;
-  const board=document.querySelector(BOARD_SEL);
   const p=el.querySelector('.p'), n=el.querySelector('.n');
-  if(!board||!p&&!n) return;
+  if(!p&&!n) return;
+
+  /* Phone: the pager is in the flow under the board (see the CSS), so it must carry no
+     inline geometry left over from a wider layout, and never the icon-only .compact form —
+     naming the episode is the whole point down here. Rotating a tablet crosses this line
+     in both directions, and this runs on resize. */
+  if(innerWidth<=720){
+    [p,n].forEach(function(b){
+      if(!b) return;
+      b.classList.remove('compact');
+      b.style.top=''; b.style.left=''; b.style.right='';
+    });
+    return;
+  }
+
+  const board=document.querySelector(BOARD_SEL);
+  if(!board) return;
   const r=board.getBoundingClientRect();
   if(!r.height) return;                         // not rendered yet
   const mid=Math.round(r.top+r.height/2);
   const top=Math.min(Math.max(mid,70),innerHeight-70)+'px';   // never off the top or bottom
-  const narrow=innerWidth<=720;
   const gap=12, edge=10;
 
   /* Fit the arrow to the gutter beside the board rather than clamping into it. A board as
@@ -316,7 +337,6 @@ function placeArrows(){
      the label is dropped before anything is allowed to overlap. */
   const fit=(btn,gutter)=>{
     btn.classList.remove('compact');
-    if(narrow){ btn.classList.add('compact'); return btn.offsetWidth; }
     if(gutter < btn.offsetWidth+gap+edge) btn.classList.add('compact');
     return btn.offsetWidth;
   };
@@ -324,12 +344,12 @@ function placeArrows(){
   if(p){
     p.style.top=top;
     const w=fit(p, r.left);
-    p.style.left=(narrow?edge:Math.max(edge,Math.round(r.left)-gap-w))+'px';
+    p.style.left=Math.max(edge,Math.round(r.left)-gap-w)+'px';
   }
   if(n){
     n.style.top=top; n.style.left='';
     const w=fit(n, innerWidth-r.right);
-    n.style.right=(narrow?edge:Math.max(edge,Math.round(innerWidth-r.right)-gap-w))+'px';
+    n.style.right=Math.max(edge,Math.round(innerWidth-r.right)-gap-w)+'px';
   }
 }
 addEventListener('resize',placeArrows,{passive:true});

@@ -196,7 +196,10 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   It carries its own ink on its own fill, so only the shadow changes by theme (black reads
   as dirt on paper). Each tier ink is checked against the **dark end** of its gradient, the
   worst case — that is why the violet is `#9a7ff5` and not `--purple`, which failed 4.5:1. **Never write `.elcnav-acct a`** — the card lives inside
-  that element, so a descendant selector boxes every row in the old header pill. **`index.html` uses it too** —
+  that element, so a descendant selector boxes every row in the old header pill. The card
+  hangs off a FIXED/STICKY header, so page scroll cannot bring its bottom into view: at
+  ~290px it overran a landscape phone and Sign out became unreachable. It is capped at
+  `calc(100dvh - 96px)` and scrolls itself — **check that cap before adding a row**. **`index.html` uses it too** —
   it loads `elc-nav.js` for the control alone (no `#elcnav` slot, so no header is rendered)
   and asks **`/api/me`**, which reads the cookie and nothing else; /api/games would ship the
   whole catalogue to answer a question about one cookie. It is a label, never a gate: every
@@ -222,14 +225,25 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   (`#grid`, `#game`, `#storyCard` — the five differ and there is no honest way to guess),
   and `placeArrows()` puts each arrow level with that box's middle and just outside its
   edge. It re-runs on resize AND scroll, because two of the boards are rendered after the
-  fetch and change height as a round is played. Below 720px they return to the viewport
-  edges and shed their label. **An arrow never overlaps the board**: `placeArrows()` measures
+  fetch and change height as a round is played. **Below 720px there is no gutter at any board
+  size** — the board reaches both screen edges — so the pager stops being an overlay and
+  becomes a **footer pager under the board**: two full-width 48px targets that NAME the
+  episode they lead to. The fixed arrow could not: it had shed its label to fit, and it sat
+  30-36px INSIDE the board at z-index 30, over a card in Phrase Pairs and the tray in
+  Sentence Builder, taking the tap with it. Side arrows over content are a desktop
+  affordance; a footer pager is what sequential content uses on a phone. `placeArrows()`
+  returns early below 720px after clearing every inline `top/left/right` and the `.compact`
+  class — rotation crosses that line in both directions, and a stale `.compact` would hide
+  the label that is the whole point. The `<nav>` therefore sits at the END of `.wrap`, above
+  the footer line: irrelevant while it is fixed, correct once it is in the flow.
+  Above 720px, **an arrow never overlaps the board**: `placeArrows()` measures
   the gutter on each side and drops the pill to its icon (`.compact`) when the label will not
   fit, rather than clamping into the board — the old `Math.max(10, …)` pinned it to the
   window edge, which is INSIDE a board that reaches the full column. Even the icon needs
   ~60px, so the four games also widen `.wrap` padding to 64px between 721px and 1240px, where
   the 1100px column would otherwise fill the window and leave no gutter at all. `node
-  tools/test-episode-arrows.mjs` runs the real function over that whole range. `tools/test-episode-pager.js` asserts each `BOARD_SEL`
+  tools/test-episode-arrows.mjs` runs the real function over that whole range, and asserts
+  the phone pager keeps no overlay geometry. `tools/test-episode-pager.js` asserts each `BOARD_SEL`
   actually matches an id in its page — rename one and the arrows silently stop positioning
   without erroring. Clue Room puts its neighbours in the HUD
   menu, having no room for arrows. **Clue Room is the
@@ -371,7 +385,7 @@ tools/test-sentence-builder.js node … — the tile label: no giveaway, meaning
 tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
 tools/test-support.mjs     node tools/test-support.mjs — mailbox never leaks, escaping, abuse limits
 tools/test-episode-data.mjs node … [epId] — the catalogue against what the 5 games assume
-tools/test-episode-arrows.mjs node … — the episode arrows never sit on the board
+tools/test-episode-arrows.mjs node … — arrows never sit on the board; the phone pager stays in flow
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
 games/*                    5 game types (clue-room, phrase-pairs, listening-gap,
@@ -587,6 +601,10 @@ never the month filter with it: storing `'recent:2026-08'` there left the Record
 comparing unequal and re-opening instead of closing. A tile whose target
 does not exist for that member renders as a plain `<div>`, not a button: an affordance that opens an
 empty card is worse than none. `node tools/test-progress-kpi.js` guards exactly that.
+**Both of the drawer's numbers are measured once, when it opens** — `max-height` from
+`scrollHeight`, `--cx` from the tile's rect — so a rotation invalidates both: the panel
+rewraps taller inside the old cap, and the KPI grid reflows 4 -> 2 columns at 760px, moving
+the tile the connector points at. `wireKpi` re-measures on resize, as the fold cards already did.
 A chart column with sessions is a **way in**: clicking it opens the Recordings drawer
 filtered to that month (`recent` ships 24 sessions so the filter has something to find; an
 older month whose detail has been trimmed says so rather than showing an empty list).
