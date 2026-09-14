@@ -266,6 +266,19 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **The Member Archive is hidden from the whole site** until it actually works: no nav
   tab, and every link commented with "Member Archive hidden until it is a working
   feature" (`index.html` x2, `games/clue-room`). `archive.html` still exists at its URL.
+- **A new episode is five hand-written blocks that must agree, and the failures are
+  silent.** `node tools/test-episode-data.mjs` checks all of it (or one id): same word SET
+  in every game (ORDER is free — story-unlock's bank order is display only), a word keeping
+  its colour wherever it appears, distinct palette colours, unique clue ids (the 3D scene
+  keys its solved set on `id`), a geometry `geom()` actually knows (`ico box sphere torus
+  octa dodeca cone cyl` — anything else silently becomes an icosahedron), puzzle answers as
+  a permutation of the words with one more segment than answers, covers that exist, a long
+  title, and the current episode having a real Use It Live prompt.
+  **The phrase must appear as a WHOLE WORD in its Listening Gap and Sentence Builder
+  sentences.** That game cuts its blank with `indexOf(phrase)`, so an inflected form strands
+  the ending: EP282's "We lingered over coffee" with phrase `linger` rendered as
+  "We ___ed over coffee" — a typo-looking artifact AND a giveaway, since only one of six
+  options takes *-ed*. Write the sentence around the base form.
 - **A game type has ONE icon and accent, in `lib/arcade-data.js`.** `api/games` returns them
   with a game's content, and every surface reads from there: the Arcade shelf, the browse
   tiles, `arcade-type.html`, the progress "Games finished" rows, and the game's own page
@@ -351,6 +364,7 @@ tools/test-episode-pager.js node … — episode neighbours and the ends of the 
 tools/test-sentence-builder.js node … — the tile label: no giveaway, meaningful case kept
 tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
 tools/test-support.mjs     node tools/test-support.mjs — mailbox never leaks, escaping, abuse limits
+tools/test-episode-data.mjs node … [epId] — the catalogue against what the 5 games assume
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
 games/*                    5 game types (clue-room, phrase-pairs, listening-gap,

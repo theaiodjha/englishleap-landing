@@ -31,6 +31,7 @@ const FLUENCY_MIN_CENTS = 200; // Transcript = 100¢, Fluency Club = 299¢ (mirr
 // stalls on an abstraction — and each is built so the episode's six words are the
 // natural vocabulary for answering it. Drafts: rewrite in Anna & Jake's voice.
 const PROMPTS = {
+  ep282: 'Tell us about the first drink of your day — coffee, tea, or something else. What do you do while you drink it, and how does a morning feel when you have to skip it?',
   ep280: 'Think about the last time you had to speak English with no time to prepare. What happened when the word you wanted would not come — and what do you do now when that happens?',
   ep279: 'Tell us about a plan you made with someone recently — where to eat, what to buy, how to get somewhere. How did the two of you decide, and did either of you change your mind?',
   ep278: 'Talk about a time you listened to English that felt far too fast — a film, a podcast, or a stranger speaking to you. How much did you actually catch, and what helps you now?',
