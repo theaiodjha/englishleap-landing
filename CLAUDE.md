@@ -223,7 +223,13 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   and `placeArrows()` puts each arrow level with that box's middle and just outside its
   edge. It re-runs on resize AND scroll, because two of the boards are rendered after the
   fetch and change height as a round is played. Below 720px they return to the viewport
-  edges and shed their label. `tools/test-episode-pager.js` asserts each `BOARD_SEL`
+  edges and shed their label. **An arrow never overlaps the board**: `placeArrows()` measures
+  the gutter on each side and drops the pill to its icon (`.compact`) when the label will not
+  fit, rather than clamping into the board — the old `Math.max(10, …)` pinned it to the
+  window edge, which is INSIDE a board that reaches the full column. Even the icon needs
+  ~60px, so the four games also widen `.wrap` padding to 64px between 721px and 1240px, where
+  the 1100px column would otherwise fill the window and leave no gutter at all. `node
+  tools/test-episode-arrows.mjs` runs the real function over that whole range. `tools/test-episode-pager.js` asserts each `BOARD_SEL`
   actually matches an id in its page — rename one and the arrows silently stop positioning
   without erroring. Clue Room puts its neighbours in the HUD
   menu, having no room for arrows. **Clue Room is the
@@ -365,6 +371,7 @@ tools/test-sentence-builder.js node … — the tile label: no giveaway, meaning
 tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
 tools/test-support.mjs     node tools/test-support.mjs — mailbox never leaks, escaping, abuse limits
 tools/test-episode-data.mjs node … [epId] — the catalogue against what the 5 games assume
+tools/test-episode-arrows.mjs node … — the episode arrows never sit on the board
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
 games/*                    5 game types (clue-room, phrase-pairs, listening-gap,

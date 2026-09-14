@@ -163,7 +163,16 @@
   .eppager .p:hover{transform:translateY(-50%) translateX(-2px)}
   .eppager .n:hover{transform:translateY(-50%) translateX(2px)}
   .eppager svg{width:14px;height:14px;flex:0 0 14px}
-  /* on a phone they go back to the viewport edge and shed the label */
+  /* Make room BESIDE the board for the episode arrows. Between these widths the 1100px
+     column nearly fills the window, leaving no gutter — the arrows then had nowhere to sit
+     but on top of the board. Widening the page padding shrinks the board instead. */
+  @media(min-width:721px) and (max-width:1240px){
+    .wrap{padding-left:64px;padding-right:64px}
+  }
+  /* dropped to the icon when the gutter beside the board is too tight for the pill
+     (set by placeArrows), and always on a phone */
+  .eppager a.compact{padding:9px;gap:0}
+  .eppager a.compact b{display:none}
   @media(max-width:720px){
     .eppager a{padding:9px;gap:0}
     .eppager b{display:none}
@@ -386,10 +395,28 @@ function placeArrows(){
   const mid=Math.round(r.top+r.height/2);
   const top=Math.min(Math.max(mid,70),innerHeight-70)+'px';   // never off the top or bottom
   const narrow=innerWidth<=720;
-  const gap=12;
-  if(p){ p.style.top=top; p.style.left=narrow?'10px':Math.max(10,Math.round(r.left)-gap-p.offsetWidth)+'px'; }
-  if(n){ n.style.top=top; n.style.left=narrow?'':'';
-         n.style.right=narrow?'10px':Math.max(10,Math.round(innerWidth-r.right)-gap-n.offsetWidth)+'px'; }
+  const gap=12, edge=10;
+
+  /* Fit the arrow to the gutter beside the board rather than clamping into it. A board as
+     wide as the column (Story Unlock's card) leaves too little room for the full pill, so
+     the label is dropped before anything is allowed to overlap. */
+  const fit=(btn,gutter)=>{
+    btn.classList.remove('compact');
+    if(narrow){ btn.classList.add('compact'); return btn.offsetWidth; }
+    if(gutter < btn.offsetWidth+gap+edge) btn.classList.add('compact');
+    return btn.offsetWidth;
+  };
+
+  if(p){
+    p.style.top=top;
+    const w=fit(p, r.left);
+    p.style.left=(narrow?edge:Math.max(edge,Math.round(r.left)-gap-w))+'px';
+  }
+  if(n){
+    n.style.top=top; n.style.left='';
+    const w=fit(n, innerWidth-r.right);
+    n.style.right=(narrow?edge:Math.max(edge,Math.round(innerWidth-r.right)-gap-w))+'px';
+  }
 }
 addEventListener('resize',placeArrows,{passive:true});
 /* The board is re-rendered each round and changes size, so resize/scroll alone would
