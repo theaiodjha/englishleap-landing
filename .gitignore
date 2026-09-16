@@ -1,0 +1,19 @@
+# Secrets. This repo is public and `git add -A` is the normal way to commit here, so an
+# env file created for a one-off command (seeding KV, testing the help form) would
+# otherwise be swept in with everything else. KV_REST_API_TOKEN, RESEND_API_KEY,
+# PATREON_CLIENT_SECRET, GEMINI_API_KEY and SESSION_SECRET all live in the Vercel
+# dashboard — nothing but a local convenience copy should ever match these lines.
+.env
+.env.*
+!.env.example
+
+# Vercel CLI link state (project and org ids, and a local env cache).
+.vercel
+
+# Never needed: the site is buildless and ships no dependencies.
+node_modules/
+
+# OS and editor droppings.
+.DS_Store
+Thumbs.db
+*.swp
