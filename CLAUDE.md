@@ -386,6 +386,8 @@ tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-fra
 tools/test-support.mjs     node tools/test-support.mjs — mailbox never leaks, escaping, abuse limits
 tools/test-episode-data.mjs node … [epId] — the catalogue against what the 5 games assume
 tools/test-episode-arrows.mjs node … — arrows never sit on the board; the phone pager stays in flow
+tools/shadow-align.html    LOCAL page (file://): mp3 + script -> shadowing timings JSON
+tools/test-shadow-parse.mjs node … — the shadowing script's structure, parsed out of the aligner
 api/stats.js               public club totals for the home page strip (edge-cached)
 lib/popular.js             ranks the site-wide play counts (popular episodes / games / pairs)
 games/*                    5 game types (clue-room, phrase-pairs, listening-gap,

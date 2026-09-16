@@ -81,6 +81,10 @@
   td.txt{font-size:13px}
   td.txt b{color:var(--ink)} td.txt.is-word b{color:var(--pink)}
   .kindsel{font-size:12px;padding:3px 6px;border-radius:6px}
+  .g{color:var(--purple);font-size:11px}
+  .rep{color:var(--soft2);font-size:11px;font-variant-numeric:tabular-nums}
+  /* a block's first row gets a rule above it, so six word blocks read as six things */
+  tr.newgroup td{border-top:1px solid color-mix(in srgb,var(--purple) 40%,transparent)}
   .n{color:var(--soft2);font-variant-numeric:tabular-nums;width:1%;white-space:nowrap}
 
   kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;
@@ -113,13 +117,23 @@
   <div class="step" id="s2">
     <h2><i>2</i> The script</h2>
     <p class="muted" style="margin-bottom:9px">
-      One utterance per line, in the order the audio says them. Blank lines are ignored.
-      Prefix a line with <code>#</code> to mark it as the word itself rather than a sentence.
+      Paste the narration script — one utterance per line, in the order the audio says them.
+      The structure is worked out for you: word blocks, respellings, meanings, cues and
+      repeat runs. Fix anything it mislabels with the dropdowns in step 3.
     </p>
-    <textarea id="script" spellcheck="false" placeholder="# reassuring
-...the only person who felt nervous.
-...to hear that I wasn't the only person who felt nervous.
-It was reassuring to hear that I wasn't the only person who felt nervous."></textarea>
+    <textarea id="script" spellcheck="false" placeholder="Welcome to your shadowing practice with the English Leap Club.
+I'll say each word three times, then the whole line three times.
+Say it back in the pauses.
+Word one. Reassuring.
+ree-uh-SHOOR-ing.
+Making you feel safer, calmer or more certain.
+Just the word, three times.
+Reassuring.
+Reassuring.
+Reassuring.
+Now the whole line, three times.
+It was reassuring to hear that I wasn't the only person who felt nervous.
+..."></textarea>
     <div class="row" style="margin-top:10px">
       <button id="parse">Read the script</button>
       <span class="muted" id="sinfo">No lines yet.</span>
@@ -239,17 +253,67 @@ let detCache = null;
 function detection() { return (detCache = detCache || detectStarts()); }
 
 /* ───────────────────────────────────────────────────────────── script in */
+/* The script is templated, so read the structure out of it rather than making someone tag
+   75 rows by hand. The rule carrying most of the weight is that a REPEAT RUN is simply
+   consecutive identical lines — that catches word x3, line x3 and keeper x3 uniformly,
+   without the tool needing to know the repeat count in advance. */
+const NUM = 'one|two|three|four|five|six|seven|eight|nine|ten';
+const reAnnounce = new RegExp('^word\\s+(' + NUM + '|\\d+)[.:]?\\s+(.+?)\\.?$', 'i');
+const reKeeper = /^one line to keep/i;
+/* Any repeat count, spelled out or not — the script says "three times" today but a
+   "four times" or a "twice" must not silently land in the meaning slot. */
+const reCue = /,\s*(?:once|twice|[a-z]+ times|\d+ times)\.?$/i;
+const norm = (x) => x.toLowerCase().replace(/[.,!?;:]+$/, '').trim();
+// "ree-uh-SHOOR-ing." — hyphenated, one token, carrying a stressed ALL-CAPS syllable
+const isRespell = (x) => /-/.test(x) && /[A-Z]{2,}/.test(x) && x.split(/\s+/).length <= 2;
+
+function smartParse(raw) {
+  const src = raw.split(/\r?\n/).map((x) => x.trim()).filter(Boolean);
+  const out = [];
+  let i = 0, gi = 0, group = null, word = null, keeperDone = false;
+  const runLen = (n) => {
+    let k = n + 1;
+    while (k < src.length && norm(src[k]) === norm(src[n])) k++;
+    return k - n;
+  };
+  while (i < src.length) {
+    const x = src[i];
+    const m = x.match(reAnnounce);
+    if (m) { gi++; group = 'w' + gi; word = m[2];
+      out.push({ kind: 'announce', group, word, text: x, t: null }); i++; continue; }
+    if (reKeeper.test(x)) { group = 'keeper'; word = null;
+      out.push({ kind: 'cue', group, text: x, t: null }); i++; continue; }
+    if (group === null) { out.push({ kind: 'intro', group: null, text: x, t: null }); i++; continue; }
+    if (keeperDone) { out.push({ kind: 'outro', group: null, text: x, t: null }); i++; continue; }
+    if (reCue.test(x)) { out.push({ kind: 'cue', group, text: x, t: null }); i++; continue; }
+    const n = runLen(i);
+    if (n > 1) {
+      const isWord = word && norm(x) === norm(word);
+      const kind = group === 'keeper' ? 'keeper' : (isWord ? 'word' : 'line');
+      for (let r = 0; r < n; r++) {
+        out.push({ kind, group, word, rep: r + 1, of: n, text: src[i + r], t: null });
+      }
+      if (group === 'keeper') keeperDone = true;
+      i += n; continue;
+    }
+    out.push({ kind: isRespell(x) ? 'respell' : 'meaning', group, word, text: x, t: null });
+    i++;
+  }
+  return out;
+}
+
 $('#parse').onclick = () => {
-  const raw = $('#script').value.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
-  lines = raw.map((s) => {
-    const isWord = s.startsWith('#');
-    return { kind: isWord ? 'word' : 'line', text: isWord ? s.slice(1).trim() : s, t: null };
-  });
+  lines = smartParse($('#script').value);
   cur = 0;
   $('#s2').classList.toggle('done', lines.length > 0);
-  $('#sinfo').innerHTML = lines.length
-    ? '<span class="ok">' + lines.length + ' utterance' + (lines.length === 1 ? '' : 's') + '</span>'
-    : '<span class="bad">nothing to read</span>';
+  if (!lines.length) { $('#sinfo').innerHTML = '<span class="bad">nothing to read</span>'; }
+  else {
+    const g = [...new Set(lines.map((l) => l.group).filter(Boolean))];
+    const reps = lines.filter((l) => l.rep).length;
+    $('#sinfo').innerHTML = '<span class="ok">' + lines.length + ' utterances</span> · '
+      + g.length + ' blocks (' + g.join(' ') + ') · ' + reps + ' of them repeats'
+      + ' <span class="muted">— repeats are where the pauses are</span>';
+  }
   renderRows(); draw(); exportJSON();
 };
 
@@ -333,14 +397,16 @@ $('#play').onclick = () => (playing ? (stop(), paint()) : play());
 $('#rate').onchange = () => { if (playing) play(now()); };
 
 /* ──────────────────────────────────────────────────────────── the table */
-const KINDS = ['word', 'step', 'line', 'keeper', 'intro'];
+const KINDS = ['intro', 'announce', 'respell', 'meaning', 'cue', 'word', 'line', 'keeper', 'outro'];
 function renderRows() {
   $('#rows').innerHTML = lines.map((l, i) =>
-    '<tr data-i="' + i + '" class="' + (i === cur ? 'cur ' : '') + (l.t == null ? 'unset' : '') + '">'
-    + '<td class="n">' + (i + 1) + '</td>'
+    '<tr data-i="' + i + '" class="' + (i === cur ? 'cur ' : '')
+      + (l.t == null ? 'unset ' : '')
+      + (i > 0 && l.group && l.group !== lines[i - 1].group ? 'newgroup' : '') + '">'
+    + '<td class="n">' + (i + 1) + (l.group ? ' <span class="g">' + l.group + '</span>' : '') + '</td>'
     + '<td><select class="kindsel" data-i="' + i + '">'
       + KINDS.map((k) => '<option' + (k === l.kind ? ' selected' : '') + '>' + k + '</option>').join('')
-    + '</select></td>'
+    + '</select>' + (l.rep ? ' <span class="rep">' + l.rep + '/' + l.of + '</span>' : '') + '</td>'
     + '<td class="t">' + (l.t == null ? 'not set' : fmt(l.t)) + '</td>'
     + '<td class="txt' + (l.kind === 'word' ? ' is-word' : '') + '"><b>' + esc(l.text) + '</b></td>'
     + '<td><button class="sm" data-p="' + i + '">▶</button></td>'
@@ -493,12 +559,25 @@ addEventListener('keydown', (e) => {
 /* ───────────────────────────────────────────────────────────── export */
 function exportJSON() {
   const ok = lines.length && lines.every((l) => l.t != null);
+  // Blocks are what the player renders; the flat list is what it seeks with. Shipping both
+  // costs a few hundred bytes and saves the player from re-deriving the structure at runtime.
+  const groups = [...new Set(lines.map((l) => l.group).filter(Boolean))];
+  const pick = (g, k) => (lines.find((l) => l.group === g && l.kind === k) || {}).text || null;
   const data = {
     ep: $('#ep').value.trim(),
-    audio: null,                                 // filled in when the mp3 is uploaded
+    audio: null,                                 // the storage id, filled in on upload
     duration: buf ? +buf.duration.toFixed(2) : null,
+    blocks: groups.map((g) => ({
+      id: g,
+      word: (lines.find((l) => l.group === g && l.word) || {}).word || null,
+      respell: pick(g, 'respell'),
+      meaning: pick(g, 'meaning'),
+      line: pick(g, 'line') || pick(g, 'keeper'),
+      from: lines.findIndex((l) => l.group === g),
+    })),
     lines: lines.map((l, i) => ({
-      i, kind: l.kind, text: l.text,
+      i, kind: l.kind, group: l.group || null,
+      rep: l.rep || null, text: l.text,
       t: l.t == null ? null : +l.t.toFixed(2),
       end: l.t == null ? null : +(endOf(i) || 0).toFixed(2),
     })),
