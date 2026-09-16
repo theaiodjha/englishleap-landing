@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shadowing aligner — English Leap</title>
+<!--
+  A LOCAL tool. Open this file directly (file://) — it ships nothing and uploads nothing.
+
+  What it is for: turning one shadowing exercise (an mp3 + its script) into the timings
+  JSON the player needs. Everything happens in the browser, so there is no Python, no
+  model download and no build step to maintain twice a week — which is the whole point:
+  a forced-alignment pipeline would contradict this repo's buildless rule and would be
+  the most fragile thing in it.
+
+  The loop is: load the audio, paste the script one utterance per line, press Detect, fix
+  anything it got wrong by playing along and tapping Enter, export. A 4-minute exercise
+  takes a few minutes the first time and less after that.
+
+  Auto-detect works on an RMS envelope with a noise floor taken from percentiles rather
+  than from zero, so it still finds the gaps when there is a music bed under them — a
+  fixed "silence is near zero" threshold finds nothing at all in that case.
+-->
+<style>
+  :root{
+    --bg:#0b0a14; --panel:#14131f; --panel2:#1b1a28; --line:rgba(255,255,255,.13);
+    --ink:#eef0fb; --soft:#a6a6c4; --soft2:#7f7f9c;
+    --teal:#1fc4b6; --purple:#8b6cff; --pink:#f6479a; --amber:#ffcd46; --coral:#ff8a63;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font:14px/1.5 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif;
+    padding:22px 20px 80px}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  h1{font-size:20px;font-weight:700;letter-spacing:-.01em}
+  h1 span{color:var(--teal)}
+  .lede{color:var(--soft);margin:6px 0 20px;max-width:70ch}
+  .lede code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-size:12.5px}
+
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+  .step > h2{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--soft2);
+    margin-bottom:12px;display:flex;align-items:center;gap:9px}
+  .step > h2 i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-style:normal;
+    font-size:11px;background:color-mix(in srgb,var(--teal) 22%,transparent);color:var(--teal)}
+  .step.done > h2 i{background:color-mix(in srgb,var(--teal) 85%,transparent);color:#062a27}
+
+  button,select{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);
+    border-radius:9px;padding:8px 13px;cursor:pointer;transition:background .15s,border-color .15s}
+  button:hover:not(:disabled){background:#252336;border-color:color-mix(in srgb,var(--teal) 45%,transparent)}
+  button:disabled{opacity:.4;cursor:default}
+  button.go{background:linear-gradient(110deg,var(--teal),var(--purple));border:0;color:#fff;font-weight:700}
+  button.sm{padding:4px 9px;font-size:12px;border-radius:7px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .muted{color:var(--soft2);font-size:12.5px}
+  .ok{color:var(--teal)} .warn{color:var(--amber)} .bad{color:var(--coral)}
+
+  #drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--soft);
+    cursor:pointer;transition:border-color .15s,background .15s}
+  #drop:hover,#drop.over{border-color:var(--teal);background:color-mix(in srgb,var(--teal) 7%,transparent)}
+
+  textarea{width:100%;min-height:150px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);padding:11px 13px;font:13px/1.65 ui-monospace,"Cascadia Code",Consolas,monospace;resize:vertical}
+
+  /* the waveform. Two lanes: the whole file, and a zoom around the playhead — 4 minutes
+     across 1100px is ~0.2s per pixel, too coarse to place a line start by eye. */
+  .lane{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+    overflow:hidden;margin-bottom:8px}
+  .lane canvas{display:block;width:100%;height:100%}
+  #over{height:104px} #zoom{height:132px}
+  .lane .cap{position:absolute;top:6px;left:9px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--soft2);pointer-events:none}
+
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft2);
+    padding:6px 8px;border-bottom:1px solid var(--line);font-weight:700}
+  td{padding:5px 8px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:middle}
+  tr.cur{background:color-mix(in srgb,var(--teal) 13%,transparent)}
+  tr.unset td:nth-child(3){color:var(--coral)}
+  td.t{font-variant-numeric:tabular-nums;white-space:nowrap;width:1%}
+  td.txt{font-size:13px}
+  td.txt b{color:var(--ink)} td.txt.is-word b{color:var(--pink)}
+  .kindsel{font-size:12px;padding:3px 6px;border-radius:6px}
+  .n{color:var(--soft2);font-variant-numeric:tabular-nums;width:1%;white-space:nowrap}
+
+  kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;
+    padding:1px 6px;font:12px/1.4 ui-monospace,Consolas,monospace;color:var(--ink)}
+  .keys{display:flex;gap:16px;flex-wrap:wrap;color:var(--soft);font-size:12.5px;margin-top:10px}
+
+  pre#out{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;
+    max-height:260px;overflow:auto;font:12px/1.55 ui-monospace,Consolas,monospace;color:var(--soft);white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Shadowing aligner <span>·</span> English Leap</h1>
+  <p class="lede">
+    Turns one exercise (<code>.mp3</code> + script) into the timings the player reads. Runs entirely in this
+    tab — nothing is uploaded. Load the audio, paste one utterance per line, press <b>Detect</b>, then play
+    through and correct anything it misplaced.
+  </p>
+
+  <!-- 1 ─────────────────────────────────────────────────────────── audio -->
+  <div class="step" id="s1">
+    <h2><i>1</i> The audio</h2>
+    <div id="drop">Drop the <b>.mp3</b> here, or click to choose
+      <input type="file" id="file" accept="audio/*" hidden></div>
+    <p class="muted" id="ainfo" style="margin-top:10px">No audio loaded.</p>
+  </div>
+
+  <!-- 2 ────────────────────────────────────────────────────────── script -->
+  <div class="step" id="s2">
+    <h2><i>2</i> The script</h2>
+    <p class="muted" style="margin-bottom:9px">
+      One utterance per line, in the order the audio says them. Blank lines are ignored.
+      Prefix a line with <code>#</code> to mark it as the word itself rather than a sentence.
+    </p>
+    <textarea id="script" spellcheck="false" placeholder="# reassuring
+...the only person who felt nervous.
+...to hear that I wasn't the only person who felt nervous.
+It was reassuring to hear that I wasn't the only person who felt nervous."></textarea>
+    <div class="row" style="margin-top:10px">
+      <button id="parse">Read the script</button>
+      <span class="muted" id="sinfo">No lines yet.</span>
+    </div>
+  </div>
+
+  <!-- 3 ────────────────────────────────────────────────────────── align -->
+  <div class="step" id="s3">
+    <h2><i>3</i> Align</h2>
+    <div class="lane" id="ovWrap"><span class="cap">whole file</span><canvas id="over"></canvas></div>
+    <div class="lane" id="zmWrap"><span class="cap">around the playhead — click to place</span><canvas id="zoom"></canvas></div>
+
+    <div class="row">
+      <button class="go" id="play">▶ Play</button>
+      <button id="detect">Detect gaps</button>
+      <select id="rate" title="Playback speed">
+        <option value="0.6">0.6×</option><option value="0.75">0.75×</option>
+        <option value="1" selected>1×</option><option value="1.25">1.25×</option>
+      </select>
+      <span class="muted" id="clock">0:00.00 / 0:00.00</span>
+      <span class="muted" id="dinfo"></span>
+    </div>
+
+    <div class="keys">
+      <span><kbd>Space</kbd> play / pause</span>
+      <span><kbd>Enter</kbd> mark this line here, go to next</span>
+      <span><kbd>←</kbd> <kbd>→</kbd> nudge 50ms</span>
+      <span><kbd>↑</kbd> <kbd>↓</kbd> pick a line</span>
+      <span><kbd>P</kbd> preview the selected line</span>
+    </div>
+
+    <table id="tbl"><thead><tr>
+      <th class="n">#</th><th style="width:118px">Kind</th><th class="t">Start</th>
+      <th>Text</th><th style="width:1%"></th>
+    </tr></thead><tbody id="rows"></tbody></table>
+  </div>
+
+  <!-- 4 ───────────────────────────────────────────────────────── export -->
+  <div class="step" id="s4">
+    <h2><i>4</i> Export</h2>
+    <div class="row" style="margin-bottom:10px">
+      <label class="muted">Episode <input id="ep" value="ep282" style="width:90px;background:var(--panel2);
+        border:1px solid var(--line);border-radius:7px;color:var(--ink);padding:5px 8px;font:inherit"></label>
+      <button id="copy">Copy JSON</button>
+      <button id="dl">Download .json</button>
+      <span class="muted" id="xinfo"></span>
+    </div>
+    <pre id="out">—</pre>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fmt = (t) => {
+  if (!isFinite(t)) return '—';
+  const m = Math.floor(t / 60), s = t - m * 60;
+  return m + ':' + (s < 10 ? '0' : '') + s.toFixed(2);
+};
+
+let buf = null;            // decoded AudioBuffer
+let env = null, envDt = 0; // RMS envelope + seconds per bin
+let lines = [];            // {kind, text, t}
+let cur = 0;               // selected line
+let ctx = null, src = null, startedAt = 0, startOff = 0, playing = false;
+let previewEnd = null;     // stop point when previewing a single line
+
+/* ────────────────────────────────────────────────────────────── audio in */
+const drop = $('#drop'), file = $('#file');
+drop.onclick = () => file.click();
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over');
+  if (e.dataTransfer.files[0]) load(e.dataTransfer.files[0]); };
+file.onchange = () => file.files[0] && load(file.files[0]);
+
+async function load(f) {
+  $('#ainfo').textContent = 'Decoding ' + f.name + '…';
+  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+  try {
+    buf = await ctx.decodeAudioData(await f.arrayBuffer());
+  } catch (err) {
+    $('#ainfo').innerHTML = '<span class="bad">Could not decode that file.</span> ' + err;
+    return;
+  }
+  buildEnv();
+  $('#s1').classList.add('done');
+  $('#ainfo').innerHTML = '<b>' + f.name + '</b> — ' + fmt(buf.duration)
+    + ' · ' + buf.sampleRate + ' Hz · ' + (buf.numberOfChannels === 1 ? 'mono' : buf.numberOfChannels + ' ch')
+    + ' · <span class="ok">decoded</span>';
+  draw();
+}
+
+/* An RMS envelope at 20ms. Everything downstream (drawing, gap detection, previewing)
+   reads this rather than the samples, so a 4-minute file is a few thousand numbers. */
+function buildEnv() {
+  const W = Math.max(1, Math.round(buf.sampleRate * 0.02));
+  const n = Math.floor(buf.length / W);
+  const chans = [];
+  for (let c = 0; c < buf.numberOfChannels; c++) chans.push(buf.getChannelData(c));
+  env = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    let sum = 0;
+    for (let c = 0; c < chans.length; c++) {
+      const d = chans[c], base = i * W;
+      for (let j = 0; j < W; j++) { const v = d[base + j]; sum += v * v; }
+    }
+    env[i] = Math.sqrt(sum / (W * chans.length));
+  }
+  envDt = W / buf.sampleRate;
+  detCache = null;                 // the envelope changed, so the threshold must be redone
+}
+
+/* detectStarts() is called by the drawing code as well as by the button, and it sorts the
+   whole envelope. Cache it: the answer only changes when a new file is decoded. */
+let detCache = null;
+function detection() { return (detCache = detCache || detectStarts()); }
+
+/* ───────────────────────────────────────────────────────────── script in */
+$('#parse').onclick = () => {
+  const raw = $('#script').value.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+  lines = raw.map((s) => {
+    const isWord = s.startsWith('#');
+    return { kind: isWord ? 'word' : 'line', text: isWord ? s.slice(1).trim() : s, t: null };
+  });
+  cur = 0;
+  $('#s2').classList.toggle('done', lines.length > 0);
+  $('#sinfo').innerHTML = lines.length
+    ? '<span class="ok">' + lines.length + ' utterance' + (lines.length === 1 ? '' : 's') + '</span>'
+    : '<span class="bad">nothing to read</span>';
+  renderRows(); draw(); exportJSON();
+};
+
+/* ─────────────────────────────────────────────────────────── gap detect */
+/* The noise floor comes from PERCENTILES of the envelope, not from zero. A recording with
+   a music bed never goes near zero, so a fixed "silence < 0.01" threshold finds no gaps at
+   all and the tool looks broken. Taking p05 as the floor and p90 as the voice level makes
+   the threshold relative to whatever this particular file's quiet actually is. */
+function detectStarts() {
+  if (!env) return { starts: [], th: 0, floor: 0, voice: 0 };
+  const sorted = Float32Array.from(env).sort();
+  const at = (p) => sorted[clamp(Math.floor(p * sorted.length), 0, sorted.length - 1)];
+  const floor = at(0.05), voice = at(0.90);
+  const th = floor + (voice - floor) * 0.18;
+
+  const loud = Array.from(env, (v) => v > th);
+  // close pinholes: a stop consonant inside a word is not a gap
+  const HOLE = Math.round(0.12 / envDt);
+  for (let i = 0; i < loud.length; i++) {
+    if (loud[i]) continue;
+    let j = i; while (j < loud.length && !loud[j]) j++;
+    if (j - i <= HOLE) for (let k = i; k < j; k++) loud[k] = true;
+    i = j;
+  }
+  const MIN = Math.round(0.20 / envDt);          // ignore clicks and breaths
+  const starts = [];
+  for (let i = 0; i < loud.length; i++) {
+    if (!loud[i]) continue;
+    let j = i; while (j < loud.length && loud[j]) j++;
+    if (j - i >= MIN) starts.push(i * envDt);
+    i = j;
+  }
+  return { starts, th, floor, voice };
+}
+
+$('#detect').onclick = () => {
+  if (!buf) { $('#dinfo').innerHTML = '<span class="bad">load the audio first</span>'; return; }
+  if (!lines.length) { $('#dinfo').innerHTML = '<span class="bad">read the script first</span>'; return; }
+  const { starts, th, floor, voice } = detection();
+  const n = starts.length, want = lines.length;
+  // back the start off slightly — a detector always trims the first few ms of a plosive
+  const LEAD = 0.06;
+  for (let i = 0; i < Math.min(n, want); i++) lines[i].t = Math.max(0, starts[i] - LEAD);
+  for (let i = n; i < want; i++) lines[i].t = null;
+
+  let msg;
+  if (n === want) msg = '<span class="ok">' + n + ' segments — matches the script exactly.</span>';
+  else if (n > want) msg = '<span class="warn">' + n + ' segments for ' + want
+    + ' lines — the read runs on somewhere. First ' + want + ' assigned; check the tail.</span>';
+  else msg = '<span class="warn">only ' + n + ' segments for ' + want
+    + ' lines — the gaps are shallow (music bed?). Place the rest by hand.</span>';
+  const contrast = voice > 0 ? (voice / Math.max(floor, 1e-6)) : 0;
+  $('#dinfo').innerHTML = msg + ' <span class="muted">· quiet-to-voice ratio '
+    + contrast.toFixed(1) + '×' + (contrast < 3 ? ' — that is a bed, not silence' : '') + '</span>';
+  cur = 0; renderRows(); draw(); exportJSON();
+};
+
+/* ───────────────────────────────────────────────────────────── playback */
+function now() { return playing ? startOff + (ctx.currentTime - startedAt) * rate() : startOff; }
+function rate() { return parseFloat($('#rate').value) || 1; }
+
+function play(from, until) {
+  if (!buf) return;
+  stop();
+  previewEnd = until == null ? null : until;
+  src = ctx.createBufferSource();
+  src.buffer = buf; src.playbackRate.value = rate();
+  src.connect(ctx.destination);
+  startOff = clamp(from == null ? now() : from, 0, buf.duration - 0.01);
+  startedAt = ctx.currentTime;
+  src.start(0, startOff);
+  src.onended = () => { if (playing) { playing = false; startOff = buf.duration; paint(); } };
+  playing = true; $('#play').textContent = '❚❚ Pause';
+}
+function stop() {
+  if (src) { try { src.onended = null; src.stop(); } catch (e) {} src = null; }
+  if (playing) { startOff = now(); playing = false; }
+  previewEnd = null; $('#play').textContent = '▶ Play';
+}
+$('#play').onclick = () => (playing ? (stop(), paint()) : play());
+$('#rate').onchange = () => { if (playing) play(now()); };
+
+/* ──────────────────────────────────────────────────────────── the table */
+const KINDS = ['word', 'step', 'line', 'keeper', 'intro'];
+function renderRows() {
+  $('#rows').innerHTML = lines.map((l, i) =>
+    '<tr data-i="' + i + '" class="' + (i === cur ? 'cur ' : '') + (l.t == null ? 'unset' : '') + '">'
+    + '<td class="n">' + (i + 1) + '</td>'
+    + '<td><select class="kindsel" data-i="' + i + '">'
+      + KINDS.map((k) => '<option' + (k === l.kind ? ' selected' : '') + '>' + k + '</option>').join('')
+    + '</select></td>'
+    + '<td class="t">' + (l.t == null ? 'not set' : fmt(l.t)) + '</td>'
+    + '<td class="txt' + (l.kind === 'word' ? ' is-word' : '') + '"><b>' + esc(l.text) + '</b></td>'
+    + '<td><button class="sm" data-p="' + i + '">▶</button></td>'
+    + '</tr>').join('');
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+$('#rows').addEventListener('click', (e) => {
+  const p = e.target.closest('[data-p]');
+  if (p) { preview(+p.dataset.p); return; }
+  const tr = e.target.closest('tr[data-i]');
+  if (tr) { cur = +tr.dataset.i; renderRows(); draw(); }
+});
+$('#rows').addEventListener('change', (e) => {
+  const s = e.target.closest('.kindsel');
+  if (!s) return;
+  lines[+s.dataset.i].kind = s.value; renderRows(); exportJSON();
+});
+
+function endOf(i) {
+  for (let j = i + 1; j < lines.length; j++) if (lines[j].t != null) return lines[j].t;
+  return buf ? buf.duration : null;
+}
+function preview(i) {
+  const l = lines[i]; if (!l || l.t == null || !buf) return;
+  cur = i; renderRows();
+  play(l.t, endOf(i));
+}
+
+/* ────────────────────────────────────────────────────────────── drawing */
+function fit(cv) {
+  const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+  if (cv.width !== Math.round(r.width * d) || cv.height !== Math.round(r.height * d)) {
+    cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d);
+  }
+  const g = cv.getContext('2d');
+  g.setTransform(d, 0, 0, d, 0, 0);
+  return { g, w: r.width, h: r.height };
+}
+
+function wave(cv, t0, t1, withText) {
+  const { g, w, h } = fit(cv);
+  g.clearRect(0, 0, w, h);
+  g.fillStyle = '#1b1a28'; g.fillRect(0, 0, w, h);
+  if (!env) { g.fillStyle = '#7f7f9c'; g.font = '12px system-ui';
+    g.fillText('waveform appears once the audio is decoded', 12, h / 2); return; }
+
+  const mid = h / 2;
+  let peak = 0; for (let i = 0; i < env.length; i++) if (env[i] > peak) peak = env[i];
+  peak = peak || 1;
+
+  g.fillStyle = 'rgba(31,196,182,.55)';
+  for (let x = 0; x < w; x++) {
+    const a = t0 + (t1 - t0) * (x / w), b = t0 + (t1 - t0) * ((x + 1) / w);
+    let m = 0;
+    for (let i = Math.floor(a / envDt); i < Math.ceil(b / envDt); i++) {
+      if (i >= 0 && i < env.length && env[i] > m) m = env[i];
+    }
+    const hh = Math.max(1, (m / peak) * (h * 0.44));
+    g.fillRect(x, mid - hh, 1, hh * 2);
+  }
+
+  // the detector's threshold, so a shallow gap is visibly shallow rather than a mystery
+  if (env) {
+    const d = detection();
+    if (d && d.th) {
+      const y = (d.th / peak) * (h * 0.44);
+      g.strokeStyle = 'rgba(255,205,70,.45)'; g.setLineDash([4, 4]); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(0, mid - y); g.lineTo(w, mid - y);
+      g.moveTo(0, mid + y); g.lineTo(w, mid + y); g.stroke(); g.setLineDash([]);
+    }
+  }
+
+  const X = (t) => ((t - t0) / (t1 - t0)) * w;
+  lines.forEach((l, i) => {
+    if (l.t == null || l.t < t0 || l.t > t1) return;
+    const x = X(l.t), on = i === cur;
+    g.strokeStyle = on ? '#ffcd46' : (l.kind === 'word' ? '#f6479a' : '#8b6cff');
+    g.lineWidth = on ? 2 : 1;
+    g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
+    g.fillStyle = g.strokeStyle;
+    g.fillRect(x, 0, Math.min(26, w - x), 13);
+    g.fillStyle = '#0b0a14'; g.font = '700 10px ui-monospace,Consolas,monospace';
+    g.fillText(String(i + 1), x + 3, 10);
+    if (withText) {
+      g.fillStyle = on ? '#eef0fb' : 'rgba(238,240,251,.55)';
+      g.font = '12px system-ui';
+      g.fillText(l.text.slice(0, 46), x + 5, h - 8);
+    }
+  });
+
+  const p = now();
+  if (p >= t0 && p <= t1) {
+    g.strokeStyle = '#fff'; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(X(p), 0); g.lineTo(X(p), h); g.stroke();
+  }
+}
+
+const ZOOM = 6; // seconds either side in the lower lane
+function zoomWin() {
+  const p = now(), d = buf ? buf.duration : 1;
+  return [clamp(p - ZOOM, 0, Math.max(0, d - 2 * ZOOM)), clamp(p - ZOOM, 0, Math.max(0, d - 2 * ZOOM)) + 2 * ZOOM];
+}
+function paint() {
+  wave($('#over'), 0, buf ? buf.duration : 1, false);
+  const [a, b] = zoomWin();
+  wave($('#zoom'), a, b, true);
+  $('#clock').textContent = fmt(now()) + ' / ' + fmt(buf ? buf.duration : 0);
+}
+function draw() { paint(); }
+
+function seekFrom(cv, e, t0, t1) {
+  const r = cv.getBoundingClientRect();
+  const t = t0 + (t1 - t0) * ((e.clientX - r.left) / r.width);
+  return clamp(t, 0, buf ? buf.duration : 0);
+}
+$('#over').onclick = (e) => { if (!buf) return; const t = seekFrom($('#over'), e, 0, buf.duration);
+  playing ? play(t) : (startOff = t, paint()); };
+$('#zoom').onclick = (e) => {
+  if (!buf || !lines.length) return;
+  const [a, b] = zoomWin();
+  lines[cur].t = seekFrom($('#zoom'), e, a, b);
+  renderRows(); paint(); exportJSON();
+};
+
+/* ─────────────────────────────────────────────────────────────── keys */
+addEventListener('keydown', (e) => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+  const k = e.key;
+  if (k === ' ') { e.preventDefault(); playing ? (stop(), paint()) : play(); }
+  else if (k === 'Enter') {
+    e.preventDefault();
+    if (!lines.length) return;
+    lines[cur].t = now();                       // mark where we are, move on
+    if (cur < lines.length - 1) cur++;
+    renderRows(); paint(); exportJSON();
+  } else if (k === 'ArrowLeft' || k === 'ArrowRight') {
+    e.preventDefault();
+    if (lines[cur] && lines[cur].t != null) {
+      lines[cur].t = clamp(lines[cur].t + (k === 'ArrowRight' ? 0.05 : -0.05), 0, buf.duration);
+      renderRows(); paint(); exportJSON();
+    }
+  } else if (k === 'ArrowUp' || k === 'ArrowDown') {
+    e.preventDefault();
+    cur = clamp(cur + (k === 'ArrowDown' ? 1 : -1), 0, Math.max(0, lines.length - 1));
+    renderRows(); paint();
+  } else if (k === 'p' || k === 'P') { e.preventDefault(); preview(cur); }
+});
+
+/* ───────────────────────────────────────────────────────────── export */
+function exportJSON() {
+  const ok = lines.length && lines.every((l) => l.t != null);
+  const data = {
+    ep: $('#ep').value.trim(),
+    audio: null,                                 // filled in when the mp3 is uploaded
+    duration: buf ? +buf.duration.toFixed(2) : null,
+    lines: lines.map((l, i) => ({
+      i, kind: l.kind, text: l.text,
+      t: l.t == null ? null : +l.t.toFixed(2),
+      end: l.t == null ? null : +(endOf(i) || 0).toFixed(2),
+    })),
+  };
+  $('#out').textContent = JSON.stringify(data, null, 2);
+  $('#s4').classList.toggle('done', !!ok);
+  const missing = lines.filter((l) => l.t == null).length;
+  $('#xinfo').innerHTML = !lines.length ? '' : ok
+    ? '<span class="ok">all ' + lines.length + ' placed</span>'
+    : '<span class="warn">' + missing + ' still unplaced</span>';
+  return data;
+}
+$('#ep').oninput = exportJSON;
+$('#copy').onclick = async () => {
+  try { await navigator.clipboard.writeText(JSON.stringify(exportJSON(), null, 2));
+    $('#copy').textContent = 'Copied'; setTimeout(() => ($('#copy').textContent = 'Copy JSON'), 1200);
+  } catch (e) { $('#xinfo').innerHTML = '<span class="bad">clipboard blocked — select the JSON below</span>'; }
+};
+$('#dl').onclick = () => {
+  const blob = new Blob([JSON.stringify(exportJSON(), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = ($('#ep').value.trim() || 'shadow') + '-shadow.json';
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+
+/* keep the playhead and lanes live without pinning a timer to the audio clock */
+(function tick() { if (buf) { if (playing && previewEnd != null && now() >= previewEnd) { stop(); } paint(); }
+  requestAnimationFrame(tick); })();
+addEventListener('resize', paint);
+renderRows(); paint();
+</script>
+</body>
+</html>

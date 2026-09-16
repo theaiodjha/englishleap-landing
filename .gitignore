@@ -17,3 +17,9 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.swp
+
+# Source material for the shadowing exercises. This is PAID Patreon content, and anything
+# committed here is deployed to Vercel as a plain static file — englishleap.app/assets/...
+# is fetchable by anyone, with no session and no tier check. The finished audio belongs in
+# private storage behind signedLink()/api/download.js, never in the repo.
+assets/shadowing/
