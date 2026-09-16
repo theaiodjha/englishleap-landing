@@ -436,7 +436,7 @@ member (`lib/quota.js`), Fluency-gated.
 clue-room block of the catalogue (`getArcade()`), takes the episode flagged `current`
 (or the requested `episodeId`) and uses its six clue words. Long titles come from
 `lib/episode-titles.js`. Per-episode hand-written prompts live in `PROMPTS` in
-`api/use-it-live.js` — **all 30 episodes now have one**; `promptFor()` still falls back to a
+`api/use-it-live.js` — **every episode has one**, and `tools/test-episode-data.mjs` fails the CURRENT episode if it does not; `promptFor()` still falls back to a
 title-built prompt for any episode added later. Write the real one when you add an episode:
 the generic version is useless for a format title like "40 Minutes of Real English", and a
 concrete task ("talk about a night you could not switch off") is what a nervous B1 learner
