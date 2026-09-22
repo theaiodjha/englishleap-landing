@@ -35,6 +35,16 @@ const note = (ep, msg, extra = '') => {
 };
 const sameSet = (a, b) => a.length === b.length && [...a].sort().join('|') === [...b].sort().join('|');
 
+/* The phrases that carry hand-drawn artwork instead of a generated tile, read out of
+   slugFor() in the game itself so the two cannot drift apart. */
+const HAND_DRAWN = (() => {
+  const src = fs.readFileSync(path.join(ROOT, 'games', 'clue-room', 'index.html'), 'utf8');
+  const m = /const slugFor\s*=\s*w\s*=>\s*\(\{([\s\S]*?)\}\[/.exec(src);
+  if (!m) { console.log('note (catalogue)  could not read slugFor() — icon check will be strict'); return new Set(); }
+  return new Set([...m[1].matchAll(/'([^']+)'\s*:/g)].map((x) => x[1].toLowerCase()));
+})();
+
+const missingTiles = [];
 const byType = Object.fromEntries(ARCADE.map((g) => [g.type, g]));
 const TYPES = Object.keys(byType);
 const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -86,6 +96,20 @@ for (const id of ids) {
     }
   }
   if (!EPISODE_TITLES[id]) fail(id, 'no long title in lib/episode-titles.js');
+
+  // --- the clue tiles. A missing one does not throw: buildIcon() keeps the canvas
+  // placeholder and swallows the 404, so the clue quietly renders in the device's emoji
+  // font while its five siblings use the baked tile.
+  for (const c of eps['clue-room'].content.clues) {
+    if (HAND_DRAWN.has(String(c.word).toLowerCase())) continue;   // uses its own artwork
+    const key = [...(c.emoji || '')].map((ch) => ch.codePointAt(0).toString(16)).join('-')
+      + '_' + String(c.color || '').replace('#', '');
+    if (!fs.existsSync(path.join(ROOT, 'games', 'clue-room', 'icons', 'auto', key + '.png'))) {
+      // the current episode is the one members open this week — its tiles should be there
+      if (eps['clue-room'].current) fail(id, `clue-room: no baked tile for "${c.word}"`, key + '.png');
+      else missingTiles.push({ id, word: c.word, key });
+    }
+  }
 
   // --- the six words, shared by every game
   const ref = wordsOf['clue-room'](eps['clue-room'].content);
@@ -174,6 +198,16 @@ for (const id of ids) {
         + 'Use It Live would fall back to the generic title-built task');
     }
   }
+}
+
+/* One line, not fifty-five. Every one of these traces to the same event, so say that
+   rather than listing each clue and burying everything else in the report. */
+if (missingTiles.length) {
+  const colours = [...new Set(missingTiles.map((m) => m.key.split('_')[1]))];
+  const shows = [...new Set(missingTiles.map((m) => m.id))];
+  note('(icons)', `${missingTiles.length} baked clue tiles are missing across ${shows.length} older episodes`,
+    'all of them ' + colours.map((c) => '#' + c).join(' / ')
+    + ' — the two colours the palette fix introduced. Those clues fall back to the device emoji font.');
 }
 
 const scope = `${ids.length} episode${ids.length === 1 ? '' : 's'}`;

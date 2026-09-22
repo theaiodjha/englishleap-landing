@@ -31,8 +31,15 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 ## House rules (do these every time)
 
 - **Validate before packaging:** `node --check` every changed JS; extract and
-  `node --check` inline `<script>` blocks in changed HTML; then run `python3 tools/audit.py`
-  (wired into the pre-push hook). Fix HIGH/MED; LOW at discretion.
+  `node --check` inline `<script>` blocks in changed HTML; then run `python3 tools/audit.py`.
+  Fix HIGH/MED; LOW at discretion.
+- **Install the hooks once per clone: `node tools/install-hooks.js`.** `.git/hooks` is not
+  tracked, so a hook committed to the repo does NOT arrive with a clone or a fetch — this
+  project spent months believing the audit ran on push when no hook existed, which is how
+  the EP282 `linger` fix shipped broken twice with the test that catches it sitting right
+  there. The hook source lives in `tools/hooks/` so it is reviewed like any other file; it
+  runs `tools/audit.py` (blocking on HIGH/MED) and `tools/test-episode-data.mjs`.
+  `git push --no-verify` skips it.
 - **The theme choice and the tour live ONLY in the account card — for everyone.** The
   floating theme toggle and the floating "Take the tour" pill are retired site-wide:
   `theme.js` no longer builds `#elc-theme-toggle` (the `ELCTheme` API is unchanged and
@@ -310,6 +317,20 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   Fast Word Challenge, in `practice-arcade.html`). Editing an icon in `lib/arcade-data.js`
   is NOT enough on its own: `getArcade()` reads KV first and falls back to the file, so
   re-run `node tools/seed-arcade.js` or production keeps the old glyph.
+- **`lib/arcade-data.js` is REGENERATED wholesale when an episode is added**, from a source
+  outside this repo. Any fix made to that file by hand is therefore temporary: the EP282
+  `linger` base form and the "Feels So Good" casing were both restored, then reverted by the
+  next episode, then restored again. **Fix the generator's source as well, or it comes back.**
+  The pre-push hook now blocks the `linger` shape specifically, but it cannot know about a
+  correction it has never been told to look for.
+- **A missing clue tile is silent.** `buildIcon()` keeps its canvas placeholder and swallows
+  the 404, so the clue renders in the DEVICE's emoji font while its siblings use the baked,
+  colour-matched tile — visible only as one clue that looks slightly wrong. Six phrases carry
+  hand-drawn artwork instead and are exempt; that list is `slugFor()` in
+  `games/clue-room/index.html`, which `tools/test-episode-data.mjs` reads rather than
+  duplicating. **Known backlog: 55 tiles are missing across 28 older episodes**, every one of
+  them `#ffcd46` or `#1f86c9` — the two colours the palette fix introduced, whose tiles were
+  never re-baked. The test fails only for the CURRENT episode and notes the rest.
 - **Never redraw Oriva.** Only use the six real PNG poses from the kit
   (celebrate, exercise, happy, point, read, think). If a PNG is absent, hide it gracefully.
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).
@@ -374,6 +395,8 @@ lib/episode-titles.js      long/searchable episode titles for the arcade browser
 lib/quiet-deprecations.js  silences DEP0169 (Vercel adapter's url.parse); imported by api routes
 tools/audit.py             cross-renderer/consistency audit (pre-push hook)
 tools/{seed-arcade,issue-code}.js      seed arcade to KV; issue member codes
+tools/install-hooks.js     node tools/install-hooks.js — installs tools/hooks/* into .git/hooks
+tools/hooks/pre-push       the gate: audit.py + test-episode-data.mjs
 tools/test-popular.mjs     node tools/test-popular.mjs — asserts the popularity ranking rules
 tools/test-stats.mjs       node tools/test-stats.mjs — asserts the public stats floor + rounding
 tools/test-progress-kpi.js node tools/test-progress-kpi.js — asserts where each KPI tile leads

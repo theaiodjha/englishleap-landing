@@ -31,6 +31,7 @@ const FLUENCY_MIN_CENTS = 200; // Transcript = 100¢, Fluency Club = 299¢ (mirr
 // stalls on an abstraction — and each is built so the episode's six words are the
 // natural vocabulary for answering it. Drafts: rewrite in Anna & Jake's voice.
 const PROMPTS = {
+  ep285: 'Tell us how your mornings actually start — what the first hour looks like, and what you do on a day when you wake up already behind.',
   ep283: 'Tell us about a day when everything went wrong at once — what happened, how you felt in the middle of it, and how the day ended.',
   ep282: 'Tell us about the first drink of your day — coffee, tea, or something else. What do you do while you drink it, and how does a morning feel when you have to skip it?',
   ep280: 'Think about the last time you had to speak English with no time to prepare. What happened when the word you wanted would not come — and what do you do now when that happens?',

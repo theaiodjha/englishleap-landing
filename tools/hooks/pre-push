@@ -1,14 +1,57 @@
 #!/bin/sh
-# ELC pre-push gate — runs the site audit and blocks the push on HIGH-severity issues.
-# One-time setup (run once in the repo):  git config core.hooksPath tools/hooks
-echo "→ Running site audit (tools/audit.py)…"
-if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
-"$PY" tools/audit.py
-if [ $? -ne 0 ]; then
-  echo ""
-  echo "✗ Push blocked: HIGH-severity issues found above."
-  echo "  Fix them, or override with:  git push --no-verify"
+# English Leap — pre-push gate.
+#
+# Install with:  node tools/install-hooks.js
+#
+# CLAUDE.md has long said the audit was "wired into the pre-push hook", but the hook did not
+# exist in this clone — .git/hooks is not tracked by git, so it never arrives with a fetch
+# and silently is not there. That gap is why the EP282 "lingered" fix shipped broken twice:
+# the check that catches it was sitting in the repo, never run.
+#
+# Two gates, both cheap:
+#   tools/audit.py                cross-renderer/consistency audit (HIGH/MED block)
+#   tools/test-episode-data.mjs   the catalogue against what the five games assume
+#
+# Skip deliberately with:  git push --no-verify
+
+set -e
+cd "$(git rev-parse --show-toplevel)"
+
+say() { printf '  %s\n' "$1"; }
+printf '\npre-push checks\n'
+
+# Windows Python needs UTF-8 forced: audit.py writes a temp file containing arrows and dies
+# on the cp1252 default. Harmless everywhere else.
+PY=python3
+command -v python3 >/dev/null 2>&1 || PY=python
+if PYTHONUTF8=1 "$PY" tools/audit.py > /tmp/elc-audit.$$ 2>&1; then
+  tail -1 /tmp/elc-audit.$$ | sed 's/^/  /'
+else
+  say 'audit.py FAILED:'
+  sed 's/^/    /' /tmp/elc-audit.$$
+  rm -f /tmp/elc-audit.$$
   exit 1
 fi
-echo "✓ Audit clean — pushing."
-exit 0
+if grep -qE 'HIGH=[1-9]|MED=[1-9]' /tmp/elc-audit.$$; then
+  say 'audit reports HIGH or MEDIUM findings — not pushing.'
+  sed 's/^/    /' /tmp/elc-audit.$$
+  rm -f /tmp/elc-audit.$$
+  exit 1
+fi
+rm -f /tmp/elc-audit.$$
+
+if node tools/test-episode-data.mjs > /tmp/elc-ep.$$ 2>&1; then
+  tail -1 /tmp/elc-ep.$$ | sed 's/^/  /'
+  grep '^note' /tmp/elc-ep.$$ | sed 's/^/  /' || true
+else
+  say 'episode data FAILED:'
+  grep -E '^(FAIL|note)' /tmp/elc-ep.$$ | sed 's/^/    /'
+  rm -f /tmp/elc-ep.$$
+  say ''
+  say 'If a fix was reverted by regenerating lib/arcade-data.js, correct it UPSTREAM too,'
+  say 'or the next episode will bring it back.'
+  exit 1
+fi
+rm -f /tmp/elc-ep.$$
+
+printf '\n'
