@@ -706,6 +706,16 @@ hesitation, pauses, speed, smoothness or tone — **including as PRAISE** ("you 
 confident" judges a voice, not a sentence) — and defines the rubric's `fluency` as LANGUAGE
 fluency, finding words and linking ideas, never delivery. The one honest exception is
 searching for a WORD, which is a language event; struggling with a SOUND is not.
+**A hardcoded dark fill plus `color:var(--ink)` is invisible on light — measure it.** The
+feedback badge shipped with a near-black pill and ink text: 13.8:1 on dark, and **1.29:1 on
+light**, because `--ink` flips to `#241f3a` while the pill stayed black. That is the house
+rule about new components needing a `theme.css` rule, and it is not caught by looking — the
+dark theme looks perfect. Also re-learned here: **`#1fc4b6` cannot reach 3:1 on paper at ANY
+opacity** (1.9:1 at full strength), so a teal BORDER on a control needs `#0b6f68` exactly as
+teal text does — a button's boundary is its affordance. And the waiting overlay now becomes
+frosted paper with ink text on light rather than a black sheet over a lavender page: it
+passed contrast either way, but a near-black scrim is not what daylight looks like.
+
 **Feedback is a sheet you can put away, not a card that stays forever.** It was inline and
 permanent: you scrolled away from your words to read it, and once read it was clutter on a
 page whose next job is another recording. Now it arrives as a side sheet (bottom sheet under

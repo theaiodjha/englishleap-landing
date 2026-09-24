@@ -198,11 +198,11 @@
   .thinking p{color:rgba(255,255,255,.76);font-size:var(--fs-md);line-height:1.5;margin:9px 0 0;min-height:3em}
   /* three dots that fill in turn — a progress feel without a fake progress bar */
   .thinking .dots{display:flex;gap:7px;justify-content:center;margin-top:16px}
-  .thinking .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.28);
+  .thinking .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.46);
     animation:pulseDot 1.4s ease-in-out infinite}
   .thinking .dots i:nth-child(2){animation-delay:.18s}
   .thinking .dots i:nth-child(3){animation-delay:.36s}
-  @keyframes pulseDot{0%,100%{background:rgba(255,255,255,.28);transform:scale(1)}
+  @keyframes pulseDot{0%,100%{background:rgba(255,255,255,.46);transform:scale(1)}
     50%{background:var(--teal);transform:scale(1.35)}}
   @media (prefers-reduced-motion:reduce){
     .thinking-in img,.thinking .dots i{animation:none}

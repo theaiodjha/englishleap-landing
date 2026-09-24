@@ -244,6 +244,44 @@ html[data-theme="light"] .iback{background:rgba(255,255,255,.62) !important}
   .mic.live::after{animation:none !important}
 }
 
+/* ---- Out Loud, on paper ---------------------------------------------------
+   Two things I got wrong building these and only found by measuring.
+
+   The feedback badge hardcodes a near-black fill and takes its text from --ink. On dark
+   that is pale ink on a dark pill, 13.8:1. On light --ink flips to #241f3a and the pill
+   stays black, so it measured 1.29:1 — dark on dark, effectively invisible. It needs the
+   whole treatment inverted, not a tweak.
+
+   The waiting overlay passes contrast on light (white on a near-black scrim is 9.2:1) but
+   a black sheet dropped over a pale lavender page is not what daylight looks like. On
+   light it becomes frosted paper with ink text, which is the same idea in the other key. */
+html[data-theme="light"] .fbbadge{
+  background:color-mix(in srgb,var(--teal) 14%,rgba(255,255,255,.94));
+  /* #1fc4b6 cannot reach 3:1 on paper at ANY opacity — it is 1.9:1 at full strength — and
+     this is a button, so its boundary is the affordance. The documented darker step. */
+  border-color:#0b6f68;
+  color:#2b2650;
+  box-shadow:0 16px 40px -18px rgba(80,60,150,.55);
+}
+html[data-theme="light"] .fbbadge:hover{
+  border-color:#084f4a;
+  background:color-mix(in srgb,var(--teal) 22%,rgba(255,255,255,.94));
+}
+
+html[data-theme="light"] .thinking{
+  background:rgba(244,238,255,.82);
+}
+html[data-theme="light"] .thinking h3{color:#241f3a}
+html[data-theme="light"] .thinking p{color:#4a4470}
+/* teal is 1.9:1 on paper — the documented darker step for anything that has to be seen */
+html[data-theme="light"] .thinking .dots i{background:rgba(60,50,110,.26)}
+@media (prefers-reduced-motion:no-preference){
+  html[data-theme="light"] .thinking .dots i{animation-name:pulseDotLight}
+}
+@keyframes pulseDotLight{
+  0%,100%{background:rgba(60,50,110,.26);transform:scale(1)}
+  50%{background:#0b6f68;transform:scale(1.35)}
+}
 /* The six target words on out-loud.html. A NEW class on purpose: `.chip` is shared with
    four games and already carries two light-theme override blocks, so restyling it here
    would land on all of them. `color-mix` against the word's own palette colour is doing
