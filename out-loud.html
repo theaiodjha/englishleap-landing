@@ -26,7 +26,20 @@
   @keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(4vw,-5vh) scale(1.15)}}
   .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(120% 80% at 50% -10%,transparent 40%,rgba(2,2,8,.55) 100%)}
 
-  .wrap{position:relative;z-index:2;max-width:720px;margin:0 auto;padding:22px 20px 80px}
+  .wrap{position:relative;z-index:2;max-width:1060px;margin:0 auto;padding:22px 20px 80px}
+
+  /* Task and record are the two halves of one action and are roughly the same height, so
+     on a wide screen they sit side by side: read the question, answer it, no scrolling
+     between the two. The meter is a thin status bar and the feedback is long prose, so
+     both span. Below 900px it is the original single column, in the original order. */
+  .duo{display:grid;gap:var(--sp-4);align-items:start}
+  @media(min-width:900px){
+    .duo{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}
+    .wrap{padding-left:28px;padding-right:28px}
+  }
+  /* Below the split there is only one stack, and a single column 1000px wide reads badly —
+     keep the measure it had before the page learned to use the width. */
+  @media(max-width:899px){ .wrap{max-width:720px} }
   a{color:var(--teal)}
 
   .hd{display:flex;align-items:center;justify-content:space-between;gap:14px 18px;flex-wrap:wrap;padding:18px 0 6px}
@@ -47,11 +60,13 @@
 
   .eyebrow{font-family:var(--display);font-weight:700;letter-spacing:.16em;font-size:var(--fs-sm);color:var(--teal);
     display:inline-flex;align-items:center;gap:var(--sp-2);text-transform:uppercase}
-  .hero{text-align:center;padding:28px 6px 6px}
-  .hero h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6.5vw,46px);line-height:1.08;margin:var(--sp-3) 0 0;letter-spacing:-.01em}
+  .hero{text-align:center;padding:10px 6px 2px}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:clamp(27px,4.4vw,38px);line-height:1.08;margin:0;letter-spacing:-.01em}
   .hero h1 .g{background:linear-gradient(100deg,var(--cyan),var(--purple) 55%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .lede{color:var(--soft);font-size:clamp(15px,2.3vw,17px);line-height:1.55;max-width:34em;margin:14px auto 0}
-  .welcome{font-family:var(--display);font-weight:600;color:var(--ink);font-size:var(--fs-md);margin:var(--sp-3) 0 0;min-height:1px}
+  .lede{color:var(--soft);font-size:clamp(15px,2.3vw,17px);line-height:1.5;max-width:52em;margin:9px auto 0}
+  .welcome{font-family:var(--display);font-weight:600;color:var(--ink);font-size:var(--fs-md);margin:var(--sp-2) 0 0;min-height:1px}
+  /* who wrote the feedback, said where the feedback is */
+  .byline{color:var(--soft2);font-size:var(--fs-sm);line-height:1.5;margin:6px 0 2px;max-width:46em}
 
   .card{position:relative;background:linear-gradient(135deg,rgba(139,108,255,.12),rgba(31,196,182,.06));border:1px solid var(--line);
     border-radius:24px;padding:22px;margin-top:var(--sp-4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 20px 54px -26px rgba(0,0,0,.75)}
@@ -178,11 +193,9 @@
 
   <div id="app" class="hidden">
     <div class="hero">
-      <span class="eyebrow">&#127897;&#65039; Out Loud &middot; Find your voice</span>
-      <h1>Say it out loud. <span class="g">Find your voice.</span></h1>
-      <p class="lede">Record your answer, and Oriva listens &mdash; then names two things you did well
-        and one gentle thing to try next. Oriva is our AI coach, and it answers the way Anna &amp; Jake teach:
-        warm, specific, never picking at grammar. &#128172;</p>
+      <h1>Say it <span class="g">out loud.</span></h1>
+      <p class="lede">Record your answer and Oriva, our AI coach, names two things you did well
+        &mdash; and one gentle thing to try next.</p>
       <p class="welcome" id="title"></p>
     </div>
 
@@ -196,6 +209,7 @@
       <div class="bar"><i id="barfill" style="width:0%"></i></div>
     </div>
 
+    <div class="duo">
     <div class="card">
       <h2>&#127919; Your task</h2>
       <p class="epline" id="epline"></p>
@@ -232,9 +246,12 @@
       </div>
       <div class="msg" id="msg"></div>
     </div>
+    </div><!-- /.duo -->
 
     <div class="card fb hidden" id="fb">
       <span class="eyebrow">&#10024; Your feedback</span>
+      <p class="byline">From Oriva, our AI coach &mdash; written the way Anna &amp; Jake teach:
+        warm, specific, never picking at grammar.</p>
       <p class="summary" id="fbSummary"></p>
       <div class="block win"><div class="lbl">&#10024; What went well</div><ul id="fbWins"></ul></div>
       <div class="block tweak"><div class="lbl">&#127919; One gentle tweak</div><ul id="fbTweak"></ul></div>
