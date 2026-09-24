@@ -706,6 +706,19 @@ hesitation, pauses, speed, smoothness or tone — **including as PRAISE** ("you 
 confident" judges a voice, not a sentence) — and defines the rubric's `fluency` as LANGUAGE
 fluency, finding words and linking ideas, never delivery. The one honest exception is
 searching for a WORD, which is a language event; struggling with a SOUND is not.
+**Feedback is a sheet you can put away, not a card that stays forever.** It was inline and
+permanent: you scrolled away from your words to read it, and once read it was clutter on a
+page whose next job is another recording. Now it arrives as a side sheet (bottom sheet under
+760px) and minimises to an Oriva badge that waits for the rest of the session. **It is
+deliberately NOT modal** — `aria-modal` is false and the page behind is neither dimmed nor
+inert, because the six words are what a member looks at while deciding what to say next and a
+modal would hide them behind feedback about the last take. Escape MINIMISES rather than
+destroys: "close" here means "for now". Two verbs, and the difference matters —
+`minimiseFeedback()` keeps it (sheet away, badge up) while `hideFeedback()` ends it (both
+away, `hasFeedback` false) and is used where the feedback stops being true: a new take, a
+cleared set, a switched episode. There is no state where both are up, and never a badge
+promising feedback that is gone.
+
 **The page has PHASES, and they change emphasis, never content.** `#app[data-phase]` is set
 in one place (`setPhase()`) and the CSS does the rest. While **recording**, the task card's
 children fade to 42% — except `.wchips`, because mid-sentence the six words are the one thing

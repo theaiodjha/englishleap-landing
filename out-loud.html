@@ -148,6 +148,45 @@
   @media (prefers-reduced-motion:reduce){ .task-card > *{transition:none} }
 
   /* the wait */
+  /* ---- the feedback sheet -------------------------------------------------
+     A side sheet on a wide screen, a bottom sheet on a phone. NOT modal: the page behind
+     stays visible and usable, because the six words are what you look at while deciding
+     what to say next — a modal would hide them behind feedback about the last take. */
+  .fbsheet{position:fixed;z-index:70;right:18px;top:18px;bottom:18px;width:min(430px,calc(100vw - 36px));
+    display:flex;flex-direction:column;
+    animation:sheetIn .34s cubic-bezier(.22,1,.36,1)}
+  .fbsheet.hidden{display:none}
+  .fbsheet .card{margin:0;overflow-y:auto;overscroll-behavior:contain;max-height:100%;
+    box-shadow:0 34px 80px -28px rgba(0,0,0,.85)}
+  @keyframes sheetIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+  @media(max-width:760px){
+    .fbsheet{right:10px;left:10px;bottom:10px;top:auto;width:auto;max-height:86vh}
+    .fbsheet .card{max-height:86vh}
+    @keyframes sheetIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  }
+  .fbhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .fbmin{flex:0 0 34px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+    border:1px solid var(--line);background:var(--glass);color:var(--soft);cursor:pointer;padding:0;
+    transition:color .15s,border-color .15s}
+  .fbmin:hover{color:var(--ink);border-color:rgba(255,255,255,.24)}
+  .fbmin svg{width:16px;height:16px}
+
+  /* put away, not thrown away — it waits here for the rest of the session */
+  .fbbadge{position:fixed;right:18px;bottom:18px;z-index:70;display:inline-flex;align-items:center;gap:9px;
+    padding:8px 16px 8px 8px;border-radius:var(--r-full);cursor:pointer;
+    border:1px solid color-mix(in srgb,var(--teal) 45%,transparent);
+    background:color-mix(in srgb,var(--teal) 16%,rgba(12,10,28,.92));
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    color:var(--ink);font-family:var(--display);font-weight:600;font-size:var(--fs-sm);
+    box-shadow:0 16px 40px -16px rgba(0,0,0,.8);
+    animation:badgeIn .3s cubic-bezier(.22,1,.36,1)}
+  .fbbadge.hidden{display:none}
+  .fbbadge img{width:30px;height:30px;object-fit:contain;display:block}
+  .fbbadge:hover{border-color:color-mix(in srgb,var(--teal) 75%,transparent);transform:translateY(-1px)}
+  @keyframes badgeIn{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
+  @media(max-width:420px){ .fbbadge-lbl{display:none} .fbbadge{padding:8px} }
+  @media (prefers-reduced-motion:reduce){ .fbsheet,.fbbadge{animation:none} }
+
   .thinking{position:fixed;inset:0;z-index:80;display:none;place-items:center;padding:var(--sp-5);
     background:rgba(6,5,18,.72);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
   #app[data-phase="analysing"] .thinking{display:grid}
@@ -369,8 +408,14 @@
       </div>
     </div>
 
-    <div class="card fb hidden" id="fb">
-      <span class="eyebrow">&#10024; Your feedback</span>
+    <div class="fbsheet hidden" id="fbsheet" role="region" aria-label="Your feedback">
+    <div class="card fb" id="fb">
+      <div class="fbhead">
+        <span class="eyebrow">&#10024; Your feedback</span>
+        <button class="fbmin" id="fbMin" type="button" aria-label="Put the feedback away">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+        </button>
+      </div>
       <p class="byline">From Oriva, our AI coach &mdash; written the way Anna &amp; Jake teach:
         warm, specific, never picking at grammar.</p>
       <p class="summary" id="fbSummary"></p>
@@ -381,6 +426,12 @@
       <div class="closing" id="fbClosing"></div>
       <details><summary>&#128221; See what you said</summary><p id="fbTranscript"></p></details>
     </div>
+    </div>
+
+    <button class="fbbadge hidden" id="fbBadge" type="button" aria-label="Read your feedback again">
+      <img src="/assets/oriva/happy.png" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'\u2728'}))">
+      <span class="fbbadge-lbl">Your feedback</span>
+    </button>
   </div>
 
   <div id="gate"></div>
@@ -561,7 +612,7 @@ $('#epPick').addEventListener('change',async ev=>{
   if(takes.length && !confirm('Switching episode clears the takes you have recorded. Continue?')){
     ev.target.value=prev; return;
   }
-  clearTakes(); $('#fb').classList.add('hidden'); clearMsg();
+  clearTakes(); hideFeedback(); clearMsg();
   ev.target.disabled=true;
   try{
     const u=await api({action:'usage',episodeId:next});
@@ -585,7 +636,7 @@ $('#epPick').addEventListener('change',async ev=>{
     renderTask(u);
     renderPicker(u.episodes);
     setUsage(u);
-    loadNote(u); wireNote();
+    loadNote(u); wireNote(); wireFeedbackSheet();
     if(u.name) $('#title').textContent=`Hi ${u.name} — record, get feedback, improve.`;
     ELCAccount(u.name?{name:u.name, plan:u.plan}:null,{next:'/out-loud.html'});
   }catch(err){
@@ -734,7 +785,7 @@ $('#mic').onclick=async()=>{
   if($('#mic').disabled || remainingMin<=0) return;
   const left=MAX_SEC-total();
   if(left<=0){ showMsg('You have reached the 3-minute maximum. Delete a take to record more.','warn'); return; }
-  clearMsg(); $('#fb').classList.add('hidden'); stopPlayback();
+  clearMsg(); hideFeedback(); stopPlayback();
   let stream;
   try{ stream=await getMicStream(); }
   catch(err){ showMicError(err); return; }
@@ -842,6 +893,37 @@ function waitThenRetry(secs){
   updateUI();
 }
 
+/* The feedback sheet. `hasFeedback` is what makes the badge worth showing: without it,
+   minimising an empty sheet would leave a badge promising something that is not there. */
+let hasFeedback=false;
+function openFeedback(){
+  hasFeedback=true;
+  $('#fbsheet').classList.remove('hidden');
+  $('#fbBadge').classList.add('hidden');
+  const c=$('#fbsheet').querySelector('.card'); if(c) c.scrollTop=0;
+  $('#fbMin').focus({preventScroll:true});
+}
+/* Gone entirely — sheet AND badge. Used on the paths where the feedback stops being true:
+   a new take, a cleared set, a switched episode. Distinct from minimise, which keeps it. */
+function hideFeedback(){
+  hasFeedback=false;
+  $('#fbsheet').classList.add('hidden');
+  $('#fbBadge').classList.add('hidden');
+}
+function minimiseFeedback(){
+  if(!hasFeedback) return;
+  $('#fbsheet').classList.add('hidden');
+  $('#fbBadge').classList.remove('hidden');
+}
+function wireFeedbackSheet(){
+  $('#fbMin').addEventListener('click',minimiseFeedback);
+  $('#fbBadge').addEventListener('click',openFeedback);
+  // Escape puts it away rather than destroying it — "close" here means "for now"
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && !$('#fbsheet').classList.contains('hidden')) minimiseFeedback();
+  });
+}
+
 /* One place decides what the page is doing, so the CSS can do the rest. */
 function setPhase(p){
   const app=$('#app'); if(!app) return;
@@ -878,7 +960,10 @@ async function submit(){
   const t=total();
   if(!takes.length || t<MIN_SEC){ updateUI(); return; }
   $('#analyze').disabled=true;
-  clearMsg(); startThinking();
+  clearMsg();
+  // the last take's feedback is about to be replaced; get it out of the way first
+  hideFeedback();
+  startThinking();
   try{
     if(!pendingWav) pendingWav=await buildWav();   // encode once, reuse on retry
     const b64=await blobToB64(new Blob([pendingWav],{type:'audio/wav'}));
@@ -923,8 +1008,7 @@ function renderFeedback(f){
   document.querySelectorAll('#words .wchip').forEach(c=>{
     if(used.has((c.dataset.w||'').toLowerCase())) c.classList.add('hit');
   });
-  $('#fb').classList.remove('hidden');
-  $('#fb').scrollIntoView({behavior:'smooth',block:'start'});
+  openFeedback();
 }
 
 function blobToB64(b){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]);fr.onerror=rej;fr.readAsDataURL(b);});}
