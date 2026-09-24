@@ -706,6 +706,22 @@ hesitation, pauses, speed, smoothness or tone — **including as PRAISE** ("you 
 confident" judges a voice, not a sentence) — and defines the rubric's `fluency` as LANGUAGE
 fluency, finding words and linking ideas, never delivery. The one honest exception is
 searching for a WORD, which is a language event; struggling with a SOUND is not.
+**A member can tell the coach how they speak.** `uil:note:{uid}` holds one line, up to 200
+characters, written once and read before every analysis — "I stammer", "my voice is hoarse
+at the moment", "I speak slowly, I am not stuck". It is a SETTING, so no TTL: practice
+history ages out, a person's voice does not. It is read in the same lookup as the recent
+tweaks (`coachContext()`), so knowing the member costs one round trip, not two. The control
+is a collapsed `<details>` in the record card — most members have nothing to say there, and
+a box permanently asking about your speech implies everyone is expected to have something
+wrong. It saves on an explicit button, never on blur: someone describing their own body
+should not have it swallowed silently when they look away.
+**It is free text going into a model prompt, so it is handled as data, not instructions**:
+`cleanNote()` flattens newlines and strips control characters before storage (a newline is
+how a sentence starts looking like a new instruction), it is wrapped in `<<< >>>` in the
+prompt, and the prompt says outright that nothing inside can change the judgement and that a
+request for a particular verdict is to be ignored. `node tools/test-voice-note.mjs` covers
+the cleaning and the injection case.
+
 **`wpm` is the open question here**: it is still shown next to every recording on
 `progress.html`, and for a member who stammers it is a running measure of their disfluency —
 and the site's own rule is that the rubric never appears as a number because this is a

@@ -173,6 +173,26 @@
   details{margin-top:14px}details summary{cursor:pointer;color:var(--soft2);font-family:var(--display);font-weight:600;font-size:var(--fs-sm)}
   details p{color:var(--soft);font-size:var(--fs-md);line-height:1.6;margin:.5rem 0 0}
 
+  /* Collapsed by default: most members have nothing to say here, and a box permanently
+     asking about your speech implies everyone is expected to have something wrong. */
+  .voice{margin-top:var(--sp-4);padding-top:13px;border-top:1px solid var(--line)}
+  .voice > summary{cursor:pointer;list-style:none;font-family:var(--display);font-weight:600;
+    font-size:var(--fs-sm);color:var(--soft);padding:2px 0;transition:color .15s}
+  .voice > summary::-webkit-details-marker{display:none}
+  .voice > summary:hover{color:var(--ink)}
+  .voice[open] > summary{color:var(--ink);margin-bottom:8px}
+  .voice-why{color:var(--soft2);font-size:var(--fs-xs);line-height:1.55;margin:0 0 9px}
+  .voice textarea{width:100%;background:var(--glass2);border:1px solid var(--line);border-radius:12px;
+    color:var(--ink);padding:10px 12px;font:inherit;font-size:var(--fs-sm);line-height:1.5;resize:vertical}
+  .voice textarea:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+  .voice-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+  .voice-count{font-size:var(--fs-xs);color:var(--soft2);font-variant-numeric:tabular-nums}
+  .voice-count.saved{color:var(--teal)}
+  .btn.ghost{background:var(--glass);border:1px solid var(--line);color:var(--ink);
+    font-family:var(--display);font-weight:600;font-size:var(--fs-sm);padding:8px 16px;
+    border-radius:var(--r-full);cursor:pointer}
+  .btn.ghost:hover{border-color:color-mix(in srgb,var(--teal) 45%,transparent)}
+
   .msg{margin-top:var(--sp-3);font-size:var(--fs-md);padding:var(--sp-3) 14px;border-radius:13px;display:none;line-height:1.5}
   .msg.show{display:block}
   .msg.err{background:linear-gradient(135deg,rgba(246,71,154,.18),rgba(255,90,90,.10));color:#ffc2d6;border:1px solid rgba(246,71,154,.4)}
@@ -256,6 +276,19 @@
         <audio id="player" class="hidden"></audio>
       </div>
       <div class="msg" id="msg"></div>
+
+      <details class="voice" id="voiceBox">
+        <summary>&#128172; Anything Oriva should know about how you speak?</summary>
+        <p class="voice-why">Your words, kept just for you. Oriva reads this before every
+          recording &mdash; it never changes how your English is judged, only what Oriva
+          knows about your voice. Clear the box to remove it.</p>
+        <textarea id="voiceNote" maxlength="200" rows="2"
+          placeholder="I stammer. &middot; My voice is hoarse at the moment. &middot; I speak slowly &mdash; I am not stuck."></textarea>
+        <div class="voice-row">
+          <span class="voice-count" id="voiceCount"></span>
+          <button class="btn ghost" id="voiceSave" type="button">Save</button>
+        </div>
+      </details>
     </div>
     </div><!-- /.duo -->
 
@@ -302,6 +335,41 @@ async function api(payload){
   if(!r.ok){const e=new Error(d.error||'error');e.status=r.status;e.data=d;throw e;}
   return d;
 }
+/* The voice note. Saved explicitly rather than on blur: this is a member describing their
+   own body, and a box that silently swallows what you typed the moment you look away is the
+   wrong feel for that. The summary shows a tick once something is stored, so a member can
+   see at a glance that Oriva has been told without opening it. */
+let noteSaved='';
+function paintNote(){
+  const box=$('#voiceNote'); if(!box) return;
+  const n=box.value.trim().length, max=Number(box.getAttribute('maxlength'))||200;
+  const c=$('#voiceCount'), dirty=box.value.trim()!==noteSaved;
+  c.classList.toggle('saved',!dirty&&!!noteSaved);
+  c.textContent = dirty ? `${n}/${max}` : (noteSaved?'\u2713 Oriva knows':`${n}/${max}`);
+  const sum=$('#voiceBox').querySelector('summary');
+  sum.innerHTML = (noteSaved?'\u2705 ':'\uD83D\uDCAC ')
+    + (noteSaved?'Oriva knows how you speak':'Anything Oriva should know about how you speak?');
+}
+function loadNote(u){
+  const box=$('#voiceNote'); if(!box||typeof u.note!=='string') return;
+  noteSaved=u.note; box.value=u.note;
+  if(u.noteMax) box.setAttribute('maxlength',String(u.noteMax));
+  paintNote();
+}
+function wireNote(){
+  const box=$('#voiceNote'); if(!box) return;
+  box.addEventListener('input',paintNote);
+  $('#voiceSave').addEventListener('click',async()=>{
+    const btn=$('#voiceSave'); btn.disabled=true;
+    try{
+      const d=await api({action:'note',text:box.value});
+      noteSaved=d.note||''; box.value=noteSaved; paintNote();
+    }catch(e){ showMsg('Could not save that just now. Please try again.','err'); }
+    finally{ btn.disabled=false; }
+  });
+  paintNote();
+}
+
 function showMsg(t,kind){const m=$('#msg');m.className='msg show '+(kind||'');m.textContent=t;}
 function clearMsg(){$('#msg').className='msg';}
 
@@ -427,6 +495,7 @@ $('#epPick').addEventListener('change',async ev=>{
     renderTask(u);
     renderPicker(u.episodes);
     setUsage(u);
+    loadNote(u); wireNote();
     if(u.name) $('#title').textContent=`Hi ${u.name} — record, get feedback, improve.`;
     ELCAccount(u.name?{name:u.name, plan:u.plan}:null,{next:'/out-loud.html'});
   }catch(err){
