@@ -12,7 +12,7 @@ import { readSession, revalidateSession, planOf } from '../lib/session.js';
 import { getUsage, addUsage, clampRecordingSec, limitFor, MAX_REC_SEC, getClubUsage } from '../lib/quota.js';
 import { getEpisodes } from '../lib/arcade-store.js';
 import { logSession, getAggregates, getSessions, getNote, setNote, NOTE_MAX } from '../lib/history.js';
-import { focusFor, allNew, speechMetrics } from '../lib/coach.js';
+import { focusFor, allNew, speechMetrics, OWNED_AT } from '../lib/coach.js';
 
 // Audio analysis of a 3-minute clip can take well past the platform default, and a
 // killed function looks like a generic failure to the member. Give it real headroom.
@@ -84,7 +84,8 @@ async function episodeFor(wanted) {
   try { eps = await getEpisodes(); } catch { /* fall through to the static fallback */ }
   if (!eps.length) return FALLBACK_EP;
   const e = (wanted && eps.find((x) => x.id === wanted)) || eps.find((x) => x.current) || eps[0];
-  return { id: e.id, number: e.n, title: e.title, prompt: promptFor(e.id, e.title), words: e.words };
+  return { id: e.id, number: e.n, title: e.title, prompt: promptFor(e.id, e.title),
+    words: e.words, wordMeta: e.wordMeta || [] };
 }
 
 // Everything the member can practise, newest first — feeds the episode picker.
@@ -248,8 +249,14 @@ async function focusWords(uid, words) {
        to tell them apart to describe them honestly, and it has no counts of its own — so
        send the never-spoken subset rather than making it guess. */
     const focusNew = focus.filter((w) => !(counts[String(w).toLowerCase().trim()] > 0));
-    return { focus, focusNew, fresh: allNew(words, agg.words) };
-  } catch { return { focus: [], focusNew: [], fresh: false }; }
+    /* How many times each of THESE six words has been used, so the page can show progress
+       as a bar instead of a sentence. Only the episode's own words — the aggregate holds
+       every word the member has ever used and none of the rest is any of the page's
+       business. */
+    const used = {};
+    for (const w of words) used[w] = Math.min(OWNED_AT, counts[String(w).toLowerCase().trim()] || 0);
+    return { focus, focusNew, used, ownedAt: OWNED_AT, fresh: allNew(words, agg.words) };
+  } catch { return { focus: [], focusNew: [], used: {}, ownedAt: OWNED_AT, fresh: false }; }
 }
 
 export default async function handler(req, res) {
@@ -295,6 +302,7 @@ export default async function handler(req, res) {
     return res.json({
       ok: true, name: s.name, plan: planOf(s), ...publicUsage(u),
       prompt: ep.prompt, episode: ep.number, episodeId: ep.id, title: ep.title, words: ep.words,
+      wordMeta: ep.wordMeta || [],
       ...(await focusWords(s.uid, ep.words)),     // { focus, fresh }
       note: await getNote(s.uid),
       noteMax: NOTE_MAX,

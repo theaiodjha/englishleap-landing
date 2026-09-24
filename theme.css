@@ -244,6 +244,22 @@ html[data-theme="light"] .iback{background:rgba(255,255,255,.62) !important}
   .mic.live::after{animation:none !important}
 }
 
+/* The six target words on out-loud.html. A NEW class on purpose: `.chip` is shared with
+   four games and already carries two light-theme override blocks, so restyling it here
+   would land on all of them. `color-mix` against the word's own palette colour is doing
+   the work in both themes; on paper the tint has to be lighter and the border darker, and
+   the word itself stays in an ink token so a pale accent never becomes the text colour. */
+html[data-theme="light"] .wchip{
+  background:color-mix(in srgb,var(--wc) 9%,rgba(255,255,255,.86));
+  border-color:color-mix(in srgb,var(--wc) 45%,transparent);
+  color:#2b2650;
+}
+html[data-theme="light"] .wchip.owned{
+  background:color-mix(in srgb,var(--wc) 16%,rgba(255,255,255,.86));
+  border-color:color-mix(in srgb,var(--wc) 66%,transparent);
+}
+html[data-theme="light"] .wchip .own{background:color-mix(in srgb,var(--wc) 20%,transparent)}
+
 /* ---- figure/ground on light ----------------------------------------------
    index.html and archive.html read correctly because their .card uses a TOKEN
    (--panel / --glass) that flips to white above. out-loud.html and the focus

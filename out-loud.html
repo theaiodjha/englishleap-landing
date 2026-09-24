@@ -103,6 +103,35 @@
   .chip.due .tick{border-color:rgba(255,205,70,.65);color:var(--gold)}
   .chip.due.on{color:#04201c;border-color:transparent;font-weight:600;transform:translateY(-1px);
     background:linear-gradient(120deg,var(--mint),var(--teal));box-shadow:0 8px 24px -8px rgba(31,196,182,.7)}
+  /* The six target words. Each carries --wc, its own palette colour from the catalogue —
+     the same colour it wears in every game — and a bar showing how close it is to being
+     owned. The word itself stays in an ink token: a coloured label loses contrast on light
+     and starts reading as a status, which is the bar's job, not the text's. */
+  .wchips{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+  .wchip{position:relative;display:inline-flex;align-items:center;gap:8px;
+    padding:8px 14px 10px;border-radius:15px;overflow:hidden;
+    border:1px solid color-mix(in srgb,var(--wc) 38%,transparent);
+    background:color-mix(in srgb,var(--wc) 11%,var(--glass2));
+    font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink);
+    transition:transform .2s cubic-bezier(.22,1,.36,1),border-color .2s}
+  .wchip .em{font-size:15px/* emoji glyph, not type */;line-height:1}
+  /* the ownership bar: a LENGTH, so the state is never carried by colour alone */
+  .wchip .own{position:absolute;left:0;bottom:0;height:3px;width:100%;
+    background:color-mix(in srgb,var(--wc) 16%,transparent)}
+  .wchip .own i{display:block;height:100%;width:var(--p,0%);background:var(--wc);
+    border-radius:0 3px 3px 0;transition:width .7s cubic-bezier(.22,1,.36,1)}
+  /* owned: the word is yours — fill the chip and tick it */
+  .wchip.owned{border-color:color-mix(in srgb,var(--wc) 62%,transparent);
+    background:color-mix(in srgb,var(--wc) 20%,var(--glass2))}
+  .wchip.owned .tk{color:var(--wc)}
+  .wchip .tk{font-size:var(--fs-xs);opacity:.9}
+  /* today's two: a ring, so "aim here" is visible without another sentence */
+  .wchip.due{box-shadow:0 0 0 3px color-mix(in srgb,var(--wc) 20%,transparent);
+    border-color:color-mix(in srgb,var(--wc) 70%,transparent);transform:translateY(-1px)}
+  /* used in THIS recording — the live confirmation while feedback renders */
+  .wchip.hit{transform:translateY(-2px) scale(1.03);
+    box-shadow:0 0 0 3px color-mix(in srgb,var(--wc) 32%,transparent)}
+
   .duenote{margin:var(--sp-3) 0 0;font-size:var(--fs-sm);line-height:1.6;color:var(--soft)}
   .duenote .hlw{color:var(--gold);font-weight:700;background:rgba(255,205,70,.13);
     border-bottom:1.5px solid rgba(255,205,70,.55);padding:1px 6px;border-radius:7px;white-space:nowrap}
@@ -245,7 +274,7 @@
       <h2>&#127919; Your task</h2>
       <p class="epline" id="epline"></p>
       <p class="task" id="prompt">&mdash;</p>
-      <div class="chips" id="words"></div>
+      <div class="wchips" id="words"></div>
       <p class="duenote" id="duenote"></p>
       <div class="picker hidden" id="picker">
         <label class="picklbl" for="epPick">&#127911; Practise a different episode</label>
@@ -438,22 +467,35 @@ function renderTask(u){
   // Words this member has never used naturally are marked, so practice compounds
   // instead of circling the same easy three.
   const due=new Set((u.focus||[]).map(w=>String(w).toLowerCase()));
-  $('#words').innerHTML=words.map(w=>
-    `<span class="chip${due.has(w.toLowerCase())?' due':''}" data-w="${w}"><span class="tick">✓</span>${w}</span>`).join('');
+  /* Colour and emoji come from the catalogue — the same identity the word has in every
+     game. The bar is how many natural uses out of OWNED_AT this member has. Both the bar
+     and the aria-label carry the state, so it is never colour alone. */
+  const meta={}; (u.wordMeta||[]).forEach(m=>{ meta[String(m.w).toLowerCase()]=m; });
+  const used=u.used||{}, ownedAt=Number(u.ownedAt)||3;
+  $('#words').innerHTML=words.map(w=>{
+    const k=w.toLowerCase(), m=meta[k]||{}, n=Math.min(ownedAt,Number(used[w])||0);
+    const owned=n>=ownedAt, pct=Math.round((n/ownedAt)*100);
+    const say = owned ? `${w} — yours now, used ${ownedAt} times or more`
+      : n===0 ? `${w} — not used out loud yet`
+      : `${w} — used ${n} of ${ownedAt} times`;
+    return `<span class="wchip${owned?' owned':''}${due.has(k)?' due':''}" data-w="${esc(w)}"`
+      + ` style="--wc:${esc(m.c||'#8b6cff')}" title="${esc(say)}" aria-label="${esc(say)}">`
+      + (m.e?`<span class="em" aria-hidden="true">${esc(m.e)}</span>`:'')
+      + esc(w)
+      + (owned?'<span class="tk" aria-hidden="true">✓</span>':'')
+      + `<span class="own" aria-hidden="true"><i style="width:${pct}%"></i></span>`
+      + `</span>`;
+  }).join('');
   const list=(u.focus||[]);
   /* Nothing is singled out on a first visit: all six words are equally new, so saying
      "you have not used these two" would be arbitrary rather than personal.
      And a focus word is not necessarily an UNUSED one — it can be one used once or twice
      but not yet owned. Telling a member they have never said a word they said a minute ago
      is a claim they can check, so the two cases get their own sentences. */
-  const newly=(u.focusNew||[]), rusty=list.filter(w=>!newly.includes(w));
-  const note = newly.length>1
-    ? `✨ Reach for ${newly[0]} and ${newly[1]} today — you have not used them out loud yet.`
-    : newly.length===1 && rusty.length
-      ? `✨ Reach for ${newly[0]} today — that one is still untouched, and ${rusty[0]} could use another go.`
-    : newly.length===1 ? `✨ Reach for ${newly[0]} today — you have not used it out loud yet.`
-    : rusty.length>1 ? `✨ Reach for ${rusty[0]} and ${rusty[1]} today — another outing or two and they will stick.`
-    : rusty.length ? `✨ Reach for ${rusty[0]} today — another outing or two and it will stick.`
+  /* The bars now say how far along each word is, so the sentence no longer has to. It
+     keeps only the part prose is better at than a bar: WHICH ones to aim at today. */
+  const note = list.length>1 ? `✨ Reach for ${list[0]} and ${list[1]} today.`
+    : list.length===1 ? `✨ Reach for ${list[0]} today.`
     : u.fresh ? `✨ All ${words.length} phrases are new to you — work in as many as feel natural.` : '';
   $('#duenote').innerHTML = note ? hlWords(note, list) : '';
 }
@@ -794,7 +836,12 @@ function renderFeedback(f){
     const on=used.has(w.toLowerCase());
     return `<span class="chip ${on?'on':''}"><span class="tick">✓</span>${w}</span>`;
   }).join('');
-  document.querySelectorAll('#words .chip').forEach(c=>{ if(used.has((c.dataset.w||'').toLowerCase())) c.classList.add('on'); });
+  /* Light up the task words this recording actually used. The selector and the class both
+     had to follow the chips to .wchip — left as '#words .chip' it matched nothing and the
+     confirmation silently stopped happening, with no error to notice. */
+  document.querySelectorAll('#words .wchip').forEach(c=>{
+    if(used.has((c.dataset.w||'').toLowerCase())) c.classList.add('hit');
+  });
   $('#fb').classList.remove('hidden');
   $('#fb').scrollIntoView({behavior:'smooth',block:'start'});
 }

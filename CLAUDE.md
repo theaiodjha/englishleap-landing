@@ -706,6 +706,19 @@ hesitation, pauses, speed, smoothness or tone — **including as PRAISE** ("you 
 confident" judges a voice, not a sentence) — and defines the rubric's `fluency` as LANGUAGE
 fluency, finding words and linking ideas, never delivery. The one honest exception is
 searching for a WORD, which is a language event; struggling with a SOUND is not.
+**The six target words carry their own colour and their own progress.** `getEpisodes()` used
+to map clues to `c.word` and drop `c.color`/`c.emoji` one line before they became useful —
+they are now kept as `wordMeta` and shipped to the page, so a word looks the same on Out Loud
+as it does in all five games. Each chip also carries a bar showing natural uses out of
+`OWNED_AT`, which let the prose underneath collapse from "Reach for scattered today — that
+one is still untouched, and overwhelmed could use another go" to "Reach for scattered and
+overwhelmed today": the bars say how far along each word is, so the sentence only has to say
+which ones to aim at. Less text, more information — that is the shape every density fix on
+this page should take. **The class is `.wchip`, NOT `.chip`**: `.chip` is shared by four
+games and carries two separate light-theme override blocks, so restyling it here would land
+on all of them — the `.ep.go` collision again. State is never colour-alone: the bar is a
+length, owned adds a tick, and every chip has an aria-label spelling it out.
+
 **A member can tell the coach how they speak.** `uil:note:{uid}` holds one line, up to 200
 characters, written once and read before every analysis — "I stammer", "my voice is hoarse
 at the moment", "I speak slowly, I am not stuck". It is a SETTING, so no TTL: practice
