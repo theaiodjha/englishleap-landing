@@ -122,7 +122,7 @@ assistant knows the exact patterns from prior episodes).
 | `games/<type>/index.html` | The 5 game engines (generic — read `content`). |
 | `index.html` | Landing page (tiers, pillars, legend). |
 | `practice-arcade.html` | Arcade hub + login/error messaging. |
-| `archive.html`, `use-it-live.html` | Transcript archive; speaking-feedback feature. |
+| `archive.html`, `out-loud.html` | Transcript archive; speaking-feedback feature. |
 | `tools/seed-arcade.js` | Optional KV seeder (NOT needed for deploy-only). |
 | `covers/`, `games/clue-room/icons/auto/` | Per-episode covers and clue tiles. |
 
@@ -133,7 +133,7 @@ assistant knows the exact patterns from prior episodes).
   vanilla component + forced-alignment (aeneas/WhisperX) build step for timings +
   PWA "save for offline". Audio comes from Google AI Studio (Gemini TTS) -> ffmpeg
   to mono mp3/m4a.
-- **Use It Live** (record + AI speaking feedback) exists but nav is gated behind an
+- **Out Loud** (record + AI speaking feedback) exists but nav is gated behind an
   `UIL_ENABLED` flag.
 
 ## 9. What the next chat needs from you

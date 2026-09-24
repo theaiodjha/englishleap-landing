@@ -11,7 +11,7 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const NAV = fs.readFileSync(path.join(ROOT, 'elc-nav.js'), 'utf8');
-const UIL = fs.readFileSync(path.join(ROOT, 'use-it-live.html'), 'utf8');
+const UIL = fs.readFileSync(path.join(ROOT, 'out-loud.html'), 'utf8');
 
 let bad = 0;
 const ok = (label, cond, extra = '') => {
@@ -36,7 +36,7 @@ function bootNav(store = {}) {
     readyState: 'complete', documentElement: { classList: { toggle() {}, add() {}, remove() {} } },
     getElementById: () => null, querySelector: () => null, addEventListener() {},
   };
-  global.location = { pathname: '/use-it-live.html', origin: 'https://englishleap.app', search: '' };
+  global.location = { pathname: '/out-loud.html', origin: 'https://englishleap.app', search: '' };
   global.window = global;
   global.addEventListener = () => {};
   global.setTimeout = () => 0;

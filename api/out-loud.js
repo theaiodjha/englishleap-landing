@@ -1,5 +1,5 @@
 import "../lib/quiet-deprecations.js";
-// /api/use-it-live — record-and-review speaking practice.
+// /api/out-loud — record-and-review speaking practice.
 //   POST { action:'usage' }                                  → minutes left this month
 //   POST { action:'analyze', audio, mimeType, durationSec, episodeId }
 //         → warm feedback on the recording, and meters its length against the
@@ -24,7 +24,7 @@ const FLUENCY_MIN_CENTS = 200; // Transcript = 100¢, Fluency Club = 299¢ (mirr
 
 // The speaking task comes from the SAME six words the Arcade teaches for an episode.
 // clue-room is the free-tier game, so it carries every episode — reading it there keeps
-// Use It Live in step with the arcade automatically, with no second list to maintain.
+// Out Loud in step with the arcade automatically, with no second list to maintain.
 // Hand-written prompts win where they exist; everything else gets a warm generic one.
 // Per-episode speaking tasks. Each one asks for a specific memory or opinion rather
 // than "the theme", because a nervous B1 learner can start a story immediately but
@@ -201,7 +201,7 @@ export default async function handler(req, res) {
   // --- feature flag: hidden from the audience until tested & verified ---
   // Turn the feature on for everyone by setting env  UIL_ENABLED=true
   // While off, you can still preview it yourself via either:
-  //   • open /use-it-live.html?preview=TOKEN  where TOKEN === env UIL_PREVIEW_TOKEN
+  //   • open /out-loud.html?preview=TOKEN  where TOKEN === env UIL_PREVIEW_TOKEN
   //   • add your Patreon uid (e.g. p:12345) to env UIL_PREVIEW_UIDS (comma-separated)
   const ENABLED = ['true', '1'].includes(String(process.env.UIL_ENABLED));
   const previewToken = process.env.UIL_PREVIEW_TOKEN || '';
@@ -209,7 +209,7 @@ export default async function handler(req, res) {
   const previewUids = String(process.env.UIL_PREVIEW_UIDS || '').split(',').map(x => x.trim()).filter(Boolean);
   const preview = (previewToken && token && token === previewToken) || (s && s.uid && previewUids.includes(s.uid));
   if (!ENABLED && !preview) {
-    return res.status(503).json({ ok: false, coming_soon: true, message: 'Use It Live is coming soon \u2014 we\u2019re testing it now.' });
+    return res.status(503).json({ ok: false, coming_soon: true, message: 'Out Loud is coming soon \u2014 we\u2019re testing it now.' });
   }
 
   // Entitlement must track live Patreon status: without this a cancelled member keeps
@@ -219,7 +219,7 @@ export default async function handler(req, res) {
   if (!fluencyOK(s)) {
     return res.status(s ? 403 : 401).json({
       ok: false, login: !s, upgrade: !!s,
-      error: s ? 'Use It Live is part of Fluency Club ($2.99).' : 'Sign in with Patreon to use this.',
+      error: s ? 'Out Loud is part of Fluency Club ($2.99).' : 'Sign in with Patreon to use this.',
     });
   }
 

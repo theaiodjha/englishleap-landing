@@ -190,12 +190,12 @@ for (const id of ids) {
   if (new Set(gaps).size !== gaps.length) fail(id, 'story-unlock: a phrase is used in two gaps', gaps.join(','));
   if (!su.bonusEnding) fail(id, 'story-unlock: no bonus ending');
 
-  // --- Use It Live derives the current episode's speaking task from this catalogue
+  // --- Out Loud derives the current episode's speaking task from this catalogue
   if (eps['clue-room'].current) {
-    const uil = fs.readFileSync(path.join(ROOT, 'api', 'use-it-live.js'), 'utf8');
+    const uil = fs.readFileSync(path.join(ROOT, 'api', 'out-loud.js'), 'utf8');
     if (!new RegExp(`\\b${escRe(id)}\\s*:`).test(uil)) {
-      fail(id, 'is CURRENT but has no hand-written prompt in api/use-it-live.js PROMPTS — '
-        + 'Use It Live would fall back to the generic title-built task');
+      fail(id, 'is CURRENT but has no hand-written prompt in api/out-loud.js PROMPTS — '
+        + 'Out Loud would fall back to the generic title-built task');
     }
   }
 }

@@ -92,7 +92,7 @@ ok('no dead affordance on the empty tiles',
 // --- the three cards below the KPI row ---
 ok('the KPI card may overflow, so a selected tile is not clipped',
   /class="card wide nofold"/.test(hFull));
-// The allowance must match the METER (what Use It Live enforces), not the practice
+// The allowance must match the METER (what Out Loud enforces), not the practice
 // history — the two are separate counters and the meter can legitimately be ahead.
 ok('allowance shows the meter, not the history aggregate',
   /2 <span>of 100 minutes used this month/.test(hFull) && /98 left/.test(hFull),

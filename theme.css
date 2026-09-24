@@ -188,7 +188,7 @@ html.elc-nofloat-theme #elc-theme-toggle:not(.in-menu){display:none}
 @media (pointer:coarse){#elc-theme-toggle{height:46px}#elc-theme-toggle button{min-width:44px}}
 
 /* ================================================================
-   Practice Arcade + Use It Live components (added with the rollout)
+   Practice Arcade + Out Loud components (added with the rollout)
    Anything that hardcoded a white-on-dark fill, a dark shadow, or a
    neon text colour needs a light equivalent to stay readable.
    ================================================================ */
@@ -246,7 +246,7 @@ html[data-theme="light"] .iback{background:rgba(255,255,255,.62) !important}
 
 /* ---- figure/ground on light ----------------------------------------------
    index.html and archive.html read correctly because their .card uses a TOKEN
-   (--panel / --glass) that flips to white above. use-it-live.html and the focus
+   (--panel / --glass) that flips to white above. out-loud.html and the focus
    card hardcode a violet gradient, so on a violet ground they dissolve into the
    page — same hue, 1.14:1 apart. Make them paper, and let the border and shadow
    do the separating, which is how light UI is supposed to work.            */

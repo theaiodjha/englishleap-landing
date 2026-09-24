@@ -589,11 +589,11 @@ function arcadeNotices(d){
   const el=document.getElementById('notices');
   if(!el) return;
 
-  // 1. news: Use It Live has opened. Truly one-time, so the key carries no period.
+  // 1. news: Out Loud has opened. Truly one-time, so the key carries no period.
   if(window.ELC_SHOW_UIL && ELCNotice(el,{
     key:'uil-launch', tone:'good', icon:'&#127897;&#65039;',
-    html:`<b>Use It Live is open.</b> Record your English and get warm, specific feedback
-      &mdash; <a href="/use-it-live.html">try it</a>.`
+    html:`<b>Out Loud is open.</b> Record your English and get warm, specific feedback
+      &mdash; <a href="/out-loud.html">try it</a>.`
   })) return;
 
   // 2. state: still on trial. Ends on its own, so a plain key is right.

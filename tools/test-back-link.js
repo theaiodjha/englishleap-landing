@@ -39,7 +39,7 @@ const cases = [
   ['from the game-type page', P + '/arcade-type.html?type=phrase-pairs', '/arcade-type.html?type=phrase-pairs  |  Phrase Pairs'],
   ['from browse',             P + '/arcade-browse.html',                 '/arcade-browse.html  |  Browse the arcade'],
   ['from the arcade',         P + '/practice-arcade.html',               '/practice-arcade.html  |  Practice Arcade'],
-  ['from Use It Live',        P + '/use-it-live.html',                   '/use-it-live.html  |  Use It Live'],
+  ['from Out Loud',        P + '/out-loud.html',                   '/out-loud.html  |  Out Loud'],
   ['from the marketing home', P + '/',                                   '/  |  Home'],
   ['a reload (self)',         P + '/progress.html',                      '/practice-arcade.html  |  Practice Arcade'],
   ['from off-site',           'https://patreon.com/x',                   '/practice-arcade.html  |  Practice Arcade'],

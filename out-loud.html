@@ -4,8 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#06060f" />
-<meta name="description" content="Use It Live — record yourself speaking English and get warm, gentle AI feedback on your confidence and fluency. Part of the English Leap Club Fluency tier." />
-<title>English Leap Club · Use It Live</title>
+<meta name="description" content="Out Loud — record yourself speaking English and get warm, gentle AI feedback on your confidence and fluency. Part of the English Leap Club Fluency tier." />
+<title>English Leap Club · Out Loud</title>
 <script src="/theme.js"></script>
 <link rel="stylesheet" href="/elc.css" />
 <link rel="stylesheet" href="/theme.css" />
@@ -178,9 +178,11 @@
 
   <div id="app" class="hidden">
     <div class="hero">
-      <span class="eyebrow">&#127897;&#65039; Use It Live &middot; Speak &amp; review</span>
-      <h1>Speak it. Get <span class="g">real feedback.</span></h1>
-      <p class="lede">Record your answer out loud, and Anna &amp; Jake will tell you what you did well &mdash; and one gentle thing to try next. &#128172;</p>
+      <span class="eyebrow">&#127897;&#65039; Out Loud &middot; Find your voice</span>
+      <h1>Say it out loud. <span class="g">Find your voice.</span></h1>
+      <p class="lede">Record your answer, and Oriva listens &mdash; then names two things you did well
+        and one gentle thing to try next. Oriva is our AI coach, and it answers the way Anna &amp; Jake teach:
+        warm, specific, never picking at grammar. &#128172;</p>
       <p class="welcome" id="title"></p>
     </div>
 
@@ -267,7 +269,7 @@ let episodeId='';   // whichever episode the server served us — sent back on a
 let pendingWav=null, busyTries=0, retrying=false; // encoded once; a busy retry never re-encodes
 
 async function api(payload){
-  const r=await fetch('/api/use-it-live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(PREVIEW?{...payload,preview:PREVIEW}:payload)});
+  const r=await fetch('/api/out-loud',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(PREVIEW?{...payload,preview:PREVIEW}:payload)});
   const d=await r.json().catch(()=>({}));
   if(!r.ok){const e=new Error(d.error||'error');e.status=r.status;e.data=d;throw e;}
   return d;
@@ -390,16 +392,16 @@ $('#epPick').addEventListener('change',async ev=>{
     renderPicker(u.episodes);
     setUsage(u);
     if(u.name) $('#title').textContent=`Hi ${u.name} — record, get feedback, improve.`;
-    ELCAccount(u.name?{name:u.name, plan:u.plan}:null,{next:'/use-it-live.html'});
+    ELCAccount(u.name?{name:u.name, plan:u.plan}:null,{next:'/out-loud.html'});
   }catch(err){
     if(err.data && err.data.coming_soon){
-      gate(`<div class="gate"><span class="eyebrow">&#10024; Coming soon</span><h2>&#127897;&#65039; Use It Live is almost ready</h2>
+      gate(`<div class="gate"><span class="eyebrow">&#10024; Coming soon</span><h2>&#127897;&#65039; Out Loud is almost ready</h2>
         <p>We&rsquo;re putting the finishing touches on your speaking practice and testing it carefully. It will open to Fluency Club members very soon &mdash; thank you for your patience! &#128156;</p>
         <a class="cta" href="/practice-arcade.html">&#127918; Try the Practice Arcade meanwhile</a></div>`);
     } else if(err.status===401){
       gate(`<div class="gate"><span class="eyebrow">&#128172; Fluency Club</span><h2>Speak and get feedback</h2>
         <p>Sign in with Patreon to record your English and get gentle, friendly feedback.</p>
-        <a class="cta" href="/api/auth/login?next=/use-it-live.html">Continue with Patreon</a></div>`);
+        <a class="cta" href="/api/auth/login?next=/out-loud.html">Continue with Patreon</a></div>`);
     } else if(err.status===403){
       gate(`<div class="gate"><span class="eyebrow">&#128172; Fluency Club</span><h2>This is a Fluency Club feature</h2>
         <p>Record-and-review speaking practice is part of Fluency Club ($2.99/mo), with 100 practice minutes every month.</p>
@@ -442,7 +444,7 @@ function micErrorMessage(err){
   if(n==='NotAllowedError'||n==='SecurityError') return 'Microphone access is blocked. Tap the lock or camera icon near the address bar, allow the microphone, then try again.';
   if(n==='NotFoundError'||n==='OverconstrainedError') return 'No microphone was found on this device.';
   if(n==='NotReadableError'||n==='AbortError') return 'Your microphone is busy in another app. Close it and try again.';
-  if(n==='InsecureError') return 'Recording needs a secure (https) page. Please open https://englishleap.app/use-it-live.html directly.';
+  if(n==='InsecureError') return 'Recording needs a secure (https) page. Please open https://englishleap.app/out-loud.html directly.';
   if(n==='UnsupportedError') return 'This browser can\u2019t record audio here. If you opened this inside another app (like a messenger), tap \u201cOpen in Safari/Chrome\u201d and try again.';
   if(n==='NoRecorderError') return 'Your browser is a little old for recording. Please update it, or use the latest Chrome or Safari.';
   return 'I could not reach your microphone. Please allow microphone access and try again.';

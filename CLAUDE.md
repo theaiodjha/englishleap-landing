@@ -74,7 +74,7 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   forms: `index.html`'s **pill** (`.pill-eyebrow`, neutral `#3a3560` ink on light, its
   `.dot` carrying the colour at `#0b6f68` with the glow dropped — a box-shadow halo reads
   as light at night and as a smudge on paper) and the plain **teal label** on
-  `practice-arcade.html`/`use-it-live.html` (`var(--teal)` = 1.9:1 on light, now `#0b6f68`).
+  `practice-arcade.html`/`out-loud.html` (`var(--teal)` = 1.9:1 on light, now `#0b6f68`).
   Neither had a rule in `theme.css` until now.
 - **`color-scheme` drives native controls.** `elc.css` sets `dark`, `theme.css` sets
   `light` — without it a `<select>` renders in the OS's scheme, so voice pickers appeared
@@ -115,14 +115,14 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   row in half). Cap such a grid with `width:min(<design>, 100%, <width implied by the
   height left below the header>)` using `svh`.
 - **One member header, defined once** in `elc-nav.js` (Arcade · Progress, each with an
-  icon; Use It Live appears when `SHOW_UIL` is flipped at launch). The brand is the real
+  icon; Out Loud appears when `SHOW_UIL` is flipped at launch). The brand is the real
   logo — `/assets/brand/elc-icon-64.png` + "English Leap" — matching `index.html`. Member pages
   carry `<div id="elcnav"></div><script src="/elc-nav.js"></script>` at the top of `.wrap`
   (it is `position:sticky` and frosts once scrolled, matching `index.html`; never put
   `overflow-x:hidden` on an ancestor — use `clip`, or sticky stops working)
   and nothing else — the script renders synchronously so page scripts still find `#acct`.
   Six pages previously had five different headers with drifting labels, and Progress and
-  Use It Live did not link to each other.
+  Out Loud did not link to each other.
 - **Nothing waits on a round trip to decide what to paint.** Being signed in is an
   HttpOnly cookie, so a page cannot know it without asking — which is why the theme toggle
   and tour pill used to appear on every navigation and then vanish, and why the header
@@ -145,7 +145,7 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   history, written by `logSession()` which **fails open** — so anything analysed while
   that write failed, or before history existed, is metered but never logged, and the
   meter runs ahead. The allowance row on `progress.html` must therefore show the
-  **meter** (`usedMin`/`limitMin`), the same figure Use It Live shows: pointing it at the
+  **meter** (`usedMin`/`limitMin`), the same figure Out Loud shows: pointing it at the
   history aggregate to match the all-time KPI was tried and traded a cosmetic mismatch
   for a real one — the page disagreed with the recorder about a limit the member is
   subject to. The KPI above is all-time practice, a different question; the caption under
@@ -172,9 +172,9 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   (`uil-quota-2026-09`, not `uil-quota`) — a notice that can be switched off permanently
   will be, and then the once it mattered it is gone. **A notice about the CURRENT state is
   not dismissible** (the at-zero quota message is rendered directly, with no close button):
-  you cannot dismiss a fact. Four exist: the Use It Live **quota warning** (at whichever is
+  you cannot dismiss a fact. Four exist: the Out Loud **quota warning** (at whichever is
   kinder of a fifth of the allowance or 15 minutes; at zero it becomes a non-dismissible
-  statement), and three on the Arcade via `arcadeNotices()` — the **Use It Live launch**
+  statement), and three on the Arcade via `arcadeNotices()` — the **Out Loud launch**
   (`uil-launch`, fired by `window.ELC_SHOW_UIL`, the same switch as the nav tab), the
   **trial** state (`trial-open`, ends by itself), and the **away three weeks** nudge
   (`away-{year}-{week}`, so it can return). **Only ONE ever shows**, in that order — news,
@@ -214,7 +214,7 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   Arcade, not back at the home page. The plan comes from **`planOf(s)` in `lib/session.js`** —
   derived from `cents`, not `s.tier`, which is `'fluency'` for ANY paid pledge and so
   labels a $1 Transcript backer a Fluency member. `api/games.js` ships it as `level`;
-  `api/list.js`, `api/progress.js` and `api/use-it-live.js` ship it as `plan`.
+  `api/list.js`, `api/progress.js` and `api/out-loud.js` ship it as `plan`.
 - **There is no global back button** — the tabs are the way around, and **the games keep
   their minimal bar** — back, brand, account, no tabs (a game is a focus task) — while
   `index.html` keeps its marketing nav. The four standard games DO use the shared account
@@ -300,7 +300,7 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
   keys its solved set on `id`), a geometry `geom()` actually knows (`ico box sphere torus
   octa dodeca cone cyl` — anything else silently becomes an icosahedron), puzzle answers as
   a permutation of the words with one more segment than answers, covers that exist, a long
-  title, and the current episode having a real Use It Live prompt.
+  title, and the current episode having a real Out Loud prompt.
   **The phrase must appear as a WHOLE WORD in its Listening Gap and Sentence Builder
   sentences.** That game cuts its blank with `indexOf(phrase)`, so an inflected form strands
   the ending: EP282's "We lingered over coffee" with phrase `linger` rendered as
@@ -336,7 +336,7 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **Conventional one-line git commits** (e.g. `fix(auth): …`, `feat(uil): …`).
 - **Two design systems, never mixed:** the marketing/member site uses **Clash Display +
   General Sans** (Fontshare) with the dark "aurora" aesthetic (see `practice-arcade.html`
-  / `use-it-live.html`); the premium PDF/print pipeline uses **Poppins**.
+  / `out-loud.html`); the premium PDF/print pipeline uses **Poppins**.
 - **Tokens live in `elc.css`, not in the page.** Every page links it before its own
   `<style>`, so a page can still override a token it genuinely needs. It also carries the
   **type scale** (`--fs-xs`…`--fs-2xl`, six steps replacing 22 ad-hoc px values) and the
@@ -371,7 +371,7 @@ practice-arcade.html       the Arcade (Patreon-gated mini-games) + "Browse games
 arcade-browse.html         browse the whole game catalogue by episode
 arcade-type.html           per-game-type page
 archive.html               Member Archive (gated content library)
-use-it-live.html           Use It Live — record & get AI feedback (FLAGGED OFF, see below)
+out-loud.html           Out Loud — record & get AI feedback (FLAGGED OFF, see below)
 elc-tour.js                guided Oriva tour (home + arcade); auto-runs first visit
 api/auth/{login,callback,signout}.js   Patreon OAuth flow
 api/{games,list,download,unlock}.js    arcade data, archive list/download, code redemption
@@ -380,7 +380,7 @@ api/support.js             help form -> email via Resend; the mailbox never reac
 help.html                  quick answers + a message form with screenshots (linked from the account card)
 api/progress.js            records game completions + returns practice history / recap / dashboard
 progress.html              the member progress page (KPI row, monthly chart, phrase mastery)
-api/use-it-live.js         Use It Live: usage + audio analysis (Gemini), flag-gated
+api/out-loud.js         Out Loud: usage + audio analysis (Gemini), flag-gated
 lib/session.js             session cookie (HMAC), readSession(), checkMembership() → tier/uid/email,
                            revalidateSession() → shared 24h live Patreon re-check
 lib/quota.js               monthly audio quota (Upstash), keyed to session.uid; tier-aware
@@ -432,12 +432,12 @@ games/*                    5 game types (clue-room, phrase-pairs, listening-gap,
   logs the first time) — keep the env var set.
 - **Fluency entitlement** = `cents >= 200` (Transcript = 100¢, Fluency = 299¢); a legacy
   session with `cents === undefined` counts as full. Mirror this anywhere you gate
-  Fluency-only features (see `api/games.js` and `api/use-it-live.js`).
+  Fluency-only features (see `api/games.js` and `api/out-loud.js`).
 - **Re-check membership on every gated route** with `revalidateSession(res, s)` — it
   refreshes the token, re-confirms with Patreon at most every `RECHECK_HOURS`, backfills
   `cents` on legacy sessions, and returns `null` (clearing the cookie) once a membership
   goes inactive. Without it a cancelled member keeps their access for the cookie's 30 days.
-  `api/games.js` and `api/use-it-live.js` use it; **`api/list.js` still has its own inline
+  `api/games.js` and `api/out-loud.js` use it; **`api/list.js` still has its own inline
   copy** — fold it in when you next touch that file.
 - **Wrong-account UX:** callback requests `identity[email]`, masks it (`ja***@gmail.com`),
   and passes `&who=` on `e=notmember`; the arcade names the account and offers a
@@ -451,7 +451,28 @@ OAuth state cookie to always share the callback origin, make **apex the primary 
 the dashboard still does apex→www (it loops). The core "not a member" failures are now
 fixed in code (campaign id); this remains good hygiene for state-cookie robustness.
 
-## Use It Live — CURRENT STATE: hidden behind a flag
+## Out Loud — CURRENT STATE: hidden behind a flag
+
+**The name is "Out Loud", the tagline is "Find your voice."** It was "Use It Live" until the
+rename, which happened while the feature was still hidden — no inbound links, no bookmarks,
+nothing indexed, so the page and the route were renamed outright with no redirect. "Live"
+was a promise the feature does not keep: you record, you wait, the model answers. **The
+INTERNALS keep the old name on purpose** — the `uil:` KV prefixes (`uil:min`, `uil:agg`,
+`uil:log`, `uil:recapseen`) hold live member data that is not worth migrating, and
+`UIL_ENABLED` / `UIL_PREVIEW_TOKEN` / `UIL_PREVIEW_UIDS` are set in the Vercel dashboard,
+where a renamed variable silently turns the feature off if one is missed. `SHOW_UIL` and the
+`uil:` nav-item flag stay for the same reason. A shipped name and an identifier do not have
+to agree.
+
+**Oriva gives the feedback, and the page says so.** The lede used to read "Anna & Jake will
+tell you what you did well" — but the feedback is Gemini's, and the only disclosure was in a
+`<meta name="description">` no member ever sees. Crediting AI output to two named real
+people is the kind of claim that costs trust the moment someone works it out. Oriva is
+openly a character and is ALREADY the voice members practise with ("match Oriva's rhythm" in
+the shadowing audio), so making Oriva the listener is honest and still warm. The prompt in
+`api/out-loud.js` does tell the model to write as Anna & Jake, which is why the page can say
+Oriva "answers the way Anna & Jake teach" — note "answers the way", not "trained on": it is
+prompted, not fine-tuned, and the copy should not imply otherwise.
 
 Record-and-review speaking practice: the learner records audio, **Gemini** analyses it
 (Claude can't take audio) and returns warm feedback (2 wins + 1 gentle tweak,
@@ -462,7 +483,7 @@ member (`lib/quota.js`), Fluency-gated.
 clue-room block of the catalogue (`getArcade()`), takes the episode flagged `current`
 (or the requested `episodeId`) and uses its six clue words. Long titles come from
 `lib/episode-titles.js`. Per-episode hand-written prompts live in `PROMPTS` in
-`api/use-it-live.js` — **every episode has one**, and `tools/test-episode-data.mjs` fails the CURRENT episode if it does not; `promptFor()` still falls back to a
+`api/out-loud.js` — **every episode has one**, and `tools/test-episode-data.mjs` fails the CURRENT episode if it does not; `promptFor()` still falls back to a
 title-built prompt for any episode added later. Write the real one when you add an episode:
 the generic version is useless for a format title like "40 Minutes of Real English", and a
 concrete task ("talk about a night you could not switch off") is what a nervous B1 learner
@@ -496,13 +517,13 @@ clip is ~6.7k tokens → roughly 300 requests/min, not 1000. `maxDuration: 60` i
 route because a long clip plus a retry easily outruns the platform default.
 
 **Intentionally OFF for the audience** until tested:
-- `api/use-it-live.js` returns a `coming_soon` 503 unless `UIL_ENABLED=true`.
-- `use-it-live.html` shows a clean "coming soon" card in that state.
-- Nav links are **commented out** — search `Use It Live hidden until verified` across
+- `api/out-loud.js` returns a `coming_soon` 503 unless `UIL_ENABLED=true`.
+- `out-loud.html` shows a clean "coming soon" card in that state.
+- Nav links are **commented out** — search `Out Loud hidden until verified` across
   `index.html`, `archive.html`, `practice-arcade.html` (and the tour step in `elc-tour.js`).
 
 **Owner preview while hidden** (either):
-- open `/use-it-live.html?preview=TOKEN` where `TOKEN === UIL_PREVIEW_TOKEN`, or
+- open `/out-loud.html?preview=TOKEN` where `TOKEN === UIL_PREVIEW_TOKEN`, or
 - add your uid (e.g. `p:12345`) to `UIL_PREVIEW_UIDS` (comma-separated).
 
 Preview bypasses the flag only — the Fluency gate still applies, and the creator account
@@ -521,7 +542,7 @@ PATREON_REDIRECT_URI     must equal the apex callback registered in Patreon
 PATREON_CAMPAIGN_ID      SET (live) — resolves membership to your campaign (fixed trial logins)
 # data
 KV_REST_API_URL, KV_REST_API_TOKEN     Upstash (arcade + quota)
-# Use It Live
+# Out Loud
 GEMINI_API_KEY           required for audio analysis (Google AI Studio key)
 GEMINI_MODEL             optional, default gemini-3.6-flash (2.5-flash is retired for new keys)
 UIL_ENABLED              'true' to open the feature to everyone (default: off)
@@ -541,8 +562,8 @@ SUPPORT_FROM             sender on the Resend-VERIFIED domain, which is the SUBD
 0. ~~Set `PATREON_CAMPAIGN_ID`~~ — **done**: set in Vercel, campaign-membership
    resolution is live and the fallback warning is gone.
 1. **Confirm apex-canonical** in Vercel Domains + `PATREON_REDIRECT_URI` = apex callback.
-2. **Set `GEMINI_API_KEY`** (Use It Live is inert without it).
-3. **Test Use It Live privately** via preview; verify an **iPhone/Safari** recording
+2. **Set `GEMINI_API_KEY`** (Out Loud is inert without it).
+3. **Test Out Loud privately** via preview; verify an **iPhone/Safari** recording
    (MP4/AAC) analyses end-to-end, and desktop mics work once OS/browser permission is
    granted (the page shows step-by-step OS guidance on failure).
 4. **Launch:** `UIL_ENABLED=true` + uncomment nav/tour.
@@ -770,7 +791,7 @@ is the worse failure. Every visitor field is escaped before it enters the email 
 - Inlining a script that contains the literal `</script>` (e.g. in a comment) breaks
   the page — keep `elc-tour.js` external.
 - Gemini audio accepts ogg/mp3/aac/wav/flac (WebM worked in testing, but is undocumented).
-  `use-it-live.html` no longer relies on the `MediaRecorder` container at all — it decodes
+  `out-loud.html` no longer relies on the `MediaRecorder` container at all — it decodes
   each take and re-encodes one WAV, so Chrome/Safari differences stop at decode time.
 - Gemini model ids retire: `gemini-2.5-flash` is refused for new API keys with a **404**
   naming its replacement. Default is `gemini-3.6-flash`; override with `GEMINI_MODEL`.

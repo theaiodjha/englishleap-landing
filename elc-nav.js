@@ -2,7 +2,7 @@
  *
  * Six pages previously carried five different headers (.topbar, .hd, .bar, .nav …) with
  * drifting labels ("Arcade" vs "Practice Arcade") and inconsistent destinations — Progress
- * and Use It Live did not link to each other at all. Defining the items once makes that
+ * and Out Loud did not link to each other at all. Defining the items once makes that
  * class of bug impossible.
  *
  * Usage: put `<div id="elcnav"></div><script src="/elc-nav.js"></script>` at the top of
@@ -13,7 +13,7 @@
  * back-only bar. index.html keeps its marketing nav.
  */
 (function () {
-  // Use It Live is still hidden behind UIL_ENABLED — flip this the day it launches.
+  // Out Loud is still hidden behind UIL_ENABLED — flip this the day it launches.
   var SHOW_UIL = false;
   // published so a page can announce the launch from the same single switch
   window.ELC_SHOW_UIL = SHOW_UIL;
@@ -22,14 +22,14 @@
     arcade: '<path d="M7 12h4M9 10v4"/><circle cx="15.5" cy="11" r="1"/><circle cx="17.5" cy="13.5" r="1"/>' +
             '<rect x="2.5" y="6.5" width="19" height="11" rx="4"/>',
     progress: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
-    live: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'
   };
 
   var ITEMS = [
     { href: '/practice-arcade.html', label: 'Arcade',      icon: 'arcade',
       match: ['/practice-arcade.html', '/arcade-browse.html', '/arcade-type.html'] },
     { href: '/progress.html',        label: 'Progress',    icon: 'progress', match: ['/progress.html'] },
-    { href: '/use-it-live.html',     label: 'Use It Live', icon: 'live',     match: ['/use-it-live.html'], uil: true }
+    { href: '/out-loud.html',     label: 'Out Loud', icon: 'mic' ,     match: ['/out-loud.html'], uil: true }
   ];
 
   function svg(name) {
@@ -49,7 +49,7 @@
   var PAGE = {
     '/practice-arcade.html': 'Practice Arcade',
     '/arcade-browse.html': 'Browse the arcade',
-    '/use-it-live.html': 'Use It Live',
+    '/out-loud.html': 'Out Loud',
     '/help.html': 'Help',
     '/archive.html': 'Member Archive'
   };
