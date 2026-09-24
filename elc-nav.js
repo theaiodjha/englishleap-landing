@@ -14,7 +14,7 @@
  */
 (function () {
   // Out Loud is still hidden behind UIL_ENABLED — flip this the day it launches.
-  var SHOW_UIL = false;
+  var SHOW_UIL = true;
   // published so a page can announce the launch from the same single switch
   window.ELC_SHOW_UIL = SHOW_UIL;
 

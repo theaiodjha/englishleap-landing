@@ -293,7 +293,9 @@
     { sel: '.journey', pose: 'point',
       title: 'How it all fits',
       body: 'Watch \u2192 Read \u2192 Play \u2192 Speak. That\u2019s the loop that turns a 10-minute episode into English you can use.' },
-    // Out Loud tour step hidden until verified
+    { sel: 'a[href="/out-loud.html"]', pose: 'think',
+      title: 'Say it out loud',
+      body: 'Record yourself answering this week’s question, and Oriva tells you two things you did well — and one gentle thing to try next.' },
     { sel: '#convo', pose: 'think',
       title: 'Unlock everything',
       body: 'Free players get the Clue Room. Fluency Club opens every game for every episode \u2014 and you can start with a free week.' },
