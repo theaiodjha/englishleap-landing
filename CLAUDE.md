@@ -697,6 +697,18 @@ can't be trended; the rubric can. Plus two deterministic measures computed from 
 transcript server-side (`speechMetrics`), not asked of the model, so the same input always
 gives the same number: **wpm** and **ttr** (type-token ratio, vocabulary spread).
 
+**The tweak must be ANCHORED, or it is always the same tweak.** The schema asked the wins to
+be specific and point at real moments, and asked the tweak only to be *about a topic*
+("confidence or flow, not a grammar nitpick") — which leaves breathe / slow down / pause, so
+every member got "take a slow, deep breath before you record", every session. The prompt now
+requires the tweak to name a moment from THIS recording, rules out those default answers
+unless the audio genuinely shows rushing or panic, and gives a specific fallback for a fluent
+take (name a target word they did not reach for). It also gets a MEMORY: `recentTweaksFor()`
+reads the last 6 tweaks out of `uil:log:{uid}` — they are already stored so the progress page
+can read feedback back — and tells the model not to repeat itself. One extra KV read per
+analysis. `node tools/test-tweak-prompt.mjs` asserts what reaches Gemini; model output cannot
+be tested, but the prompt is where the bug was.
+
 **The rubric is never shown to the member** — `delete feedback.rubric` before responding.
 It lives in the data, not on screen. That is deliberate: the brand promise is a practice
 community, not a scoreboard.

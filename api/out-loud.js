@@ -11,7 +11,7 @@ import "../lib/quiet-deprecations.js";
 import { readSession, revalidateSession, planOf } from '../lib/session.js';
 import { getUsage, addUsage, clampRecordingSec, limitFor, MAX_REC_SEC, getClubUsage } from '../lib/quota.js';
 import { getEpisodes } from '../lib/arcade-store.js';
-import { logSession, getAggregates } from '../lib/history.js';
+import { logSession, getAggregates, getSessions } from '../lib/history.js';
 import { focusFor, allNew, speechMetrics } from '../lib/coach.js';
 
 // Audio analysis of a 3-minute clip can take well past the platform default, and a
@@ -100,7 +100,7 @@ function fluencyOK(s) {
   return (Number(s.cents) || 0) >= FLUENCY_MIN_CENTS;
 }
 
-function analysisPrompt(ep, focus) {
+function analysisPrompt(ep, focus, recentTweaks) {
   return `You are Anna and Jake, the warm hosts of the "Speak English With Class" podcast, giving friendly feedback to a B1–B2 English learner. They recorded themselves speaking for this task from Episode ${ep.number} ("${ep.title}"):
 
 TASK THEY WERE GIVEN: "${ep.prompt}"
@@ -109,12 +109,26 @@ STILL WORKING ON: ${focus.join(', ')} — if they use one of these naturally, sa
 
 Listen to the audio and reflect it back kindly. This is NOT a grammar test and NOT a score sheet. Focus on confidence, flow, and the words they used well. Be specific and point to real moments. Use plain, warm B1–B2 English.
 
+ABOUT THE TWEAK — this is the part that goes wrong most often, so read it twice.
+It must be anchored in THIS recording, exactly as the wins are. Point at something that
+actually happened: a sentence they restarted, a thought they left hanging, a simple word
+they used where a target word would have fitted, a place they explained something in three
+words that deserved ten. Name the moment so they can hear it again in their head.
+Do NOT suggest breathing, relaxing, slowing down, taking your time, or speaking up unless
+this recording genuinely shows rushing, panic or a voice too quiet to hear. Those are the
+default answers a coach reaches for when they have not really listened, and they are almost
+never the most useful thing available. If the recording is genuinely fluent and you are
+struggling to find anything, give them something to REACH for next time — name a target
+word they did not use and the kind of sentence it would have fitted.${(recentTweaks && recentTweaks.length) ? `
+You have already given this learner these tweaks. Say something different:
+${recentTweaks.map((t) => `  - ${t}`).join('\n')}` : ''}
+
 Return ONLY a JSON object with this exact shape:
 {
   "transcript": "<a clean transcript of what the learner said>",
   "summary": "<one warm sentence describing what they talked about>",
   "wins": ["<specific thing they did well>", "<a second specific win>"],
-  "tweak": "<ONE small, gentle, doable suggestion for next time — about confidence or flow, not a grammar nitpick>",
+  "tweak": "<ONE small, doable suggestion — anchored to a real moment in THIS recording>",
   "words_used": ["<any TARGET words they actually used naturally, base form>"],
   "closing": "<one short encouraging line>",
   "rubric": { "fluency": <1-5>, "clarity": <1-5>, "vocabulary": <1-5>, "task": <1-5> }
@@ -136,12 +150,25 @@ function transientWait(status, text) {
   return Math.min(60, Math.max(5, named || (status === 429 ? 20 : 8)));
 }
 
-async function analyzeAudio(base64, mimeType, ep, focus) {
+/* What the coach has already told this learner, newest first, so it stops repeating
+   itself. The sessions are already stored for the progress page — this reads the same
+   list, one extra KV command per analysis, which is a fair price for the difference
+   between "take a deep breath" every time and feedback that sounds like it listened. */
+const TWEAK_MEMORY = 6;
+async function recentTweaksFor(uid) {
+  try {
+    const rows = await getSessions(uid, TWEAK_MEMORY);
+    return (rows || []).map((r) => String(r.tweak || r.x || '').trim())
+      .filter(Boolean).slice(0, TWEAK_MEMORY);
+  } catch { return []; }               // never let history break an analysis
+}
+
+async function analyzeAudio(base64, mimeType, ep, focus, recentTweaks) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
   const body = {
     contents: [{
       parts: [
-        { text: analysisPrompt(ep, focus) },
+        { text: analysisPrompt(ep, focus, recentTweaks) },
         { inline_data: { mime_type: mimeType, data: base64 } },
       ],
     }],
@@ -169,14 +196,14 @@ async function analyzeAudio(base64, mimeType, ep, focus) {
 
 // A rate-limited call fails in well under a second, so one short wait still fits the
 // function budget — and retrying HERE means the member never re-uploads their audio.
-async function analyzeWithRetry(base64, mimeType, ep, focus) {
+async function analyzeWithRetry(base64, mimeType, ep, focus, recentTweaks) {
   try {
-    return await analyzeAudio(base64, mimeType, ep, focus);
+    return await analyzeAudio(base64, mimeType, ep, focus, recentTweaks);
   } catch (e) {
     if (!e.transient) throw e;
     const wait = Math.min(e.retryAfter, 6) * 1000 + Math.floor(Math.random() * 900); // jitter spreads a burst
     await new Promise((r) => setTimeout(r, wait));
-    return analyzeAudio(base64, mimeType, ep, focus);
+    return analyzeAudio(base64, mimeType, ep, focus, recentTweaks);
   }
 }
 
@@ -278,7 +305,8 @@ export default async function handler(req, res) {
     const { focus } = await focusWords(s.uid, ep.words);
 
     let feedback;
-    try { feedback = await analyzeWithRetry(audio, mimeType, ep, focus); }
+    const recentTweaks = await recentTweaksFor(s.uid);
+    try { feedback = await analyzeWithRetry(audio, mimeType, ep, focus, recentTweaks); }
     catch (e) {
       // Busy is a wait, not a failure, and emphatically not "you are out of minutes" —
       // the client keys off `busy` so it never shows the quota message for a burst.
