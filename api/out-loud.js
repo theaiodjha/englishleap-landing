@@ -186,8 +186,14 @@ async function analyzeWithRetry(base64, mimeType, ep, focus) {
 async function focusWords(uid, words) {
   try {
     const agg = await getAggregates(uid);
-    return { focus: focusFor(words, agg.words), fresh: allNew(words, agg.words) };
-  } catch { return { focus: [], fresh: false }; }
+    const focus = focusFor(words, agg.words);
+    const counts = agg.words || {};
+    /* `focus` mixes never-spoken words with spoken-but-not-yet-owned ones. The page needs
+       to tell them apart to describe them honestly, and it has no counts of its own — so
+       send the never-spoken subset rather than making it guess. */
+    const focusNew = focus.filter((w) => !(counts[String(w).toLowerCase().trim()] > 0));
+    return { focus, focusNew, fresh: allNew(words, agg.words) };
+  } catch { return { focus: [], focusNew: [], fresh: false }; }
 }
 
 export default async function handler(req, res) {

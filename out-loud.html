@@ -345,11 +345,19 @@ function renderTask(u){
   $('#words').innerHTML=words.map(w=>
     `<span class="chip${due.has(w.toLowerCase())?' due':''}" data-w="${w}"><span class="tick">✓</span>${w}</span>`).join('');
   const list=(u.focus||[]);
-  // Nothing is singled out on a first visit: all six words are equally new, so saying
-  // "you have not used these two" would be arbitrary rather than personal.
-  const note = list.length>1
-    ? `✨ Reach for ${list[0]} and ${list[1]} today — you have not used them out loud yet.`
-    : list.length ? `✨ Reach for ${list[0]} today — you have not used it out loud yet.`
+  /* Nothing is singled out on a first visit: all six words are equally new, so saying
+     "you have not used these two" would be arbitrary rather than personal.
+     And a focus word is not necessarily an UNUSED one — it can be one used once or twice
+     but not yet owned. Telling a member they have never said a word they said a minute ago
+     is a claim they can check, so the two cases get their own sentences. */
+  const newly=(u.focusNew||[]), rusty=list.filter(w=>!newly.includes(w));
+  const note = newly.length>1
+    ? `✨ Reach for ${newly[0]} and ${newly[1]} today — you have not used them out loud yet.`
+    : newly.length===1 && rusty.length
+      ? `✨ Reach for ${newly[0]} today — that one is still untouched, and ${rusty[0]} could use another go.`
+    : newly.length===1 ? `✨ Reach for ${newly[0]} today — you have not used it out loud yet.`
+    : rusty.length>1 ? `✨ Reach for ${rusty[0]} and ${rusty[1]} today — another outing or two and they will stick.`
+    : rusty.length ? `✨ Reach for ${rusty[0]} today — another outing or two and it will stick.`
     : u.fresh ? `✨ All ${words.length} phrases are new to you — work in as many as feel natural.` : '';
   $('#duenote').innerHTML = note ? hlWords(note, list) : '';
 }
