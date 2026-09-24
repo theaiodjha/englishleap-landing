@@ -73,7 +73,9 @@
   .card{position:relative;background:linear-gradient(135deg,rgba(139,108,255,.12),rgba(31,196,182,.06));border:1px solid var(--line);
     border-radius:24px;padding:22px;margin-top:var(--sp-4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 20px 54px -26px rgba(0,0,0,.75)}
   .card h2{font-family:var(--display);font-weight:600;font-size:var(--fs-lg);margin:0 0 8px;display:flex;align-items:center;gap:9px}
-  .task{color:var(--soft);font-size:var(--fs-md);line-height:1.55;margin:.2rem 0 0}
+  /* the one thing on this card a member must read */
+  .task{color:var(--ink);font-size:clamp(19px,2.1vw,23px);line-height:1.4;margin:10px 0 0;
+    font-family:var(--display);font-weight:500;letter-spacing:-.005em;text-wrap:pretty}
   .epline{font-family:var(--display);font-size:var(--fs-xs);letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--soft2);margin:0 0 7px}
   /* Folded. It was a labelled full-width select costing ~90px permanently, for something
      used rarely — now it costs a line until someone wants it. Same control, same data. */
@@ -112,30 +114,30 @@
      the same colour it wears in every game — and a bar showing how close it is to being
      owned. The word itself stays in an ink token: a coloured label loses contrast on light
      and starts reading as a status, which is the bar's job, not the text's. */
-  .wchips{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
-  .wchip{position:relative;display:inline-flex;align-items:center;gap:8px;
-    padding:8px 14px 10px;border-radius:15px;overflow:hidden;
-    border:1px solid color-mix(in srgb,var(--wc) 38%,transparent);
-    background:color-mix(in srgb,var(--wc) 11%,var(--glass2));
-    font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink);
-    transition:transform .2s cubic-bezier(.22,1,.36,1),border-color .2s}
-  .wchip .em{font-size:15px/* emoji glyph, not type */;line-height:1}
-  /* the ownership bar: a LENGTH, so the state is never carried by colour alone */
-  .wchip .own{position:absolute;left:0;bottom:0;height:3px;width:100%;
-    background:color-mix(in srgb,var(--wc) 16%,transparent)}
+  /* The six words. NO pill: no fill, no border, no sticker. A word with a coloured rule
+     under it is still identified by colour and still shows progress, at a fraction of the
+     ink — six filled pills were six things shouting at the same volume. */
+  .wchips{display:flex;flex-wrap:wrap;gap:7px 22px;margin-top:18px}
+  .wchip{position:relative;display:inline-flex;align-items:baseline;gap:9px;
+    padding:2px 0 9px;font-family:var(--display);font-weight:600;
+    font-size:var(--fs-md);color:var(--ink);
+    transition:opacity .25s,transform .25s cubic-bezier(.22,1,.36,1)}
+  /* "aim here today" as a SHAPE — filled dot for the two, hollow ring for the rest */
+  .wchip .mk{flex:0 0 7px;width:7px;height:7px;border-radius:50%;align-self:center;
+    border:1.5px solid var(--wc);background:transparent;transition:background .25s}
+  .wchip.due .mk{background:var(--wc);box-shadow:0 0 0 3px color-mix(in srgb,var(--wc) 18%,transparent)}
+  /* progress as a rule under the word: a LENGTH, never colour alone */
+  .wchip .own{position:absolute;left:0;right:0;bottom:0;height:2px;
+    background:color-mix(in srgb,var(--wc) 20%,transparent);border-radius:2px}
   .wchip .own i{display:block;height:100%;width:var(--p,0%);background:var(--wc);
-    border-radius:0 3px 3px 0;transition:width .7s cubic-bezier(.22,1,.36,1)}
-  /* owned: the word is yours — fill the chip and tick it */
-  .wchip.owned{border-color:color-mix(in srgb,var(--wc) 62%,transparent);
-    background:color-mix(in srgb,var(--wc) 20%,var(--glass2))}
-  .wchip.owned .tk{color:var(--wc)}
-  .wchip .tk{font-size:var(--fs-xs);opacity:.9}
-  /* today's two: a ring, so "aim here" is visible without another sentence */
-  .wchip.due{box-shadow:0 0 0 3px color-mix(in srgb,var(--wc) 20%,transparent);
-    border-color:color-mix(in srgb,var(--wc) 70%,transparent);transform:translateY(-1px)}
-  /* used in THIS recording — the live confirmation while feedback renders */
-  .wchip.hit{transform:translateY(-2px) scale(1.03);
-    box-shadow:0 0 0 3px color-mix(in srgb,var(--wc) 32%,transparent)}
+    border-radius:2px;transition:width .8s cubic-bezier(.22,1,.36,1)}
+  .wchip.owned .own{background:color-mix(in srgb,var(--wc) 30%,transparent)}
+  .wchip.owned .tk{color:var(--wc);font-size:var(--fs-xs)}
+  .wchip:not(.owned) .tk{display:none}
+  /* not one of today's two, and not yours yet — present, quieter */
+  .wchip:not(.due):not(.owned){opacity:.62}
+  .wchip.hit{transform:translateY(-2px)}
+  .wchip.hit .own i{background:var(--wc);box-shadow:0 0 10px color-mix(in srgb,var(--wc) 60%,transparent)}
 
   /* ---- phases -------------------------------------------------------------
      The page is in exactly one of these at a time, set on #app. They change EMPHASIS,
@@ -143,6 +145,10 @@
   /* Dim the task card's CHILDREN, not the card. Opacity on the card would create a
      stacking context and then nothing inside could be made brighter again — the words
      would fade with everything else and no rule could rescue them. */
+  /* stretch leaves space at the bottom of the shorter card; pin the picker there so it
+     reads as deliberate rather than as a card that ran out of things to say */
+  .task-card{display:flex;flex-direction:column}
+  .task-card .picker{margin-top:auto}
   .task-card > *{transition:opacity .45s ease}
   #app[data-phase="recording"] .task-card > :not(.wchips){opacity:.42}
   @media (prefers-reduced-motion:reduce){ .task-card > *{transition:none} }
@@ -209,9 +215,8 @@
     .thinking .dots i{background:rgba(255,255,255,.45)}
   }
 
-  .duenote{margin:var(--sp-3) 0 0;font-size:var(--fs-sm);line-height:1.6;color:var(--soft)}
-  .duenote .hlw{color:var(--gold);font-weight:700;background:rgba(255,205,70,.13);
-    border-bottom:1.5px solid rgba(255,205,70,.55);padding:1px 6px;border-radius:7px;white-space:nowrap}
+  /* the focus words are already marked in the row above, so this is a caption now */
+  .duenote{margin:var(--sp-4) 0 0;font-size:var(--fs-xs);line-height:1.5;color:var(--soft2)}
   .chip .tick{width:16px;height:16px;display:grid;place-items:center;border-radius:50%;border:1.5px solid var(--soft2);font-size:var(--fs-xs)}
   .chip.on .tick{border-color:#04201c;background:rgba(4,32,28,.25);color:#04201c}
 
@@ -258,11 +263,10 @@
     border:1px solid var(--line);background:var(--glass);color:var(--soft);transition:.2s;padding:0}
   .tbtn:hover{color:var(--ink);border-color:rgba(255,255,255,.22)}
   .tbtn.del:hover{color:#ffc2d6;border-color:rgba(246,71,154,.45)}
-  /* The waveform is decorative — you cannot tell two takes apart by looking at it, which
-     is why it was already dropped on small screens. In the two-column band it would be
-     ~60px wide and say even less, so it only survives in the single-column layout where
-     the card is full width. */
-  @media(min-width:900px){ .wave{display:none} }
+  /* Dropping the waveform in the two-column band was a mistake: it is what made a take
+     look like a recording rather than a row in a table. Back, at a fixed 46px — narrow
+     enough that two pills still fit a row, which was the only reason it went. */
+  .take .wave{flex:0 0 46px;width:46px;gap:1.5px;height:20px;opacity:.85}
   @media(max-width:400px){ .wave{display:none} .take{gap:var(--sp-2)} }
 
   /* feedback */
@@ -348,7 +352,6 @@
 
     <div class="duo">
     <div class="card task-card">
-      <h2>&#127919; Your task</h2>
       <p class="epline" id="epline"></p>
       <p class="task" id="prompt">&mdash;</p>
       <div class="wchips" id="words"></div>
@@ -539,24 +542,6 @@ function quotaNotice(u){
 
 function gate(html){ $('#app').classList.add('hidden'); $('#gate').innerHTML=html; }
 
-/* Mark the focus words inside a sentence. Text is split into segments — plain strings
-   are still matchable, marked ones are objects — so a phrase can never be wrapped twice
-   (longest first means "put off" is consumed before "off" is looked for). Escaping
-   happens last, on each segment, so no placeholder characters are ever needed. */
-function hlWords(text, words){
-  const list=(words||[]).slice().filter(Boolean).sort((a,b)=>String(b).length-String(a).length);
-  let parts=[String(text||'')];
-  list.forEach(w=>{
-    const needle=String(w), next=[];
-    parts.forEach(seg=>{
-      if(typeof seg!=='string'){ next.push(seg); return; }
-      const bits=seg.split(needle);
-      bits.forEach((b,i)=>{ if(i) next.push({w:needle}); if(b) next.push(b); });
-    });
-    parts=next;
-  });
-  return parts.map(p=>typeof p==='string'?esc(p):'<b class="hlw">'+esc(p.w)+'</b>').join('');
-}
 
 function renderTask(u){
   $('#prompt').textContent=u.prompt;
@@ -579,7 +564,7 @@ function renderTask(u){
       : `${w} — used ${n} of ${ownedAt} times`;
     return `<span class="wchip${owned?' owned':''}${due.has(k)?' due':''}" data-w="${esc(w)}"`
       + ` style="--wc:${esc(m.c||'#8b6cff')}" title="${esc(say)}" aria-label="${esc(say)}">`
-      + (m.e?`<span class="em" aria-hidden="true">${esc(m.e)}</span>`:'')
+      + '<span class="mk" aria-hidden="true"></span>'
       + esc(w)
       + (owned?'<span class="tk" aria-hidden="true">✓</span>':'')
       + `<span class="own" aria-hidden="true"><i style="width:${pct}%"></i></span>`
@@ -593,10 +578,9 @@ function renderTask(u){
      is a claim they can check, so the two cases get their own sentences. */
   /* The bars now say how far along each word is, so the sentence no longer has to. It
      keeps only the part prose is better at than a bar: WHICH ones to aim at today. */
-  const note = list.length>1 ? `✨ Reach for ${list[0]} and ${list[1]} today.`
-    : list.length===1 ? `✨ Reach for ${list[0]} today.`
-    : u.fresh ? `✨ All ${words.length} phrases are new to you — work in as many as feel natural.` : '';
-  $('#duenote').innerHTML = note ? hlWords(note, list) : '';
+  const note = list.length ? `Today: ${list.join(', ')}`
+    : u.fresh ? `All ${words.length} phrases are new to you — work in as many as feel natural.` : '';
+  $('#duenote').textContent = note;
 }
 function renderPicker(list){
   if(!Array.isArray(list)||list.length<2) return;            // nothing to switch between

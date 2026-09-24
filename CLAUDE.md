@@ -745,6 +745,18 @@ finished waiting; a real error drops it.
 costing ~90px permanently for something used rarely, and it is now a line until someone wants
 it. Same control, same data — which is the shape density fixes take here.
 
+**The task card is the prompt, and almost nothing else.** It carried a "Your task" heading
+above the task, an episode line, six filled-and-bordered pills each with an emoji, a tick and
+a coloured rule, and a sentence repeating what the pills already said — six things shouting
+at one volume, which is what "not minimal" looks like. Now: the episode line is the eyebrow,
+the **prompt is the hero** (clamp 19-23px, ink, display face) because it is the only thing on
+the card a member must read, and the words lost the pill entirely — a word, a dot and a 2px
+coloured rule. Colour still identifies, the rule still shows progress, at a fraction of the
+ink. "Aim here today" is a FILLED dot against a hollow ring, so it is a shape rather than a
+colour. The picker is pinned with `margin-top:auto` so the space `align-items:stretch` leaves
+reads as deliberate. **On light, do not dim a word to .62** — it drops below 4.5:1; hold the
+ink and change the colour instead (`#5b5680`, 6.4:1).
+
 **The six target words carry their own colour and their own progress.** `getEpisodes()` used
 to map clues to `c.word` and drop `c.color`/`c.emoji` one line before they became useful —
 they are now kept as `wordMeta` and shipped to the page, so a word looks the same on Out Loud
