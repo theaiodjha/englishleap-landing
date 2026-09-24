@@ -745,6 +745,20 @@ finished waiting; a real error drops it.
 costing ~90px permanently for something used rarely, and it is now a line until someone wants
 it. Same control, same data — which is the shape density fixes take here.
 
+**The takes have their own full-width band, and that reversed an earlier decision.** They
+were squeezed into wrapping pills with a 46px waveform because a stacked list inside a 490px
+column cost ~62px per take and pushed "Get my feedback" down the card. Moving them out was
+rejected at the time: the record card would have dropped to ~340px against a ~600px task
+card and the columns would have looked worse. **Stripping the task panel back reversed that
+arithmetic** — the task card is now ~280px and the record card was the taller of the two. So
+the band exists: total bar, takes, hint and the primary button, everything that is ABOUT the
+takes, below the pair. The waveform gets full width, which is the only size at which drawing
+one is worth it. Order reads record → review → send.
+**`#msg` stays in the RECORD card, not the band**: it reports a denied microphone too, which
+happens when there are no takes and the band is still hidden. The band shows only once there
+is something in it (`syncTakeBand()`, called from `renderTakes()`, which every mutation path
+already goes through).
+
 **The task card is the prompt, and almost nothing else.** It carried a "Your task" heading
 above the task, an episode line, six filled-and-bordered pills each with an emoji, a tick and
 a coloured rule, and a sentence repeating what the pills already said — six things shouting

@@ -248,12 +248,19 @@
   .totals .row .tot{font-family:var(--display);font-weight:600}
   .totals .row .tot b{font-size:var(--fs-xl);background:linear-gradient(100deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
   .bar>i.ok{background:linear-gradient(90deg,var(--mint),var(--teal))}
-  /* Takes WRAP rather than stack. Stacked, each take cost ~62px and four of them pushed
-     "Get my feedback" nearly 300px down the card — the primary action moving further away
-     every time you use the feature. Wrapped, four takes cost about two rows. */
-  .takes{display:flex;flex-wrap:wrap;gap:var(--sp-2);width:100%;margin-top:var(--sp-1)}
-  .take{display:flex;align-items:center;gap:8px;padding:5px 7px 5px 12px;border-radius:var(--r-full);
-    border:1px solid var(--line);flex:0 1 auto;
+  /* Back to full-width rows now they have a band of their own — the reason they were
+     squeezed into wrapping pills was that they lived in a 490px column and pushed the
+     primary button down it. Out here neither is true. */
+  .takes{display:flex;flex-direction:column;gap:var(--sp-2);width:100%;margin-top:var(--sp-4)}
+  .takeband{margin-top:var(--sp-4)}
+  .takeband.hidden{display:none}
+  .takeband .actions{margin-top:var(--sp-4)}
+  @media(min-width:900px){
+    /* the button does not need to be as wide as the page */
+    .takeband .actions{max-width:420px;margin-left:auto;margin-right:auto}
+  }
+  .take{display:flex;align-items:center;gap:12px;padding:var(--sp-2) 12px;border-radius:14px;
+    border:1px solid var(--line);
     background:var(--glass2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
   .take .n{flex:0 0 20px;font-family:var(--display);font-weight:700;font-size:var(--fs-xs);color:var(--soft2)}
   .wave{flex:1;display:flex;align-items:center;gap:2px;height:26px;min-width:0;overflow:hidden}
@@ -263,10 +270,8 @@
     border:1px solid var(--line);background:var(--glass);color:var(--soft);transition:.2s;padding:0}
   .tbtn:hover{color:var(--ink);border-color:rgba(255,255,255,.22)}
   .tbtn.del:hover{color:#ffc2d6;border-color:rgba(246,71,154,.45)}
-  /* Dropping the waveform in the two-column band was a mistake: it is what made a take
-     look like a recording rather than a row in a table. Back, at a fixed 46px — narrow
-     enough that two pills still fit a row, which was the only reason it went. */
-  .take .wave{flex:0 0 46px;width:46px;gap:1.5px;height:20px;opacity:.85}
+  /* Full width again. A waveform squeezed to 46px is a texture; at this size it is a
+     picture of what you said, which is the only reason to draw one. */
   @media(max-width:400px){ .wave{display:none} .take{gap:var(--sp-2)} }
 
   /* feedback */
@@ -370,20 +375,10 @@
         </button>
         <div class="timer" id="micLabel">Record</div>
         <p class="helper">Record a few short takes &mdash; pause and think between them. We&rsquo;ll combine them into one and give you feedback.</p>
-        <div class="totals">
-          <div class="row">
-            <span>&#9201;&#65039; Total recorded</span>
-            <span class="tot"><b id="totNow">0:00</b> / 1:00 minimum</span>
-          </div>
-          <div class="bar"><i id="totFill" style="width:0%"></i></div>
-        </div>
-        <div class="takes" id="takes"></div>
-        <div class="hint" id="hint"></div>
-        <div class="actions">
-          <button class="btn primary" id="analyze" disabled>&#9889; Get my feedback</button>
-        </div>
         <audio id="player" class="hidden"></audio>
       </div>
+      <!-- Stays in the RECORD card: it reports a denied microphone too, which happens when
+           there are no takes and the band below is still hidden. -->
       <div class="msg" id="msg"></div>
 
       <details class="voice" id="voiceBox">
@@ -400,6 +395,23 @@
       </details>
     </div>
     </div><!-- /.duo -->
+
+    <!-- Everything that is ABOUT the takes, at full width: the waveform is only worth
+         drawing at a size where it looks like a voice. Appears with the first take. -->
+    <div class="card takeband hidden" id="takeband">
+      <div class="totals">
+        <div class="row">
+          <span>&#9201;&#65039; Total recorded</span>
+          <span class="tot"><b id="totNow">0:00</b> / 1:00 minimum</span>
+        </div>
+        <div class="bar"><i id="totFill" style="width:0%"></i></div>
+      </div>
+      <div class="takes" id="takes"></div>
+      <div class="hint" id="hint"></div>
+      <div class="actions">
+        <button class="btn primary" id="analyze" disabled>&#9889; Get my feedback</button>
+      </div>
+    </div>
 
     <div class="thinking" id="thinking" role="status" aria-live="polite">
       <div class="thinking-in">
@@ -710,6 +722,13 @@ function peaks(buf,n){
   return out.map(v=>Math.max(.12,v/mx));
 }
 
+/* The band exists only once there is something in it — an empty "your takes" card above
+   a mic nobody has pressed yet is furniture. */
+function syncTakeBand(){
+  const b=$('#takeband'); if(!b) return;
+  b.classList.toggle('hidden', takes.length===0);
+}
+
 function renderTakes(){
   $('#takes').innerHTML=takes.map((t,i)=>`<div class="take">
     <span class="n">${i+1}</span>
@@ -719,6 +738,7 @@ function renderTakes(){
     <button class="tbtn del" data-act="del" data-i="${i}" aria-label="Delete take ${i+1}">&#10005;</button>
   </div>`).join('');
   markPlaying();
+  syncTakeBand();
 }
 
 function updateUI(){
