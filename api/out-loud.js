@@ -9,7 +9,7 @@ import "../lib/quiet-deprecations.js";
 // Gemini (Claude can't take audio); swap analyzeAudio() for any audio model.
 
 import { readSession, revalidateSession, planOf } from '../lib/session.js';
-import { getUsage, addUsage, clampRecordingSec, limitFor, MAX_REC_SEC } from '../lib/quota.js';
+import { getUsage, addUsage, clampRecordingSec, limitFor, MAX_REC_SEC, getClubUsage } from '../lib/quota.js';
 import { getEpisodes } from '../lib/arcade-store.js';
 import { logSession, getAggregates } from '../lib/history.js';
 import { focusFor, allNew, speechMetrics } from '../lib/coach.js';
@@ -247,6 +247,19 @@ export default async function handler(req, res) {
       return res.status(429).json({
         ok: false, quota: true, ...publicUsage(before),
         error: `You've used your ${allowance} practice minutes this month. They refresh on the 1st — see you then!`,
+      });
+    }
+
+    /* The club-wide ceiling, checked after the member's own quota and before the model
+       call. This is the circuit breaker for a runaway: a bug, a burst, or simply more
+       success than the budget expected. It is NOT a per-member limit and must never read
+       as one — `resting` is its own state, distinct from `quota` and `busy`. */
+    const club = await getClubUsage();
+    if (club.over) {
+      console.warn(`[out-loud] club ceiling reached: ${club.usedMin}/${club.capMin} min this month`);
+      return res.status(429).json({
+        ok: false, resting: true, ...publicUsage(before),
+        error: 'Out Loud is resting for today while the club catches up. Your own minutes are safe — try again tomorrow.',
       });
     }
 

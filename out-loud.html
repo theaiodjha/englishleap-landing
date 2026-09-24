@@ -667,6 +667,10 @@ async function submit(){
       showMsg('The coach is still very busy. Your recording is safe — tap “Get my feedback” again in a minute.','warn');
     }
     else if(d.quota){ setUsage(d); showMsg(d.error||'You have used your minutes this month.','warn'); }
+    /* The club-wide ceiling. Deliberately NOT the quota message: this member has minutes
+       left, and telling them otherwise would be a lie they could check. Their recording
+       stays on the page so nothing is lost. */
+    else if(d.resting){ setUsage(d); showMsg(d.error||'Out Loud is resting for today. Your own minutes are safe.','warn'); }
     else showMsg(err.message||'Something went wrong. Please try again.','err');
   }finally{ updateUI(); }
 }

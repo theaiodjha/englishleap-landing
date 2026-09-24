@@ -407,6 +407,7 @@ tools/test-episode-pager.js node … — episode neighbours and the ends of the 
 tools/test-sentence-builder.js node … — the tile label: no giveaway, meaningful case kept
 tools/test-nav-hint.js     node tools/test-nav-hint.js — asserts the first-frame account hint
 tools/test-support.mjs     node tools/test-support.mjs — mailbox never leaks, escaping, abuse limits
+tools/test-club-cap.mjs    node … — the club-wide spend ceiling, and that it fails open
 tools/test-episode-data.mjs node … [epId] — the catalogue against what the 5 games assume
 tools/test-episode-arrows.mjs node … — arrows never sit on the board; the phone pager stays in flow
 tools/shadow-align.html    LOCAL page (file://): mp3 + script -> shadowing timings JSON
@@ -493,6 +494,20 @@ list with the usage response); `?ep=ep277` deep-links straight to one, and the p
 keeps the URL in step. Switching clears any recorded takes — they would otherwise be
 scored against the wrong six words.
 
+**There is a club-wide ceiling as well as a per-member one.** Per-member quota caps ONE
+member; total exposure is members x allowance, and nothing watched the sum. `uil:club:{YYYY-MM}`
+(seconds) is incremented in the SAME pipeline call as the personal meter — so it costs no extra
+round trip, and it cannot drift below the truth and start refusing early. `getClubUsage()` is
+checked after the member's own quota and before the model call; over the cap the route returns
+`429 {resting:true}` and logs a `console.warn` into the Vercel log. **`resting` is deliberately
+its own state**, distinct from `quota` and `busy`: a member with 80 minutes left must never be
+told they are out, so the page says the feature is resting and their minutes are safe, and their
+recording stays on the page. Like everything else here it **FAILS OPEN** — a spend cap that
+locks every paying member out during an Upstash blip is a worse failure than the overspend it
+guards against; `UIL_ENABLED=false` is the real stop button. Tune it with `UIL_CLUB_CAP_MIN`
+(minutes, default 3000) from the dashboard without a deploy; `node tools/test-club-cap.mjs`
+covers the ceiling, the fail-open and the two-meters-one-trip property.
+
 **The minute allowance is per tier** (`ALLOWANCE` / `limitFor(cents)` in `lib/quota.js`):
 Fluency (200c+) = 100 min, a 600c+ tier = 400 min. The 600c rung is **plumbing only —
 nothing sells it yet**. Thresholds sit BELOW the intended price so a $6.99 tier (699c)
@@ -548,6 +563,7 @@ GEMINI_MODEL             optional, default gemini-3.6-flash (2.5-flash is retire
 UIL_ENABLED              'true' to open the feature to everyone (default: off)
 UIL_PREVIEW_TOKEN        secret for owner ?preview= access while off
 UIL_PREVIEW_UIDS         comma-separated uids that bypass the flag
+UIL_CLUB_CAP_MIN         club-wide audio minutes per month (default 3000 ~ $8.70); 0 disables
 # Help form
 RESEND_API_KEY           resend.com API key (the form says "not switched on yet" without it)
 SUPPORT_TO               where messages go; comma-separated allowed. NEVER sent to the page
