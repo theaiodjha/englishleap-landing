@@ -75,9 +75,14 @@
   .card h2{font-family:var(--display);font-weight:600;font-size:var(--fs-lg);margin:0 0 8px;display:flex;align-items:center;gap:9px}
   .task{color:var(--soft);font-size:var(--fs-md);line-height:1.55;margin:.2rem 0 0}
   .epline{font-family:var(--display);font-size:var(--fs-xs);letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--soft2);margin:0 0 7px}
-  .picker{margin-top:var(--sp-4);padding-top:15px;border-top:1px solid var(--line)}
-  .picklbl{display:block;font-family:var(--display);font-size:var(--fs-xs);letter-spacing:.13em;text-transform:uppercase;
-    font-weight:700;color:var(--soft2);margin:0 0 8px}
+  /* Folded. It was a labelled full-width select costing ~90px permanently, for something
+     used rarely — now it costs a line until someone wants it. Same control, same data. */
+  .picker{margin-top:var(--sp-4);padding-top:13px;border-top:1px solid var(--line)}
+  .picker > summary{cursor:pointer;list-style:none;font-family:var(--display);font-weight:600;
+    font-size:var(--fs-sm);color:var(--soft);padding:2px 0;transition:color .15s}
+  .picker > summary::-webkit-details-marker{display:none}
+  .picker > summary:hover{color:var(--ink)}
+  .picker[open] > summary{color:var(--ink);margin-bottom:9px}
   .eppick{appearance:none;-webkit-appearance:none;width:100%;padding:var(--sp-3) 40px 12px 14px;border-radius:13px;cursor:pointer;
     font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink);border:1px solid var(--line);background-color:var(--glass2);
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a39fce' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -131,6 +136,39 @@
   /* used in THIS recording — the live confirmation while feedback renders */
   .wchip.hit{transform:translateY(-2px) scale(1.03);
     box-shadow:0 0 0 3px color-mix(in srgb,var(--wc) 32%,transparent)}
+
+  /* ---- phases -------------------------------------------------------------
+     The page is in exactly one of these at a time, set on #app. They change EMPHASIS,
+     never content: everything on the page is still on the page. */
+  /* Dim the task card's CHILDREN, not the card. Opacity on the card would create a
+     stacking context and then nothing inside could be made brighter again — the words
+     would fade with everything else and no rule could rescue them. */
+  .task-card > *{transition:opacity .45s ease}
+  #app[data-phase="recording"] .task-card > :not(.wchips){opacity:.42}
+  @media (prefers-reduced-motion:reduce){ .task-card > *{transition:none} }
+
+  /* the wait */
+  .thinking{position:fixed;inset:0;z-index:80;display:none;place-items:center;padding:var(--sp-5);
+    background:rgba(6,5,18,.72);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+  #app[data-phase="analysing"] .thinking{display:grid}
+  .thinking-in{max-width:340px;text-align:center}
+  .thinking-in img{width:118px;height:auto;display:block;margin:0 auto 4px;
+    animation:bob 2.6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .thinking h3{font-family:var(--display);font-weight:700;font-size:var(--fs-xl);margin:0;color:#fff}
+  .thinking p{color:rgba(255,255,255,.76);font-size:var(--fs-md);line-height:1.5;margin:9px 0 0;min-height:3em}
+  /* three dots that fill in turn — a progress feel without a fake progress bar */
+  .thinking .dots{display:flex;gap:7px;justify-content:center;margin-top:16px}
+  .thinking .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.28);
+    animation:pulseDot 1.4s ease-in-out infinite}
+  .thinking .dots i:nth-child(2){animation-delay:.18s}
+  .thinking .dots i:nth-child(3){animation-delay:.36s}
+  @keyframes pulseDot{0%,100%{background:rgba(255,255,255,.28);transform:scale(1)}
+    50%{background:var(--teal);transform:scale(1.35)}}
+  @media (prefers-reduced-motion:reduce){
+    .thinking-in img,.thinking .dots i{animation:none}
+    .thinking .dots i{background:rgba(255,255,255,.45)}
+  }
 
   .duenote{margin:var(--sp-3) 0 0;font-size:var(--fs-sm);line-height:1.6;color:var(--soft)}
   .duenote .hlw{color:var(--gold);font-weight:700;background:rgba(255,205,70,.13);
@@ -270,16 +308,16 @@
     </div>
 
     <div class="duo">
-    <div class="card">
+    <div class="card task-card">
       <h2>&#127919; Your task</h2>
       <p class="epline" id="epline"></p>
       <p class="task" id="prompt">&mdash;</p>
       <div class="wchips" id="words"></div>
       <p class="duenote" id="duenote"></p>
-      <div class="picker hidden" id="picker">
-        <label class="picklbl" for="epPick">&#127911; Practise a different episode</label>
-        <select class="eppick" id="epPick"></select>
-      </div>
+      <details class="picker hidden" id="picker">
+        <summary>&#127911; Practise a different episode</summary>
+        <select class="eppick" id="epPick" aria-label="Choose an episode to practise"></select>
+      </details>
     </div>
 
     <div class="card">
@@ -320,6 +358,16 @@
       </details>
     </div>
     </div><!-- /.duo -->
+
+    <div class="thinking" id="thinking" role="status" aria-live="polite">
+      <div class="thinking-in">
+        <img src="/assets/oriva/think.png" alt=""
+             onerror="this.style.display='none'">
+        <h3>Oriva is listening</h3>
+        <p id="thinkingMsg">Taking in what you said&hellip;</p>
+        <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      </div>
+    </div>
 
     <div class="card fb hidden" id="fb">
       <span class="eyebrow">&#10024; Your feedback</span>
@@ -697,7 +745,7 @@ $('#mic').onclick=async()=>{
   mediaRec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
   mediaRec.onstop=async()=>{
     stream.getTracks().forEach(t=>t.stop());
-    recording=false; $('#mic').classList.remove('live');
+    recording=false; setPhase(takes.length?'ready':'idle'); $('#mic').classList.remove('live');
     const b=new Blob(chunks,{type:mediaRec.mimeType||'audio/webm'});
     $('#micLabel').textContent='Processing that take…';
     try{
@@ -713,7 +761,7 @@ $('#mic').onclick=async()=>{
     renderTakes(); updateUI();
   };
   hitMax=false;
-  startMs=performance.now(); recording=true;
+  startMs=performance.now(); recording=true; setPhase('recording');
   mediaRec.start();
   $('#mic').classList.add('live');
   tick();
@@ -788,27 +836,60 @@ function waitThenRetry(secs){
   (function countdown(){
     if(!retrying) return;                       // a take changed under us
     if(left<=0){ submit(); return; }
-    showMsg(`The coach is helping a lot of learners right now — trying again in ${left}s. Your recording is safe.`,'warn');
+    thinkingSay(`A lot of learners are practising right now \u2014 trying again in ${left}s. Your recording is safe.`);
     left--; setTimeout(countdown,1000);
   })();
   updateUI();
 }
+
+/* One place decides what the page is doing, so the CSS can do the rest. */
+function setPhase(p){
+  const app=$('#app'); if(!app) return;
+  if(p) app.dataset.phase=p; else app.removeAttribute('data-phase');
+}
+
+/* Honest, sequenced waiting copy — each line is true when it appears, and the last one
+   stays put however long it takes. A spinner says "something is happening"; this says what
+   is happening, which is the difference between waiting and being kept waiting. */
+const THINKING=[
+  [0,    'Taking in what you said\u2026'],
+  [2600, 'Listening for the moments that went well\u2026'],
+  [6000, 'Looking for one gentle thing to try next\u2026'],
+  [10000,'Writing it up for you\u2026'],
+];
+let thinkTimers=[];
+function startThinking(){
+  const p=$('#thinkingMsg'); if(p) p.textContent=THINKING[0][1];
+  stopThinking(true);
+  thinkTimers=THINKING.slice(1).map(([at,text])=>setTimeout(()=>{
+    const el=$('#thinkingMsg'); if(el) el.textContent=text;
+  },at));
+  setPhase('analysing');
+}
+function stopThinking(keepPhase){
+  thinkTimers.forEach(clearTimeout); thinkTimers=[];
+  if(!keepPhase) setPhase(takes.length?'ready':'idle');
+}
+// the retry countdown belongs on the panel the member is looking at, not behind it
+function thinkingSay(text){ const el=$('#thinkingMsg'); if(el) el.textContent=text; }
 
 async function submit(){
   retrying=false;
   const t=total();
   if(!takes.length || t<MIN_SEC){ updateUI(); return; }
   $('#analyze').disabled=true;
-  showMsg('Combining your takes and listening… this takes a few seconds.','warn');
+  clearMsg(); startThinking();
   try{
     if(!pendingWav) pendingWav=await buildWav();   // encode once, reuse on retry
     const b64=await blobToB64(new Blob([pendingWav],{type:'audio/wav'}));
     const d=await api({action:'analyze', audio:b64, mimeType:'audio/wav', durationSec:Math.round(t), episodeId});
-    clearMsg(); setUsage(d); renderFeedback(d.feedback);
+    stopThinking(); clearMsg(); setUsage(d); renderFeedback(d.feedback);
     clearTakes();
   }catch(err){
     const d=err.data||{};
+    // a busy retry keeps the panel up — the member has not finished waiting
     if(d.busy && busyTries<2){ busyTries++; return waitThenRetry(Number(d.retryAfter)||15); }
+    stopThinking();
     if(d.busy){
       busyTries=0;
       showMsg('The coach is still very busy. Your recording is safe — tap “Get my feedback” again in a minute.','warn');

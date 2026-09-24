@@ -706,6 +706,22 @@ hesitation, pauses, speed, smoothness or tone — **including as PRAISE** ("you 
 confident" judges a voice, not a sentence) — and defines the rubric's `fluency` as LANGUAGE
 fluency, finding words and linking ideas, never delivery. The one honest exception is
 searching for a WORD, which is a language event; struggling with a SOUND is not.
+**The page has PHASES, and they change emphasis, never content.** `#app[data-phase]` is set
+in one place (`setPhase()`) and the CSS does the rest. While **recording**, the task card's
+children fade to 42% — except `.wchips`, because mid-sentence the six words are the one thing
+you look up for. **Dim the CHILDREN, not the card**: opacity on the card creates a stacking
+context and then nothing inside can be made brighter again, so the words would fade with
+everything else and no rule could rescue them. While **analysing**, a full-screen panel
+covers the page with Oriva's `think` pose and sequenced copy — listening, then looking for
+what went well, then writing it up — each line true when it appears, the last one holding
+however long it takes. A spinner says something is happening; this says what. A Gemini
+busy-retry KEEPS the panel and moves the countdown onto it, because the member has not
+finished waiting; a real error drops it.
+
+**The episode picker is folded** into a `<details>`: it was a labelled full-width select
+costing ~90px permanently for something used rarely, and it is now a line until someone wants
+it. Same control, same data — which is the shape density fixes take here.
+
 **The six target words carry their own colour and their own progress.** `getEpisodes()` used
 to map clues to `c.word` and drop `c.color`/`c.emoji` one line before they became useful —
 they are now kept as `wordMeta` and shipped to the page, so a word looks the same on Out Loud
