@@ -36,13 +36,36 @@
 
   /* Centred, and led by the member's name rather than a page title. This is the one page
      that is entirely about them; "Your progress" could be anyone's. */
-  /* The heading gets the full column so it stays on ONE line; only the lede is held to a
-     comfortable measure. Capping the whole block at 34em wrapped the title in two. */
+  /* The heading gets the full column so it stays on ONE line — capping the whole block at
+     34em wrapped the title in two. The three claims under it are pills now and centre
+     themselves, so nothing here needs a measure. */
   .phead{text-align:center;margin:var(--sp-5) auto var(--sp-2)}
-  .phead .lede{max-width:34em;margin-left:auto;margin-right:auto}
   h1{font-family:var(--display);font-weight:700;font-size:clamp(24px,4.4vw,36px);line-height:1.12;
     margin:0;text-wrap:balance}
-  .lede{color:var(--soft);font-size:var(--fs-md);line-height:1.55;margin:10px 0 0}
+
+  /* The three claims under the heading, as pills. One neutral treatment for all three —
+     they are one sentence, not three categories, and this site uses colour to IDENTIFY.
+     Three different pill fills would read as a legend for something. The colour instead
+     sits in a 7px dot and steps pink -> violet -> teal across the row, which is the
+     journey the heading names; it decorates nothing it has to carry meaning for, because
+     the words are right there beside it. */
+  .creds{display:flex;flex-wrap:wrap;gap:var(--sp-2) 9px;justify-content:center;margin:14px 0 0}
+  .cred{display:inline-flex;align-items:center;gap:8px;
+    padding:7px 14px;border-radius:var(--r-full);
+    background:var(--glass);border:1px solid var(--line);
+    font-family:var(--display);font-weight:600;font-size:var(--fs-sm);color:var(--ink);
+    white-space:nowrap}
+  .cred i{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:var(--cd)}
+  .cred.c-read{--cd:var(--pink)} .cred.c-practise{--cd:var(--purple)} .cred.c-use{--cd:var(--teal)}
+  /* they arrive with the heading rather than after it — same stagger as the cards */
+  @media (prefers-reduced-motion:no-preference){
+    .cred{animation:credIn .5s cubic-bezier(.22,1,.36,1) backwards}
+    .cred:nth-child(1){animation-delay:.05s}
+    .cred:nth-child(2){animation-delay:.13s}
+    .cred:nth-child(3){animation-delay:.21s}
+  }
+  @keyframes credIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media(max-width:380px){ .cred{padding:6px 11px} .creds{gap:7px} }
 
   /* Two columns on a wide screen: the page was one 860px stack, which left half a
      desktop empty and pushed "Games finished" below the fold. align-items:start so a
@@ -317,7 +340,11 @@
   <div id="app" class="hidden">
     <div class="phead">
       <h1 id="title">Your English speaking journey — a closer look</h1>
-      <p class="lede" id="lede">Real practice. Real numbers. Real progress.</p>
+      <p class="creds" id="lede">
+        <span class="cred c-read"><i></i>Real practice</span>
+        <span class="cred c-practise"><i></i>Real numbers</span>
+        <span class="cred c-use"><i></i>Real progress</span>
+      </p>
     </div>
     <div id="body"></div>
   </div>

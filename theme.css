@@ -484,6 +484,16 @@ html[data-theme="light"] .pill-eyebrow{
   background:rgba(255,255,255,.80) !important;
   border-color:rgba(60,50,110,.22) !important;
 }
+/* The three claim pills on progress.html: paper, not glass. The teal dot is the only one
+   that needs a darker step — #1fc4b6 on white is 1.9:1, so it reads as a smudge; pink and
+   violet clear 3:1 on their own. */
+html[data-theme="light"] .cred{
+  background:rgba(255,255,255,.82);
+  border-color:rgba(60,50,110,.20);
+  color:#2b2650;
+}
+html[data-theme="light"] .cred.c-use{--cd:#0b6f68}
+
 html[data-theme="light"] .pill-eyebrow .dot{
   background:#0b6f68 !important; box-shadow:none !important;
 }
