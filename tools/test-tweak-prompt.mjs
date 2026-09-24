@@ -82,6 +82,34 @@ ok('with no history, no "already given" section appears',
   !/already given this learner/i.test(F),
   'a first-time learner must not be told the coach is repeating itself');
 
+// ---------------------------------------------------------------- disfluency
+/* A learner who stammers, blocks, or has a broken voice must not be marked down for it.
+   Their English fluency and their speech fluency are different things, and only one of
+   them is any of the coach's business. Left unsaid, the model treats a stammer as a
+   confidence problem and offers advice that is useless at best. */
+ok('the model is told that speech is not what it is judging',
+  /HOW THEY SPEAK IS NOT WHAT YOU ARE JUDGING/.test(F));
+for (const w of ['stammer', 'stutter', 'blocking', 'hoarse', 'smoothness', 'speed']) {
+  ok(`  "${w}" is named as off limits`, F.toLowerCase().includes(w.toLowerCase()));
+}
+ok('...and "sounding confident" is ruled out as praise too',
+  /never mention[\s\S]{0,240}tone of voice/i.test(F),
+  'you are hearing a voice, not a feeling');
+ok('a slow speaker is explicitly not a weak one',
+  /ninety seconds to say three excellent sentences/i.test(F));
+ok('searching for a WORD is kept as a fair observation',
+  /searched for a WORD/i.test(F),
+  'that is a language event; struggling with a SOUND is not');
+
+ok('the tweak rules no longer invite "you restarted that sentence"',
+  !/a sentence they restarted/i.test(F) && /restarted sentence or a repeated word is NOT/i.test(F),
+  'a person who stammers restarts sentences constantly');
+
+ok('the rubric scores language fluency, not delivery',
+  /never how smooth or fast the delivery sounded/i.test(F));
+ok('...and the top score is no longer "confident and natural"',
+  !/5 is confident and natural/.test(F), 'that scored the voice');
+
 // ---------------------------------------------------------------- a returning member
 const HIST = [
   'Take a slow, deep breath right before you press record.',

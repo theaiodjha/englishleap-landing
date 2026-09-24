@@ -697,6 +697,20 @@ can't be trended; the rubric can. Plus two deterministic measures computed from 
 transcript server-side (`speechMetrics`), not asked of the model, so the same input always
 gives the same number: **wpm** and **ttr** (type-token ratio, vocabulary spread).
 
+**How a member SPEAKS is not what Out Loud judges.** A learner who stammers, blocks on
+sounds, repeats syllables, speaks very slowly or has a hoarse or shaky voice must never be
+marked down for it: their English fluency and their speech fluency are different things, and
+only one of them is the coach's business. Unsaid, the model reads a stammer as low confidence
+and offers advice that is useless at best. The prompt now forbids mentioning stammering,
+hesitation, pauses, speed, smoothness or tone — **including as PRAISE** ("you sounded
+confident" judges a voice, not a sentence) — and defines the rubric's `fluency` as LANGUAGE
+fluency, finding words and linking ideas, never delivery. The one honest exception is
+searching for a WORD, which is a language event; struggling with a SOUND is not.
+**`wpm` is the open question here**: it is still shown next to every recording on
+`progress.html`, and for a member who stammers it is a running measure of their disfluency —
+and the site's own rule is that the rubric never appears as a number because this is a
+practice community, not a scoreboard. The same argument applies to pace.
+
 **The tweak must be ANCHORED, or it is always the same tweak.** The schema asked the wins to
 be specific and point at real moments, and asked the tweak only to be *about a topic*
 ("confidence or flow, not a grammar nitpick") — which leaves breathe / slow down / pause, so
