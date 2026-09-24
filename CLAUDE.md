@@ -745,6 +745,18 @@ finished waiting; a real error drops it.
 costing ~90px permanently for something used rarely, and it is now a line until someone wants
 it. Same control, same data — which is the shape density fixes take here.
 
+**The takes live in a DOCK, because the primary button must never be scrollable-past.** It
+was put in a 490px column (where a growing list pushed "Get my feedback" down it) and then in
+a full-width band below the fold (where the button left the screen entirely). Moving a
+growing list around the page could never fix that — the list grows either way, so the button
+had to stop living beside it. The dock is fixed to the bottom of the viewport: collapsed it
+is the whole state in one bar (how many takes, how long, how close to the minimum, and the
+button) for ~76px; expanded, the takes appear ABOVE the bar with full-width waveforms, so the
+button stays on the edge nearest a thumb. `body.has-dock` adds bottom padding to `.wrap` so
+the page ends above the dock rather than under it, and steps the feedback badge up — they
+should never coexist, since takes are cleared when feedback arrives, but "should" is not a
+guarantee.
+
 **The takes have their own full-width band, and that reversed an earlier decision.** They
 were squeezed into wrapping pills with a 46px waveform because a stacked list inside a 490px
 column cost ~62px per take and pushed "Get my feedback" down the card. Moving them out was

@@ -244,6 +244,20 @@ html[data-theme="light"] .iback{background:rgba(255,255,255,.62) !important}
   .mic.live::after{animation:none !important}
 }
 
+/* The takes dock. Everything in it is a token and flips on its own; the two shadows are
+   not — a black drop shadow reads as depth at night and as dirt on paper. */
+html[data-theme="light"] .dock-row{
+  background:rgba(255,255,255,.86);
+  border-color:rgba(60,50,110,.20);
+  box-shadow:0 22px 56px -24px rgba(80,60,150,.52);
+}
+html[data-theme="light"] .dock-body{
+  background:rgba(255,255,255,.90);
+  border-color:rgba(60,50,110,.18);
+  box-shadow:0 22px 56px -26px rgba(80,60,150,.45);
+}
+html[data-theme="light"] .dock-bar{background:rgba(60,50,110,.14)}
+
 /* ---- Out Loud, on paper ---------------------------------------------------
    Two things I got wrong building these and only found by measuring.
 

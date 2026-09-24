@@ -234,7 +234,6 @@
   .timer{font-family:var(--display);font-size:var(--fs-md);color:var(--soft)}
   .hint{font-size:var(--fs-sm);color:var(--soft2);text-align:center;max-width:34em;line-height:1.5}
   audio{width:100%;margin-top:var(--sp-1);filter:saturate(1.1)}
-  .actions{display:flex;gap:10px;width:100%;margin-top:2px}
   .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-2);padding:14px;border-radius:14px;border:0;
     font-family:var(--display);font-weight:700;font-size:var(--fs-md);cursor:pointer}
   .btn.primary{color:#fff;background:linear-gradient(110deg,var(--purple),var(--electric));box-shadow:0 14px 36px -14px rgba(139,108,255,.7)}
@@ -242,23 +241,56 @@
   .btn:disabled{opacity:.5;cursor:not-allowed}
 
   /* multi-take recorder */
-  .helper{font-size:var(--fs-sm);color:var(--soft2);text-align:center;max-width:34em;line-height:1.5;margin:0}
-  .totals{width:100%;margin-top:6px}
-  .totals .row{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-1) 10px;font-size:var(--fs-sm);color:var(--soft)}
-  .totals .row .tot{font-family:var(--display);font-weight:600}
+  .helper{font-size:var(--fs-sm);color:var(--soft2);text-align:center;max-width:34em;line-height:1.5;margin:0}  .totals .row .tot{font-family:var(--display);font-weight:600}
   .totals .row .tot b{font-size:var(--fs-xl);background:linear-gradient(100deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
   .bar>i.ok{background:linear-gradient(90deg,var(--mint),var(--teal))}
   /* Back to full-width rows now they have a band of their own — the reason they were
      squeezed into wrapping pills was that they lived in a 490px column and pushed the
      primary button down it. Out here neither is true. */
-  .takes{display:flex;flex-direction:column;gap:var(--sp-2);width:100%;margin-top:var(--sp-4)}
-  .takeband{margin-top:var(--sp-4)}
-  .takeband.hidden{display:none}
-  .takeband .actions{margin-top:var(--sp-4)}
-  @media(min-width:900px){
-    /* the button does not need to be as wide as the page */
-    .takeband .actions{max-width:420px;margin-left:auto;margin-right:auto}
+  .takes{display:flex;flex-direction:column;gap:var(--sp-2);width:100%}
+
+  /* ---- the takes dock -----------------------------------------------------
+     Fixed, because the primary action must never be somewhere you can scroll past —
+     which is what happened when the takes lived in a column, and again when they lived
+     below the fold. */
+  .dock{position:fixed;left:50%;bottom:0;transform:translateX(-50%);z-index:60;
+    width:min(1060px,100vw);padding:0 14px 14px;
+    animation:dockIn .3s cubic-bezier(.22,1,.36,1)}
+  .dock.hidden{display:none}
+  @keyframes dockIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translateX(-50%)}}
+  .dock-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:11px 12px 11px 16px;border-radius:18px;
+    background:var(--glass2);border:1px solid var(--line);
+    backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%);
+    box-shadow:0 22px 56px -22px rgba(0,0,0,.8)}
+  .dock-sum{display:inline-flex;align-items:center;gap:10px;background:none;border:0;padding:0;
+    cursor:pointer;color:var(--ink);font-family:var(--display);font-weight:600;font-size:var(--fs-sm)}
+  .dock-sum .chev{width:16px;height:16px;color:var(--soft);transition:transform .25s}
+  .dock[data-open="1"] .dock-sum .chev{transform:rotate(180deg)}
+  .dock-t{color:var(--soft);font-weight:500}
+  .dock-bar{flex:1 1 90px;min-width:70px;height:5px;border-radius:5px;background:var(--glass);overflow:hidden}
+  .dock-bar i{display:block;height:100%;width:0;border-radius:5px;
+    background:linear-gradient(90deg,var(--teal),var(--purple));transition:width .35s}
+  .dock-bar i.ok{background:linear-gradient(90deg,var(--mint),var(--teal))}
+  .dock .btn.primary{flex:0 0 auto;padding:11px 20px}
+  /* the takes sit ABOVE the bar, so the button stays on the edge nearest the thumb */
+  .dock-body{max-height:min(46vh,340px);overflow-y:auto;overscroll-behavior:contain;
+    padding:14px 16px;margin-bottom:8px;border-radius:18px;
+    background:var(--glass2);border:1px solid var(--line);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    box-shadow:0 22px 56px -26px rgba(0,0,0,.7)}
+  .dock-body[hidden]{display:none}
+  .dock-body .hint{margin-top:10px}
+  /* the page must end above the dock, not underneath it */
+  body.has-dock .wrap{padding-bottom:150px}
+  /* the feedback badge shares this corner; step it up if they ever coexist */
+  body.has-dock .fbbadge{bottom:96px}
+  @media(max-width:560px){
+    .dock-row{gap:10px}
+    .dock .btn.primary{flex:1 1 100%;order:3;justify-content:center;text-align:center}
+    .dock-bar{order:2}
   }
+  @media (prefers-reduced-motion:reduce){ .dock{animation:none} }
   .take{display:flex;align-items:center;gap:12px;padding:var(--sp-2) 12px;border-radius:14px;
     border:1px solid var(--line);
     background:var(--glass2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
@@ -398,17 +430,20 @@
 
     <!-- Everything that is ABOUT the takes, at full width: the waveform is only worth
          drawing at a size where it looks like a voice. Appears with the first take. -->
-    <div class="card takeband hidden" id="takeband">
-      <div class="totals">
-        <div class="row">
-          <span>&#9201;&#65039; Total recorded</span>
-          <span class="tot"><b id="totNow">0:00</b> / 1:00 minimum</span>
-        </div>
-        <div class="bar"><i id="totFill" style="width:0%"></i></div>
+    <!-- The takes dock. Fixed to the bottom so the primary action is never scrolled past;
+         collapsed it is the whole state in one bar, expanded it shows the takes above it. -->
+    <div class="dock hidden" id="dock">
+      <div class="dock-body" id="dockBody" hidden>
+        <div class="takes" id="takes"></div>
+        <div class="hint" id="hint"></div>
       </div>
-      <div class="takes" id="takes"></div>
-      <div class="hint" id="hint"></div>
-      <div class="actions">
+      <div class="dock-row">
+        <button class="dock-sum" id="dockToggle" type="button" aria-expanded="false" aria-controls="dockBody">
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+          <span class="dock-n"><b>0</b> takes</span>
+          <span class="dock-t"><b id="totNow">0:00</b> / 1:00 minimum</span>
+        </button>
+        <div class="dock-bar"><i id="totFill" style="width:0%"></i></div>
         <button class="btn primary" id="analyze" disabled>&#9889; Get my feedback</button>
       </div>
     </div>
@@ -632,7 +667,7 @@ $('#epPick').addEventListener('change',async ev=>{
     renderTask(u);
     renderPicker(u.episodes);
     setUsage(u);
-    loadNote(u); wireNote(); wireFeedbackSheet();
+    loadNote(u); wireNote(); wireFeedbackSheet(); wireDock();
     if(u.name) $('#title').textContent=`Hi ${u.name} — record, get feedback, improve.`;
     ELCAccount(u.name?{name:u.name, plan:u.plan}:null,{next:'/out-loud.html'});
   }catch(err){
@@ -722,11 +757,29 @@ function peaks(buf,n){
   return out.map(v=>Math.max(.12,v/mx));
 }
 
-/* The band exists only once there is something in it — an empty "your takes" card above
-   a mic nobody has pressed yet is furniture. */
-function syncTakeBand(){
-  const b=$('#takeband'); if(!b) return;
-  b.classList.toggle('hidden', takes.length===0);
+/* The dock exists only once there is something in it, and the page reserves room for it
+   only while it is there. */
+function syncDock(){
+  const d=$('#dock'); if(!d) return;
+  const any=takes.length>0;
+  d.classList.toggle('hidden',!any);
+  document.body.classList.toggle('has-dock',any);
+  // one write, and it owns the plural too — setting #dockCount first then replacing its
+  // parent's innerHTML was doing the same job twice, the first one thrown away
+  const n=d.querySelector('.dock-n');
+  if(n) n.innerHTML=`<b>${takes.length}</b> take${takes.length===1?'':'s'}`;
+  if(!any) setDock(false);           // nothing to show; collapse so it reopens clean
+}
+function setDock(open){
+  const d=$('#dock'), b=$('#dockBody'), t=$('#dockToggle');
+  if(!d||!b||!t) return;
+  d.dataset.open=open?'1':'0';
+  b.hidden=!open;
+  t.setAttribute('aria-expanded',open?'true':'false');
+}
+function wireDock(){
+  const t=$('#dockToggle'); if(!t) return;
+  t.addEventListener('click',()=>setDock($('#dockBody').hidden));
 }
 
 function renderTakes(){
@@ -738,7 +791,7 @@ function renderTakes(){
     <button class="tbtn del" data-act="del" data-i="${i}" aria-label="Delete take ${i+1}">&#10005;</button>
   </div>`).join('');
   markPlaying();
-  syncTakeBand();
+  syncDock();
 }
 
 function updateUI(){
