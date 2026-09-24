@@ -81,6 +81,10 @@
   .note{color:var(--soft);font-size:var(--fs-md);background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:var(--sp-4) 18px;text-align:center}
   .hidden{display:none!important}
   @media(max-width:480px){ .epcard{grid-template-columns:110px 1fr} }
+
+  /* house rule: the disclaimer goes on all member-facing content. These two pages
+     never had a footer at all. */
+  .foot{margin-top:42px;text-align:center;color:var(--soft2);font-size:var(--fs-xs);line-height:1.7}
 </style>
 <script src="/progress.js"></script>
 </head>
@@ -108,6 +112,9 @@
 
   <div id="episodeView" class="eplist"></div>
   <div id="gameView" class="gamelist hidden"></div>
+  <footer class="foot">
+    <div>&copy; 2024 Leap Labs &middot; A practice community - not a replacement for formal English education.</div>
+  </footer>
 </div>
 
 <script>

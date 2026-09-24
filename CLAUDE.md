@@ -360,6 +360,13 @@ Use `#1fc4b6` (teal). Mascot: **Oriva** (teal bird).
 - **Zip from inside the project dir** (`cd <root> && zip -rq ../out.zip .`).
 - Footer disclaimer on all member-facing content:
   *"A practice community - not a replacement for formal English education."*
+  `arcade-browse.html` and `arcade-type.html` had no footer at all until now.
+- **The four-pillar tagline belongs on `index.html`, not on the app pages.** "Read it. Hear
+  it. Practise it. Use it." explains the framework to someone deciding whether to join; a
+  member mid-task already knows it, and repeating it in six footers turned it into wallpaper.
+  The pillar COLOURS still run through everything — the word chips, the KPI tiles, the
+  journey strip — so the framework is carried by the system rather than by a sentence, which
+  is the stronger version. index.html keeps `.club-tagline` where it does real work.
 - Fahad makes all product/design calls; execute conventions without hand-holding but
   flag anything ambiguous.
 

@@ -64,6 +64,10 @@
   .unlock{flex:0 0 auto;font-size:var(--fs-sm);font-weight:700;color:var(--ink);background:var(--glass);border:1px solid var(--line);padding:var(--sp-2) 13px;border-radius:999px;white-space:nowrap}
   .note{color:var(--soft);font-size:var(--fs-md);background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:var(--sp-4) 18px}
 
+
+  /* house rule: the disclaimer goes on all member-facing content. These two pages
+     never had a footer at all. */
+  .foot{margin-top:42px;text-align:center;color:var(--soft2);font-size:var(--fs-xs);line-height:1.7}
 </style>
 <script src="/progress.js"></script>
   <script src="/nav-progress.js" defer></script>
@@ -77,6 +81,9 @@
 
   <div class="head" id="head"></div>
   <div class="deck" id="deck"></div>
+  <footer class="foot">
+    <div>&copy; 2024 Leap Labs &middot; A practice community - not a replacement for formal English education.</div>
+  </footer>
 </div>
 <script>
 const $=s=>document.querySelector(s);
